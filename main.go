@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"motor/configs"
+)
+
+func init() {
+	configs.ConnectDatabase()
+}
 
 func main() {
-	fmt.Printf("Hello, world.\n")
 }
