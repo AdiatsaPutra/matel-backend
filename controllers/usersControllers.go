@@ -6,19 +6,18 @@ import (
 	"motor/payloads"
 	"motor/repository"
 	"motor/security"
-
-	log "github.com/sirupsen/logrus"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Register(c *gin.Context) {
 	var body struct {
-		UserName  string `json:"username"`
-		Email     string `json:"email"`
-		Passsword string `json:"password"`
-		Phone     string `json:"phone"`
-		DeviceId  string `json:"device_id"`
+		UserName string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Phone    string `json:"phone"`
+		DeviceId string `json:"device_id"`
 	}
 
 	c.ShouldBindJSON(&body)
@@ -32,14 +31,12 @@ func Register(c *gin.Context) {
 
 	findUserFromDB, _ := repository.GetUserByName(c, user.UserName)
 
-	log.Info(findUserFromDB)
-
 	if findUserFromDB.ID != 0 {
 		exceptions.AppException(c, "User already exist")
 		return
 	}
 
-	hash, err := security.HashPassword(body.Passsword)
+	hash, err := security.HashPassword(body.Password)
 
 	if err != nil {
 		exceptions.AppException(c, err.Error())
@@ -76,5 +73,33 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	payloads.HandleSuccess(c, userResult, "User created", 200)
+	payloads.HandleSuccess(c, userResult, "User created", http.StatusOK)
+}
+
+func Login(c *gin.Context) {
+	var body struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	c.ShouldBindJSON(&body)
+
+	findUserFromDB, _ := repository.GetUserByName(c, body.Email)
+
+	if findUserFromDB.UserName != "" {
+		hashPwd := findUserFromDB.Password
+		pwd := body.Password
+
+		hash := security.VerifyPassword(hashPwd, pwd)
+
+		if hash == nil {
+			payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
+		} else {
+			exceptions.AppException(c, "Wrong Data")
+			return
+		}
+	} else {
+		exceptions.AppException(c, "User not registered")
+		return
+	}
 }
