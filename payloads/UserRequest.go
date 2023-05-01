@@ -1,6 +1,6 @@
 package payloads
 
-type CreateRequest struct {
+type UserRequest struct {
 	UserName string `json:"username"`
 	Phone    string `json:"phone"`
 	Email    string `json:"email"`
@@ -10,7 +10,7 @@ type CreateRequest struct {
 }
 
 type MemberRequest struct {
-	UserID string
+	UserID uint
 }
 
 type LoginRequest struct {

@@ -1,11 +1,13 @@
 package main
 
 import (
-	config "motor/configs"
-	"motor/route"
+	"motor/controllers"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	db := config.InitDB()
-	route.CreateHandler(db)
+	r := gin.Default()
+	r.POST("/register", controllers.Register)
+	r.Run()
 }

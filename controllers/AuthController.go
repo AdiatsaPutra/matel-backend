@@ -1,121 +1,136 @@
 package controllers
 
-import (
-	"errors"
-	"motor/exceptions"
-	"motor/payloads"
-	"motor/security"
-	"motor/services"
-	"motor/utils"
-	"net/http"
+// import (
+// 	"errors"
+// 	"motor/exceptions"
+// 	"motor/payloads"
+// 	"motor/security"
+// 	"motor/services"
+// 	"motor/utils"
+// 	"net/http"
 
-	"github.com/gin-gonic/gin"
-)
+// 	log "github.com/sirupsen/logrus"
 
-type AuthController struct {
-	authService services.AuthService
-	userService services.UserService
-}
+// 	"github.com/gin-gonic/gin"
+// )
 
-func CreateAuthRoutes(r *gin.RouterGroup, authService services.AuthService, userService services.UserService) {
-	authHandler := AuthController{
-		authService: authService,
-		userService: userService,
-	}
+// type AuthController struct {
+// 	authService   services.AuthService
+// 	userService   services.UserService
+// 	memberService services.MemberService
+// }
 
-	r.POST("/register", authHandler.DoRegister)
-	r.POST("/login", authHandler.DoLogin)
-}
+// func CreateAuthRoutes(r *gin.RouterGroup, authService services.AuthService, userService services.UserService) {
+// 	authHandler := AuthController{
+// 		authService: authService,
+// 		userService: userService,
+// 	}
 
-func (r *AuthController) DoRegister(c *gin.Context) {
-	var register payloads.CreateRequest
+// 	r.POST("/register", authHandler.DoRegister)
+// 	r.POST("/login", authHandler.DoLogin)
+// }
 
-	if err := c.ShouldBindJSON(&register); err != nil {
-		exceptions.EntityException(c, err.Error())
-		return
-	}
+// func (r *AuthController) DoRegister(c *gin.Context) {
+// 	var register payloads.UserRequest
+// 	var member payloads.MemberRequest
 
-	check := utils.ValidationForm(register)
+// 	if err := c.ShouldBindJSON(&register); err != nil {
+// 		exceptions.EntityException(c, err.Error())
+// 		return
+// 	}
 
-	if check != "" {
-		exceptions.BadRequestException(c, check)
-		return
-	}
+// 	check := utils.ValidationForm(register)
 
-	findUser, _ := r.userService.FindUser(register.UserName)
+// 	if check != "" {
+// 		exceptions.BadRequestException(c, check)
+// 		return
+// 	}
 
-	if findUser.UserName != "" {
-		exceptions.NotFoundException(c, errors.New("Username already exists").Error())
-		return
-	}
+// 	findUser, _ := r.userService.FindUser(register.UserName)
 
-	hash, err := security.HashPassword(register.Password)
+// 	if findUser.UserName != "" {
+// 		exceptions.NotFoundException(c, errors.New("Username already exists").Error())
+// 		return
+// 	}
 
-	if err != nil {
-		exceptions.AppException(c, err.Error())
-		return
-	}
+// 	hash, err := security.HashPassword(register.Password)
 
-	token, err := security.GenerateToken(findUser.UserName)
+// 	if err != nil {
+// 		exceptions.AppException(c, err.Error())
+// 		return
+// 	}
 
-	if err != nil {
-		exceptions.AppException(c, err.Error())
-		return
-	}
+// 	token, err := security.GenerateToken(findUser.UserName)
 
-	register.Password = hash
-	register.Token = token
+// 	if err != nil {
+// 		exceptions.AppException(c, err.Error())
+// 		return
+// 	}
 
-	get, err := r.authService.DoRegister(register)
+// 	register.Password = hash
+// 	register.Token = token
 
-	if err != nil {
-		exceptions.AppException(c, err.Error())
-		return
-	}
+// 	userRegister, err := r.authService.DoRegister(register)
 
-	payloads.HandleSuccess(c, get, "Register Successfully", http.StatusOK)
-}
+// 	if err != nil {
+// 		exceptions.AppException(c, err.Error())
+// 		return
+// 	}
 
-func (r *AuthController) DoLogin(c *gin.Context) {
-	var login payloads.LoginRequest
+// 	userMember, err := r.memberService.CreateMember(member)
+// 	log.Info(err)
 
-	if err := c.ShouldBindJSON(&login); err != nil {
-		exceptions.EntityException(c, err.Error())
-		return
-	}
+// 	if err != nil {
+// 		log.Info(err)
+// 		exceptions.AppException(c, err.Error())
+// 		return
+// 	}
 
-	check := utils.ValidationForm(login)
+// 	log.Info(userMember)
 
-	if check != "" {
-		exceptions.BadRequestException(c, check)
-		return
-	}
+// 	payloads.HandleSuccess(c, userRegister, "Register Successfully", http.StatusOK)
+// }
 
-	findUser, _ := r.userService.FindUser(login.Username)
+// func (r *AuthController) DoLogin(c *gin.Context) {
+// 	var login payloads.LoginRequest
 
-	if findUser.UserName != "" {
-		hashPwd := findUser.Password
-		pwd := login.Password
+// 	if err := c.ShouldBindJSON(&login); err != nil {
+// 		exceptions.EntityException(c, err.Error())
+// 		return
+// 	}
 
-		hash := security.VerifyPassword(hashPwd, pwd)
+// 	check := utils.ValidationForm(login)
 
-		if hash == nil {
-			token, err := security.GenerateToken(findUser.UserName)
+// 	if check != "" {
+// 		exceptions.BadRequestException(c, check)
+// 		return
+// 	}
 
-			if err != nil {
-				exceptions.AppException(c, err.Error())
-				return
-			}
+// 	findUser, _ := r.userService.FindUser(login.Username)
 
-			findUser.Token = token
+// 	if findUser.UserName != "" {
+// 		hashPwd := findUser.Password
+// 		pwd := login.Password
 
-			payloads.HandleSuccess(c, findUser, "Login Successfully", http.StatusOK)
-		} else {
-			exceptions.BadRequestException(c, errors.New("Password dont matched").Error())
-			return
-		}
-	} else {
-		exceptions.NotFoundException(c, errors.New("Username not found").Error())
-		return
-	}
-}
+// 		hash := security.VerifyPassword(hashPwd, pwd)
+
+// 		if hash == nil {
+// 			token, err := security.GenerateToken(findUser.UserName)
+
+// 			if err != nil {
+// 				exceptions.AppException(c, err.Error())
+// 				return
+// 			}
+
+// 			findUser.Token = token
+
+// 			payloads.HandleSuccess(c, findUser, "Login Successfully", http.StatusOK)
+// 		} else {
+// 			exceptions.BadRequestException(c, errors.New("Password dont matched").Error())
+// 			return
+// 		}
+// 	} else {
+// 		exceptions.NotFoundException(c, errors.New("Username not found").Error())
+// 		return
+// 	}
+// }
