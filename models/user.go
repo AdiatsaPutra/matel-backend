@@ -12,6 +12,7 @@ type User struct {
 	Email     string    `json:"email"`
 	DeviceId  string    `json:"device_id"`
 	IsAdmin   uint      `json:"is_admin"`
+	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"created_at" gorm:"column:created_at"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at"`
 }
