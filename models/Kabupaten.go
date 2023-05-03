@@ -2,7 +2,7 @@ package models
 
 type Kabupaten struct {
 	ID         uint   `json:"id" gorm:"column:id"`
-	ProvinsiID uint   `json:"province_id" gorm:"column:province_id"`
+	ProvinceID uint   `json:"province_id" gorm:"column:province_id"`
 	Name       string `json:"name" gorm:"column:name"`
 }
 

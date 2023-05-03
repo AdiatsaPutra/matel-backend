@@ -17,10 +17,10 @@ func Register(c *gin.Context) {
 		Email       string `json:"email"`
 		Password    string `json:"password"`
 		Phone       string `json:"phone"`
-		DeviceId    string `json:"device_id"`
-		ProvinceID  int    `json:"province_id"`
-		KabupatenID int    `json:"kabupaten_id"`
-		KecamatanID int    `json:"kecamatan_id"`
+		DeviceID    string `json:"device_id"`
+		ProvinceID  uint   `json:"province_id"`
+		KabupatenID uint   `json:"kabupaten_id"`
+		KecamatanID uint   `json:"kecamatan_id"`
 	}
 
 	c.ShouldBindJSON(&body)
