@@ -20,6 +20,17 @@ func GetUserByName(c *gin.Context, UserName string) (models.User, error) {
 
 }
 
+func SetToken(c *gin.Context, user models.User) (bool, error) {
+	result := config.InitDB().Model(&user).Where("id = ?", user.ID).Update("token", user.Token)
+
+	if result.Error != nil {
+		return true, result.Error
+	}
+
+	return true, nil
+
+}
+
 func CreateUser(c *gin.Context, user models.User) (models.User, error) {
 	var newUser = models.User{}
 	result := config.InitDB().Create(&user)

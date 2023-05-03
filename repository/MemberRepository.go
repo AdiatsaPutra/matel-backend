@@ -33,3 +33,19 @@ func CreateMember(c *gin.Context, member models.Member) (*gorm.DB, error) {
 	return result, nil
 
 }
+
+func UpdateMember(c *gin.Context, member models.Member) (models.Member, error) {
+	var newMember = models.Member{}
+
+	result := config.InitDB().Model(&member).Where("id = ?", member.ID).Update("status", member.Status)
+
+	newMember = member
+
+	if result.Error != nil {
+		exceptions.AppException(c, result.Error.Error())
+		return newMember, result.Error
+	}
+
+	return newMember, nil
+
+}

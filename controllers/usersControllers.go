@@ -13,11 +13,14 @@ import (
 
 func Register(c *gin.Context) {
 	var body struct {
-		UserName string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-		Phone    string `json:"phone"`
-		DeviceId string `json:"device_id"`
+		UserName    string `json:"username"`
+		Email       string `json:"email"`
+		Password    string `json:"password"`
+		Phone       string `json:"phone"`
+		DeviceId    string `json:"device_id"`
+		ProvinceID  int    `json:"province_id"`
+		KabupatenID int    `json:"kabupaten_id"`
+		KecamatanID int    `json:"kecamatan_id"`
 	}
 
 	c.ShouldBindJSON(&body)
@@ -26,7 +29,6 @@ func Register(c *gin.Context) {
 		UserName: body.UserName,
 		Email:    body.Email,
 		Phone:    body.Phone,
-		DeviceId: body.DeviceId,
 	}
 
 	findUserFromDB, _ := repository.GetUserByName(c, user.UserName)
@@ -45,15 +47,6 @@ func Register(c *gin.Context) {
 
 	user.Password = hash
 
-	token, err := security.GenerateToken(user.UserName)
-
-	if err != nil {
-		exceptions.AppException(c, err.Error())
-		return
-	}
-
-	user.Token = token
-
 	userResult, err := repository.CreateUser(c, user)
 
 	if err != nil {
@@ -62,8 +55,12 @@ func Register(c *gin.Context) {
 	}
 
 	member := models.Member{
-		UserID: userResult.ID,
-		Status: 0,
+		UserID:      userResult.ID,
+		Status:      0,
+		DeviceID:    body.DeviceID,
+		ProvinceID:  body.ProvinceID,
+		KabupatenID: body.KabupatenID,
+		KecamatanID: body.KecamatanID,
 	}
 
 	memberResult, _ := repository.CreateMember(c, member)
@@ -87,12 +84,29 @@ func Login(c *gin.Context) {
 	findUserFromDB, _ := repository.GetUserByName(c, body.Email)
 
 	if findUserFromDB.UserName != "" {
+
 		hashPwd := findUserFromDB.Password
 		pwd := body.Password
 
 		hash := security.VerifyPassword(hashPwd, pwd)
 
 		if hash == nil {
+			token, err := security.GenerateToken(findUserFromDB.ID)
+
+			if err != nil {
+				exceptions.AppException(c, err.Error())
+				return
+			}
+
+			findUserFromDB.Token = token
+
+			tokenCreated, err := repository.SetToken(c, findUserFromDB)
+
+			if !tokenCreated {
+				exceptions.AppException(c, err.Error())
+				return
+			}
+
 			payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 		} else {
 			exceptions.AppException(c, "Wrong Data")

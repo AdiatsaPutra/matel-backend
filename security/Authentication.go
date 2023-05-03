@@ -6,21 +6,27 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/viper"
+	"github.com/sirupsen/logrus"
 )
 
-func GetAuthentication(c *gin.Context) error {
+func Validate(c *gin.Context) {
 	token, err := VerifyToken(c)
 
 	if err != nil {
-		return err
+		// return err
 	}
 
-	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
-		return err
-	}
+	// if
+	claims, ok := token.Claims.(jwt.MapClaims)
+	// !ok && !token.Valid {
+	// 	return err
+	// }
+	logrus.Info("TOKEN")
+	logrus.Info(claims)
+	logrus.Info(token)
+	logrus.Info(ok)
 
-	return nil
+	// return nil
 }
 
 func VerifyToken(c *gin.Context) (*jwt.Token, error) {
@@ -30,29 +36,32 @@ func VerifyToken(c *gin.Context) (*jwt.Token, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(viper.GetString("security.secret_key")), nil
+		return []byte("SECRET"), nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
+	logrus.Info("==============")
+	logrus.Info(token)
 	return token, nil
 }
 
 func ExtractToken(c *gin.Context) string {
-	keys := c.Request.URL.Query()
-	token := keys.Get("token")
+	// keys := c.Request.URL.Query()
+	// token := keys.Get("token")
 
-	if token != "" {
-		return token
-	}
+	// if token != "" {
+	// 	return token
+	// }
 
 	c.Writer.Header()
 	authHeader := c.GetHeader("Authorization")
 	bearerToken := strings.Split(authHeader, " ")
 
 	if len(bearerToken) == 2 {
+		logrus.Info(bearerToken[1])
 		return bearerToken[1]
 	} else {
 		return ""
