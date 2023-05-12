@@ -9,6 +9,19 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetAllMember(c *gin.Context) ([]models.Member, error) {
+	var members []models.Member
+	result := config.InitDB().Find(&members)
+
+	if result.Error != nil {
+		exceptions.AppException(c, result.Error.Error())
+		return members, result.Error
+	}
+
+	return members, nil
+
+}
+
 func GetMember(c *gin.Context, ID uint) (models.Member, error) {
 	var member = models.Member{ID: ID}
 	result := config.InitDB().First(&member)

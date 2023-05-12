@@ -45,3 +45,17 @@ func CreateUser(c *gin.Context, user models.User) (models.User, error) {
 	return newUser, nil
 
 }
+
+func UserProfile(c *gin.Context, user models.User) (models.User, error) {
+	var newUser = models.User{}
+	result := config.InitDB().First(&user)
+
+	newUser = user
+
+	if result.Error != nil {
+		exceptions.AppException(c, result.Error.Error())
+		return newUser, result.Error
+	}
+
+	return newUser, nil
+}

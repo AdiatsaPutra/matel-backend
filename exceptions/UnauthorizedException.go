@@ -6,18 +6,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AppExceptionError struct {
+type UnauthorizedExceptionError struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
 
-func AppException(c *gin.Context, message string) {
-	res := AppExceptionError{
+func Unauthorized(c *gin.Context, message string) {
+	res := UnauthorizedExceptionError{
 		Success: false,
 		Message: message,
 		Data:    nil,
 	}
 
-	c.JSON(http.StatusInternalServerError, res)
+	c.JSON(http.StatusUnauthorized, res)
 }

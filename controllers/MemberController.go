@@ -11,6 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetAllMember(c *gin.Context) {
+	member, err := repository.GetAllMember(c)
+
+	if err != nil {
+		exceptions.AppException(c, "Member Not Found")
+		return
+	}
+
+	payloads.HandleSuccess(c, member, "Member updated", http.StatusOK)
+}
+
 func UpdateMember(c *gin.Context) {
 
 	memberId := c.Param("id")
