@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetUserByName(c *gin.Context, UserName string) (models.User, error) {
-	var user = models.User{UserName: UserName}
-	result := config.InitDB().Where("user_name = ?", user.UserName).First(&user)
+func GetUserByName(c *gin.Context, UserEmail string) (models.User, error) {
+	var user = models.User{Email: UserEmail}
+	result := config.InitDB().Where("user_email = ?", user.Email).First(&user)
 
 	if result.Error != nil {
 		return user, result.Error

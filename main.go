@@ -197,16 +197,17 @@ package main
 // }
 
 import (
-	"database/sql"
 	"fmt"
+	config "motor/configs"
 	"motor/controllers"
+	"motor/models"
 	"motor/security"
 	"net/http"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -230,64 +231,37 @@ func main() {
 	r.Run()
 }
 
-type Leasing struct {
-	ID   int
-	Name string
-	// Add other fields as needed
-}
-
 func exportHandler(c *gin.Context) {
-	// Retrieve all data from the table
-	var data []Leasing
 
-	// Populate data with sample data
-	data = append(data, Leasing{ID: 1, Name: "Lease 1"})
-	data = append(data, Leasing{ID: 2, Name: "Lease 2"})
-	// Add more sample data as needed
+	// Retrieve all data from the table
+	var data []models.Leasing
+	err := config.InitDB().Find(&data).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Create a new SQLite database file
-	sqliteDB, err := sql.Open("sqlite3", "exported.db")
+	sqliteDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	defer sqliteDB.Close()
+	// defer sqliteDB.Close()
 
-	// Enable foreign key support in SQLite
-	_, err = sqliteDB.Exec("PRAGMA foreign_keys = ON;")
+	// AutoMigrate your model in the SQLite database
+	err = sqliteDB.AutoMigrate(&models.Leasing{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Create the Leasing table in the SQLite database
-	_, err = sqliteDB.Exec(`CREATE TABLE IF NOT EXISTS leasing (
-		id INTEGER PRIMARY KEY,
-		name TEXT
-	);`)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Prepare the INSERT statement
-	stmt, err := sqliteDB.Prepare(`INSERT INTO leasing (
-		id, name
-	) VALUES (?, ?);`)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	defer stmt.Close()
 
 	// Insert data into the SQLite database
-	for _, item := range data {
-		_, err = stmt.Exec(item.ID, item.Name)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-	}
+	sqliteDB.Create(&data)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
 
 	// Set the response headers for file download
 	filename := "exported.db"
