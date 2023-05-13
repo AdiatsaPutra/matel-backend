@@ -197,10 +197,17 @@ package main
 // }
 
 import (
+	"fmt"
+	config "motor/configs"
 	"motor/controllers"
+	"motor/models"
 	"motor/security"
+	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -213,6 +220,7 @@ func main() {
 
 	r.GET("/leasing", controllers.GetLeasing)
 	r.POST("/upload-leasing", controllers.UploadLeasing)
+	r.GET("/export", exportHandler)
 
 	r.GET("/member", security.AuthMiddleware(), controllers.GetAllMember)
 
@@ -221,4 +229,43 @@ func main() {
 	r.GET("/kecamatan/:kabupaten-id", controllers.GetKecamatan)
 
 	r.Run()
+}
+
+func exportHandler(c *gin.Context) {
+
+	// Retrieve all data from the table
+	var data []models.Leasing
+	err := config.InitDB().Find(&data).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Create a new SQLite database file
+	sqliteDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// defer sqliteDB.Close()
+
+	// AutoMigrate your model in the SQLite database
+	err = sqliteDB.AutoMigrate(&models.Leasing{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Insert data into the SQLite database
+	err = sqliteDB.Create(&data).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Set the response headers for file download
+	filename := "exported.db"
+	c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Writer.Header().Set("Content-Type", "application/octet-stream")
+	c.File(filepath.Join(".", filename))
 }
