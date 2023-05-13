@@ -10,7 +10,7 @@ import (
 
 func GetUserByName(c *gin.Context, UserEmail string) (models.User, error) {
 	var user = models.User{Email: UserEmail}
-	result := config.InitDB().Where("user_email = ?", user.Email).First(&user)
+	result := config.InitDB().Where("email = ?", user.Email).First(&user)
 
 	if result.Error != nil {
 		return user, result.Error
