@@ -248,7 +248,12 @@ func exportHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	// defer sqliteDB.Close()
+	sqliteDBDB, err := sqliteDB.DB()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer sqliteDBDB.Close()
 
 	// AutoMigrate your model in the SQLite database
 	err = sqliteDB.AutoMigrate(&models.Leasing{})
