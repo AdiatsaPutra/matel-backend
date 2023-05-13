@@ -1,7 +1,7 @@
 package models
 
 import (
-	"time"
+	"gorm.io/gorm"
 )
 
 type Member struct {
@@ -12,8 +12,7 @@ type Member struct {
 	ProvinceID  uint      `json:"province_id" gorm:"column:province_id"`
 	KabupatenID uint      `json:"kabupaten_id" gorm:"column:kabupaten_id"`
 	KecamatanID uint      `json:"kecamatan_id" gorm:"column:kecamatan_id"`
-	CreatedAt   time.Time `json:"created_at" gorm:"column:created_at"`
-	UpdatedAt   time.Time `json:"updated_at" gorm:"column:updated_at"`
+	gorm.Model
 }
 
 // custom tablename

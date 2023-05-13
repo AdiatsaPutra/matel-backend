@@ -1,7 +1,7 @@
 package models
 
 import (
-	"time"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -10,11 +10,9 @@ type User struct {
 	Password string `json:"password"`
 	Phone    string `json:"phone"`
 	Email    string `json:"email"`
-
 	IsAdmin   uint      `json:"is_admin"`
 	Token     string    `json:"token"`
-	CreatedAt time.Time `json:"created_at" gorm:"column:created_at"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at"`
+	gorm.Model
 }
 
 // custom tablename
