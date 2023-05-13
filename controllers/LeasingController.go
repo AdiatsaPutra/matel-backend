@@ -7,11 +7,24 @@ import (
 	"motor/exceptions"
 	"motor/models"
 	"motor/payloads"
+	"motor/repository"
+	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+func GetLeasing(c *gin.Context) {
+	leasing, err := repository.GetLeasing(c)
+
+	if err != nil {
+		exceptions.AppException(c, "Leasing not found")
+		return
+	}
+
+	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
+}
 
 func UploadLeasing(c *gin.Context) {
 	// Retrieve the uploaded file

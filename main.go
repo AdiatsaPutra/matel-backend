@@ -211,7 +211,8 @@ func main() {
 
 	r.GET("/profil", security.AuthMiddleware(), controllers.GetProfile)
 
-	r.POST("/upload", controllers.UploadLeasing)
+	r.GET("/leasing", controllers.GetLeasing)
+	r.POST("/upload-leasing", controllers.UploadLeasing)
 
 	r.GET("/member", security.AuthMiddleware(), controllers.GetAllMember)
 
