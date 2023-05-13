@@ -257,11 +257,11 @@ func exportHandler(c *gin.Context) {
 	}
 
 	// Insert data into the SQLite database
-	err = sqliteDB.Create(&data).Error
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	sqliteDB.Create(&data)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
 
 	// Set the response headers for file download
 	filename := "exported.db"
