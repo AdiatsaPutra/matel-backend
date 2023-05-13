@@ -198,14 +198,14 @@ package main
 
 import (
 	"archive/zip"
+	"bytes"
 	"fmt"
-	"io"
+	"io/ioutil"
 	config "motor/configs"
 	"motor/controllers"
 	"motor/models"
 	"motor/security"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
@@ -234,7 +234,6 @@ func main() {
 }
 
 func exportHandler(c *gin.Context) {
-	// Retrieve all data from the table
 	var data []models.Leasing
 	err := config.InitDB().Find(&data).Error
 	if err != nil {
@@ -242,73 +241,56 @@ func exportHandler(c *gin.Context) {
 		return
 	}
 
-	// Create a new SQLite database file
 	sqliteDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	sqliteDBDB, err := sqliteDB.DB()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	defer sqliteDBDB.Close()
 
-	// AutoMigrate your model in the SQLite database
 	err = sqliteDB.AutoMigrate(&models.Leasing{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Insert data into the SQLite database
 	sqliteDB.Create(&data)
+
+	// Zip the exported database file
+	zippedData, err := zipData("exported.db")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Create a zip file
-	zipFilename := "exported.zip"
-	zipFile, err := os.Create(zipFilename)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	defer zipFile.Close()
-
-	// Create a new zip archive
-	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
-
-	// Add the SQLite database file to the zip archive
-	err = addFileToZip(zipWriter, "exported.db", "exported.db")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Set the response headers for file download
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", zipFilename))
-	c.Header("Content-Type", "application/zip")
-	c.File(zipFilename)
+	filename := "exported.zip"
+	c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Writer.Header().Set("Content-Type", "application/zip")
+	c.Data(http.StatusOK, "application/zip", zippedData)
 }
 
-func addFileToZip(zipWriter *zip.Writer, filename, fileToZip string) error {
-	fileToZipObj, err := os.Open(fileToZip)
-	if err != nil {
-		return err
-	}
-	defer fileToZipObj.Close()
+func zipData(filename string) ([]byte, error) {
+	var buf bytes.Buffer
+	zipWriter := zip.NewWriter(&buf)
 
-	// Create a new file in the zip archive
-	fileInZip, err := zipWriter.Create(filename)
+	fileData, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// Copy the contents of the file to the zip archive
-	_, err = io.Copy(fileInZip, fileToZipObj)
-	return err
+	fileWriter, err := zipWriter.Create(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = fileWriter.Write(fileData)
+	if err != nil {
+		return nil, err
+	}
+
+	err = zipWriter.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
