@@ -197,13 +197,15 @@ package main
 // }
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
 	config "motor/configs"
 	"motor/controllers"
 	"motor/models"
 	"motor/security"
 	"net/http"
-	"path/filepath"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
@@ -232,7 +234,6 @@ func main() {
 }
 
 func exportHandler(c *gin.Context) {
-
 	// Retrieve all data from the table
 	var data []models.Leasing
 	err := config.InitDB().Find(&data).Error
@@ -258,14 +259,51 @@ func exportHandler(c *gin.Context) {
 
 	// Insert data into the SQLite database
 	sqliteDB.Create(&data)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Create a zip file
+	zipFilename := "exported.zip"
+	zipFile, err := os.Create(zipFilename)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer zipFile.Close()
+
+	// Create a new zip archive
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Add the SQLite database file to the zip archive
+	err = addFileToZip(zipWriter, "exported.db", "exported.db")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Set the response headers for file download
-	filename := "exported.db"
-	c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
-	c.Writer.Header().Set("Content-Type", "application/octet-stream")
-	c.File(filepath.Join(".", filename))
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", zipFilename))
+	c.Header("Content-Type", "application/zip")
+	c.File(zipFilename)
+}
+
+func addFileToZip(zipWriter *zip.Writer, filename, fileToZip string) error {
+	fileToZipObj, err := os.Open(fileToZip)
+	if err != nil {
+		return err
+	}
+	defer fileToZipObj.Close()
+
+	// Create a new file in the zip archive
+	fileInZip, err := zipWriter.Create(filename)
+	if err != nil {
+		return err
+	}
+
+	// Copy the contents of the file to the zip archive
+	_, err = io.Copy(fileInZip, fileToZipObj)
+	return err
 }
