@@ -1,15 +1,15 @@
 package main
 
 import (
-	"compress/gzip"
+	"archive/zip"
 	"io"
+	"log"
 	config "motor/configs"
 	"motor/controllers"
 	"motor/models"
 	"motor/security"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
@@ -70,33 +70,45 @@ func exportHandler(c *gin.Context) {
 	// }
 
 	// Set the response headers for file download
-	filename := "exported.db"
-	// c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
-	// c.Writer.Header().Set("Content-Type", "application/octet-stream")
-	// c.File(filepath.Join(".", filename))
-	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+filename)
+	// filename := "exported.db"
+	fileToZip, err := os.Open("text.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fileToZip.Close()
+
+	// Create a new zip file
+	zipFile, err := os.Create("file.zip")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer zipFile.Close()
+
+	// Create a zip writer
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Create a new zip file entry
+	fileInfo, err := fileToZip.Stat()
+	if err != nil {
+		log.Fatal(err)
+	}
+	header, err := zip.FileInfoHeader(fileInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Copy the contents of the file to the zip writer
+	_, err = io.Copy(writer, fileToZip)
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename=file.zip")
 	c.Writer.Header().Set("Content-Type", "application/octet-stream")
-
-	// Create a gzip writer
-	gzipWriter := gzip.NewWriter(c.Writer)
-	defer gzipWriter.Close()
-
-	// Open the SQLite database file
-	filePath := filepath.Join(".", filename)
-	file, err := os.Open(filePath)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	defer file.Close()
-
-	// Copy the SQLite database file to the gzip writer
-	_, err = io.Copy(gzipWriter, file)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Set the content encoding to gzip
-	c.Writer.Header().Set("Content-Encoding", "gzip")
+	// c.File(filepath.Join(".", filename))
+	c.File(zipFile.Name())
 }
