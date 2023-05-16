@@ -6,6 +6,7 @@ import (
 	"io"
 	config "motor/configs"
 	"motor/controllers"
+	"motor/middlewares"
 	"motor/models"
 	"motor/security"
 	"net/http"
@@ -18,6 +19,8 @@ import (
 
 func main() {
 	r := gin.Default()
+
+	r.Use(middlewares.SetupCorsMiddleware())
 
 	r.POST("/register", controllers.Register)
 	r.POST("/login", controllers.Login)
