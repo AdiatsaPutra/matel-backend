@@ -27,17 +27,17 @@ var (
 	// csvFile        = "majestic_million.csv"
 	dataHeaders = []string{
 		"leasing",
-		"cabang",
-		"no_kontrak",
-		"nama_debitur",
-		"nomor_polisi",
-		"sisa_hutang",
-		"tipe",
-		"tahun",
-		"no_rangka",
-		"no_mesin",
-		"pic",
-		"status",
+		// "cabang",
+		// "no_kontrak",
+		// "nama_debitur",
+		// "nomor_polisi",
+		// "sisa_hutang",
+		// "tipe",
+		// "tahun",
+		// "no_rangka",
+		// "no_mesin",
+		// "pic",
+		// "status",
 	}
 )
 
@@ -180,8 +180,9 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
 			)
 
+			
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			logrus.Info("Insert")
+			log.Println("INSERT")
 			if err != nil {
 				log.Fatal(err.Error())
 			}
