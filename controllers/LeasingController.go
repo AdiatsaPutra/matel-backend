@@ -7,7 +7,6 @@ import (
 	"motor/exceptions"
 	"motor/models"
 	"motor/payloads"
-	"motor/repository"
 	"net/http"
 	"strconv"
 	"strings"
@@ -16,12 +15,27 @@ import (
 )
 
 func GetLeasing(c *gin.Context) {
-	leasing, err := repository.GetLeasing(c)
+	// leasing, err := repository.GetLeasing(c)
+	pageStr := c.DefaultQuery("page", "1")    // Get the page parameter from the query string
+	limitStr := c.DefaultQuery("limit", "20") // Get the limit parameter from the query string
 
+	page, err := strconv.Atoi(pageStr)
 	if err != nil {
-		exceptions.AppException(c, "Leasing not found")
+		c.JSON(400, gin.H{"error": "Invalid page parameter"})
 		return
 	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid limit parameter"})
+		return
+	}
+
+	var leasing []models.Leasing
+	offset := (page - 1) * limit
+
+	// Query the leasing table with pagination
+	config.InitDB().Offset(offset).Limit(limit).Find(&leasing)
 
 	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
 }
