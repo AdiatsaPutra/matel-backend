@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	// dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
-	dbConnString   = "w08um7qaben07grspf9k:pscale_pw_VAkTxIR732WX6GQhmtlAamddhm7CSHSHhY69U2rjIm7@tcp(aws.connect.psdb.cloud)/matel?tls=true&charset=utf8mb4&parseTime=True&loc=Local"
+	dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
+	// dbConnString   = "w08um7qaben07grspf9k:pscale_pw_VAkTxIR732WX6GQhmtlAamddhm7CSHSHhY69U2rjIm7@tcp(aws.connect.psdb.cloud)/matel?tls=true&charset=utf8mb4&parseTime=True&loc=Local"
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
 	totalWorker    = 100
@@ -79,7 +79,6 @@ func AddCSV(c *gin.Context) {
 
 	duration := time.Since(start)
 	log.Println(fmt.Println("done in", int(math.Ceil(duration.Seconds())), "seconds"))
-	
 
 }
 
@@ -164,7 +163,6 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
 			)
 
-			
 			logrus.Info(query)
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			logrus.Info("INSERT")
