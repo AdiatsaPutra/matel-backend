@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/csv"
-	"fmt"
 	"io"
 	config "motor/configs"
 	"motor/exceptions"
@@ -39,7 +38,6 @@ func GetLeasing(c *gin.Context) {
 	config.InitDB().Offset(offset).Limit(limit).Find(&leasing)
 	var total int64
 	if err := config.InitDB().Model(&models.Leasing{}).Count(&total).Error; err != nil {
-		fmt.Println("Failed to retrieve total:", err)
 		return
 	}
 	data := make(map[string]interface{})
