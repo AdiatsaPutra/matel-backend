@@ -15,11 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type LeasingResponse struct {
-	total   int64
-	leasing []models.Leasing
-}
-
 func GetLeasing(c *gin.Context) {
 	// leasing, err := repository.GetLeasing(c)
 	pageStr := c.DefaultQuery("page", "1")    // Get the page parameter from the query string
@@ -47,11 +42,10 @@ func GetLeasing(c *gin.Context) {
 		fmt.Println("Failed to retrieve total:", err)
 		return
 	}
+	data := make(map[string]interface{})
 
-	var data = LeasingResponse{
-		total:   total,
-		leasing: leasing,
-	}
+	data["total"] = total
+	data["leasing"] = leasing
 
 	payloads.HandleSuccess(c, data, "Leasing found", http.StatusOK)
 }
