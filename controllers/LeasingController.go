@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	config "motor/configs"
 	"motor/exceptions"
@@ -13,6 +14,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+type LeasingResponse struct {
+	total   int64
+	leasing []models.Leasing
+}
 
 func GetLeasing(c *gin.Context) {
 	// leasing, err := repository.GetLeasing(c)
@@ -36,8 +42,18 @@ func GetLeasing(c *gin.Context) {
 
 	// Query the leasing table with pagination
 	config.InitDB().Offset(offset).Limit(limit).Find(&leasing)
+	var total int64
+	if err := config.InitDB().Model(&models.Leasing{}).Count(&total).Error; err != nil {
+		fmt.Println("Failed to retrieve total:", err)
+		return
+	}
 
-	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
+	var data = LeasingResponse{
+		total:   total,
+		leasing: leasing,
+	}
+
+	payloads.HandleSuccess(c, data, "Leasing found", http.StatusOK)
 }
 
 func UploadLeasing(c *gin.Context) {
