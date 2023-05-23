@@ -16,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -73,16 +74,23 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 
 	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
-	if err != nil {
+	if file == nil {
+		logrus.Info("null")
 		exceptions.BadRequest(c, "Masukkan data valid")
-		// return
+		return nil, nil, err
 	}
-
+	if err != nil {
+		logrus.Info(err)
+		exceptions.BadRequest(c, "Masukkan data valid")
+		return nil, nil, err
+	}
+	logrus.Info(file)
+	
 	// Open the uploaded file
 	csvFile, err := file.Open()
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
-		// return
+		return nil, nil, err
 	}
 	defer csvFile.Close()
 
@@ -95,7 +103,7 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// 	return nil, nil, err
 	// }
 
-	// logrus.Info("Success open")
+	logrus.Info("Success open")
 
 	reader := csv.NewReader(csvFile)
 	return reader, csvFile, nil
@@ -153,14 +161,14 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 			}()
 
 			conn, err := db.Conn(context.Background())
-			// logrus.Info(err)
+			logrus.Info(err)
 			query := fmt.Sprintf("INSERT INTO m_leasing (%s) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
 				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
 			)
 
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			// logrus.Info("Insert")
+			logrus.Info("Insert")
 			if err != nil {
 				log.Fatal(err.Error())
 			}
