@@ -77,7 +77,8 @@ func AddCSV(c *gin.Context) {
 	wg.Wait()
 
 	duration := time.Since(start)
-	logrus.Info(fmt.Println("done in", int(math.Ceil(duration.Seconds())), "seconds"))
+	log.Println("Done")
+	log.Println(fmt.Println("done in", int(math.Ceil(duration.Seconds())), "seconds"))
 	
 
 }
