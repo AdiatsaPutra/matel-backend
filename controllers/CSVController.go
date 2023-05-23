@@ -77,7 +77,8 @@ func AddCSV(c *gin.Context) {
 	wg.Wait()
 
 	duration := time.Since(start)
-	fmt.Println("done in", int(math.Ceil(duration.Seconds())), "seconds")
+	logrus.Info(fmt.Println("done in", int(math.Ceil(duration.Seconds())), "seconds"))
+	
 
 }
 
@@ -194,9 +195,9 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 		}
 	}
 
-	// if counter%100 == 0 {
-	// 	log.Println("=> worker", workerIndex, "inserted", counter, "data")
-	// }
+	if counter%100 == 0 {
+		log.Println("=> worker", workerIndex, "inserted", counter, "data")
+	}
 }
 
 func generateQuestionsMark(n int) []string {
