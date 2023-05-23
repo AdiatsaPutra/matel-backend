@@ -36,16 +36,8 @@ func GetLeasing(c *gin.Context) {
 
 	// Query the leasing table with pagination
 	config.InitDB().Offset(offset).Limit(limit).Find(&leasing)
-	var total int64
-	if err := config.InitDB().Model(&models.Leasing{}).Count(&total).Error; err != nil {
-		return
-	}
-	data := make(map[string]interface{})
 
-	data["total"] = total
-	data["leasing"] = leasing
-
-	payloads.HandleSuccess(c, data, "Leasing found", http.StatusOK)
+	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
 }
 
 func UploadLeasing(c *gin.Context) {
