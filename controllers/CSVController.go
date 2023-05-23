@@ -20,6 +20,7 @@ import (
 )
 
 var (
+	// dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
 	dbConnString   = "w08um7qaben07grspf9k:pscale_pw_VAkTxIR732WX6GQhmtlAamddhm7CSHSHhY69U2rjIm7@tcp(aws.connect.psdb.cloud)/matel?tls=true&charset=utf8mb4&parseTime=True&loc=Local"
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
@@ -27,17 +28,17 @@ var (
 	// csvFile        = "majestic_million.csv"
 	dataHeaders = []string{
 		"leasing",
-		// "cabang",
-		// "no_kontrak",
-		// "nama_debitur",
-		// "nomor_polisi",
-		// "sisa_hutang",
-		// "tipe",
-		// "tahun",
-		// "no_rangka",
-		// "no_mesin",
-		// "pic",
-		// "status",
+		"cabang",
+		"noKontrak",
+		"namaDebitur",
+		"nomorPolisi",
+		"sisaHutang",
+		"tipe",
+		"tahun",
+		"noRangka",
+		"noMesin",
+		"pic",
+		"status",
 	}
 )
 
@@ -77,7 +78,6 @@ func AddCSV(c *gin.Context) {
 	wg.Wait()
 
 	duration := time.Since(start)
-	log.Println("Done")
 	log.Println(fmt.Println("done in", int(math.Ceil(duration.Seconds())), "seconds"))
 	
 
@@ -87,11 +87,6 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 
 	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
-	if file == nil {
-		logrus.Info("null")
-		exceptions.BadRequest(c, "Masukkan data valid")
-		return nil, nil, err
-	}
 	if err != nil {
 		logrus.Info(err)
 		exceptions.BadRequest(c, "Masukkan data valid")
@@ -106,17 +101,6 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 		return nil, nil, err
 	}
 	defer csvFile.Close()
-
-	// f, err := os.Open(file)
-	// if err != nil {
-	// 	if os.IsNotExist(err) {
-	// 		log.Fatal("file majestic_million.csv tidak ditemukan. silakan download terlebih dahulu di https://blog.majestic.com/development/majestic-million-csv-daily")
-	// 	}
-
-	// 	return nil, nil, err
-	// }
-
-	logrus.Info("Success open")
 
 	reader := csv.NewReader(csvFile)
 	return reader, csvFile, nil
@@ -181,9 +165,12 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 			)
 
 			
+			logrus.Info(query)
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			log.Println("INSERT")
+			logrus.Info("INSERT")
 			if err != nil {
+				logrus.Info(query)
+				log.Println(err)
 				log.Fatal(err.Error())
 			}
 
