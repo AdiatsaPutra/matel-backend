@@ -15,9 +15,9 @@ import (
 )
 
 func GetLeasing(c *gin.Context) {
-	// leasing, err := repository.GetLeasing(c)
 	pageStr := c.DefaultQuery("page", "1")    // Get the page parameter from the query string
 	limitStr := c.DefaultQuery("limit", "20") // Get the limit parameter from the query string
+	searchQuery := c.Query("search")           // Get the search query from the query string
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
@@ -31,17 +31,27 @@ func GetLeasing(c *gin.Context) {
 		return
 	}
 
+	db := config.InitDB()
+
 	var leasing []models.Leasing
+	var total int64
+
 	offset := (page - 1) * limit
 
-	// Query the leasing table with pagination
-	config.InitDB().Offset(offset).Limit(limit).Find(&leasing)
-	var total int64
-	if err := config.InitDB().Model(&models.Leasing{}).Count(&total).Error; err != nil {
+	query := db.Offset(offset).Limit(limit)
+
+	if searchQuery != "" {
+		query = query.Where("leasing LIKE ? OR cabang LIKE ? OR nomorPolisi LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%", "%"+searchQuery+"%")
+	}
+
+	query.Find(&leasing)
+
+	if err := db.Model(&models.Leasing{}).Count(&total).Error; err != nil {
+		c.JSON(500, gin.H{"error": "Failed to retrieve leasing"})
 		return
 	}
-	data := make(map[string]interface{})
 
+	data := make(map[string]interface{})
 	data["total"] = total
 	data["leasing"] = leasing
 
