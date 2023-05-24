@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"compress/gzip"
+	"archive/zip"
 	"io"
 	config "motor/configs"
 	"motor/models"
@@ -85,46 +85,64 @@ func ExportHandler(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Create a new gzipped file
-	gzippedFile, err := os.Create("archive.gz")
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	defer gzippedFile.Close()
-
-	// Create a new gzip writer
-	gzipWriter := gzip.NewWriter(gzippedFile)
-	defer gzipWriter.Close()
-
-	// Copy the contents of the file to the gzip writer
-	_, err = io.Copy(gzipWriter, file)
+	// Get the file information.
+	fileInfo, err := file.Stat()
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	// Flush the gzip writer to ensure all data is written
-	gzipWriter.Flush()
+	// Create a zip archive.
+	zipFilePath := "archive.zip"
+	zipFile, err := os.Create(zipFilePath)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
+		return
+	}
+	defer zipFile.Close()
 
-	// open archived file
-	archivedFile, err := os.Open("archive.gz")
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Create a new file in the zip archive.
+	header, err := zip.FileInfoHeader(fileInfo)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	defer archivedFile.Close()
+	header.Name = fileInfo.Name()
 
-	// set filename and extension
-	fileName := "archive.gz"
-	contentType := "application/octet-stream"
+	writer, err := zipWriter.CreateHeader(&zip.FileHeader{
+		Name:   filepath,
+		Method: zip.Deflate, // Menggunakan metode kompresi Deflate
+	})
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
-	// set header response
-	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+fileName)
-	c.Writer.Header().Set("Content-Type", contentType)
+	// Copy the file content to the zip archive.
+	_, err = io.Copy(writer, file)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
-	c.File(fileName)
+	// Close the zip archive.
+	err = zipWriter.Close()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
-	// Send the compressed zip file to the user.
-	// c.Data(http.StatusOK, "application/gzip", buf.Bytes())
+	// Set the response headers.
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+zipFilePath)
+	c.Writer.Header().Set("Content-Type", "application/zip")
+
+	// Send the zip file to the user.
+	c.File(zipFilePath)
+
+	// Remove file after sending it to the user.
+	os.Remove(zipFilePath)
+
 }
