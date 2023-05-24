@@ -8,13 +8,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func GetProfile(c *gin.Context) {
 	UserID := c.MustGet("user_id").(uint)
-
-	logrus.Info(UserID)
 
 	user := models.User{
 		ID: UserID,

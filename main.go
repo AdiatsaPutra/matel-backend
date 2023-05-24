@@ -22,8 +22,6 @@ func main() {
 	r.POST("/upload-leasing", controllers.AddCSV)
 	r.GET("/export", controllers.ExportHandler)
 
-	r.GET("/member", security.AuthMiddleware(), controllers.GetAllMember)
-
 	r.GET("/province", controllers.GetProvince)
 	r.GET("/kabupaten/:province-id", controllers.GetKabupaten)
 	r.GET("/kecamatan/:kabupaten-id", controllers.GetKecamatan)

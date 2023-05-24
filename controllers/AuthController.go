@@ -26,9 +26,14 @@ func Register(c *gin.Context) {
 	c.ShouldBindJSON(&body)
 
 	user := models.User{
-		UserName: body.UserName,
-		Email:    body.Email,
-		Phone:    body.Phone,
+		UserName:    body.UserName,
+		Email:       body.Email,
+		Phone:       body.Phone,
+		Status:      0,
+		DeviceID:    body.DeviceID,
+		ProvinceID:  body.ProvinceID,
+		KabupatenID: body.KabupatenID,
+		KecamatanID: body.KecamatanID,
 	}
 
 	findUserFromDB, _ := repository.GetUserByName(c, user.UserName)
@@ -51,22 +56,6 @@ func Register(c *gin.Context) {
 
 	if err != nil {
 		exceptions.AppException(c, "Cant create user")
-		return
-	}
-
-	member := models.Member{
-		UserID:      userResult.ID,
-		Status:      0,
-		DeviceID:    body.DeviceID,
-		ProvinceID:  body.ProvinceID,
-		KabupatenID: body.KabupatenID,
-		KecamatanID: body.KecamatanID,
-	}
-
-	memberResult, _ := repository.CreateMember(c, member)
-
-	if memberResult.Error != nil {
-		exceptions.AppException(c, "Cant create member")
 		return
 	}
 
@@ -117,5 +106,3 @@ func Login(c *gin.Context) {
 		return
 	}
 }
-
-
