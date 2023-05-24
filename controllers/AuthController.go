@@ -9,21 +9,51 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 func Register(c *gin.Context) {
 	var body struct {
-		UserName    string `json:"username"`
-		Email       string `json:"email"`
-		Password    string `json:"password"`
-		Phone       string `json:"phone"`
-		DeviceID    string `json:"device_id"`
-		ProvinceID  uint   `json:"province_id"`
-		KabupatenID uint   `json:"kabupaten_id"`
-		KecamatanID uint   `json:"kecamatan_id"`
+		UserName    string `json:"username" validate:"required"`
+		Email       string `json:"email" validate:"required,email"`
+		Password    string `json:"password" validate:"required"`
+		Phone       string `json:"phone" validate:"required"`
+		DeviceID    string `json:"device_id" validate:"required"`
+		ProvinceID  uint   `json:"province_id" validate:"required"`
+		KabupatenID uint   `json:"kabupaten_id" validate:"required"`
+		KecamatanID uint   `json:"kecamatan_id" validate:"required"`
 	}
 
-	c.ShouldBindJSON(&body)
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		exceptions.AppException(c, "Invalid request body")
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(body)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	findUserFromDB, err := repository.GetUserByName(c, body.UserName)
+	if err != nil {
+		exceptions.AppException(c, "Failed to fetch user from the database")
+		return
+	}
+
+	emptyUser := models.User{}
+	if findUserFromDB != emptyUser {
+		exceptions.AppException(c, "User already exists")
+		return
+	}
+
+	hash, err := security.HashPassword(body.Password)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
 
 	user := models.User{
 		UserName:    body.UserName,
@@ -34,28 +64,12 @@ func Register(c *gin.Context) {
 		ProvinceID:  body.ProvinceID,
 		KabupatenID: body.KabupatenID,
 		KecamatanID: body.KecamatanID,
+		Password:    hash,
 	}
-
-	findUserFromDB, _ := repository.GetUserByName(c, user.UserName)
-
-	if findUserFromDB.ID != 0 {
-		exceptions.AppException(c, "User already exist")
-		return
-	}
-
-	hash, err := security.HashPassword(body.Password)
-
-	if err != nil {
-		exceptions.AppException(c, err.Error())
-		return
-	}
-
-	user.Password = hash
 
 	userResult, err := repository.CreateUser(c, user)
-
 	if err != nil {
-		exceptions.AppException(c, "Cant create user")
+		exceptions.AppException(c, "Failed to create user")
 		return
 	}
 
