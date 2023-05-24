@@ -17,7 +17,7 @@ import (
 func GetLeasing(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")    // Get the page parameter from the query string
 	limitStr := c.DefaultQuery("limit", "20") // Get the limit parameter from the query string
-	searchQuery := c.Query("search")           // Get the search query from the query string
+	searchQuery := c.Query("search")          // Get the search query from the query string
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
@@ -45,11 +45,17 @@ func GetLeasing(c *gin.Context) {
 		query = query.Offset(offset).Limit(limit)
 	}
 
-	query.Find(&leasing)
+	if searchQuery != "" {
+		if err := db.Model(&models.Leasing{}).Count(&total).Error; err != nil {
+			c.JSON(500, gin.H{"error": "Failed to retrieve leasing"})
+			return
+		}
+	} else {
+		if err := query.Find(&leasing).Count(&total).Error; err != nil {
+			c.JSON(500, gin.H{"error": "Failed to retrieve leasing"})
+			return
+		}
 
-	if err := db.Model(&models.Leasing{}).Count(&total).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Failed to retrieve leasing"})
-		return
 	}
 
 	data := make(map[string]interface{})
