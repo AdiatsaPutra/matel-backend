@@ -31,11 +31,6 @@ func GetLeasing(c *gin.Context) {
 		return
 	}
 
-	// Limit the maximum limit value to 100
-	if limit > 100 {
-		limit = 100
-	}
-
 	db := config.InitDB()
 
 	var leasing []models.Leasing
