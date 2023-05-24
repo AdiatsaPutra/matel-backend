@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"archive/zip"
-	"bytes"
 	"io"
 	config "motor/configs"
 	"motor/models"
@@ -94,8 +93,16 @@ func ExportHandler(c *gin.Context) {
 	}
 
 	// Create a zip archive.
-	buf := new(bytes.Buffer)
-	zipWriter := zip.NewWriter(buf)
+	zipFilePath := "archive.zip"
+	zipFile, err := os.Create(zipFilePath)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
+		return
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
 
 	// Create a new file in the zip archive.
 	header, err := zip.FileInfoHeader(fileInfo)
@@ -105,7 +112,10 @@ func ExportHandler(c *gin.Context) {
 	}
 	header.Name = fileInfo.Name()
 
-	writer, err := zipWriter.CreateHeader(header)
+	writer, err := zipWriter.CreateHeader(&zip.FileHeader{
+		Name:   filepath,
+		Method: zip.Deflate, // Menggunakan metode kompresi Deflate
+	})
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -126,9 +136,13 @@ func ExportHandler(c *gin.Context) {
 	}
 
 	// Set the response headers.
-	c.Header("Content-Type", "application/zip")
-	c.Header("Content-Disposition", "attachment; filename=archive.zip")
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+zipFilePath)
+	c.Writer.Header().Set("Content-Type", "application/zip")
 
 	// Send the zip file to the user.
-	c.Data(http.StatusOK, "application/zip", buf.Bytes())
+	c.File(zipFilePath)
+
+	// Remove file after sending it to the user.
+	os.Remove(zipFilePath)
+
 }
