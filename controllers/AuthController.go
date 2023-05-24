@@ -26,26 +26,26 @@ func Register(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
-		exceptions.AppException(c, "Invalid request body")
+		exceptions.AppException(c, "Something went wrong")
 		return
 	}
 
 	validate := validator.New()
 	err = validate.Struct(body)
 	if err != nil {
-		exceptions.AppException(c, err.Error())
+		exceptions.AppException(c, "Lengkapi data anda")
 		return
 	}
 
 	findUserFromDB, err := repository.GetUserByName(c, body.UserName)
 	if err != nil {
-		exceptions.AppException(c, "Failed to fetch user from the database")
+		exceptions.AppException(c, "Something went wrong")
 		return
 	}
 
 	emptyUser := models.User{}
 	if findUserFromDB != emptyUser {
-		exceptions.AppException(c, "User already exists")
+		exceptions.AppException(c, "Something went wrong")
 		return
 	}
 
@@ -69,11 +69,11 @@ func Register(c *gin.Context) {
 
 	userResult, err := repository.CreateUser(c, user)
 	if err != nil {
-		exceptions.AppException(c, "Failed to create user")
+		exceptions.AppException(c, "Something went wrong")
 		return
 	}
 
-	payloads.HandleSuccess(c, userResult, "User created", http.StatusOK)
+	payloads.HandleSuccess(c, userResult, "Success Register", http.StatusOK)
 }
 
 func Login(c *gin.Context) {
