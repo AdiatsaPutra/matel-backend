@@ -16,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -87,11 +86,11 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
 	if err != nil {
-		logrus.Info(err)
+		// logrus.Info(err)
 		exceptions.BadRequest(c, "Masukkan data valid")
 		return nil, nil, err
 	}
-	logrus.Info(file)
+	// logrus.Info(file)
 
 	// Open the uploaded file
 	csvFile, err := file.Open()
@@ -163,11 +162,11 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
 			)
 
-			logrus.Info(query)
+			// logrus.Info(query)
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			// logrus.Info("INSERT")
 			if err != nil {
-				logrus.Info(query)
+				// logrus.Info(query)
 				log.Println(err)
 				log.Fatal(err.Error())
 			}

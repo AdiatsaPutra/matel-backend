@@ -36,12 +36,13 @@ func GetLeasing(c *gin.Context) {
 	var leasing []models.Leasing
 	var total int64
 
-	offset := (page - 1) * limit
-
-	query := db.Offset(offset).Limit(limit)
+	query := db
 
 	if searchQuery != "" {
 		query = query.Where("leasing LIKE ? OR cabang LIKE ? OR nomorPolisi LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%", "%"+searchQuery+"%")
+	} else {
+		offset := (page - 1) * limit
+		query = query.Offset(offset).Limit(limit)
 	}
 
 	query.Find(&leasing)
