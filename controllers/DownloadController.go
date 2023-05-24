@@ -1,8 +1,7 @@
 package controllers
 
 import (
-	"archive/zip"
-	"bytes"
+	"compress/gzip"
 	"io"
 	config "motor/configs"
 	"motor/models"
@@ -86,49 +85,46 @@ func ExportHandler(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Get the file information.
-	fileInfo, err := file.Stat()
+	// Create a new gzipped file
+	gzippedFile, err := os.Create("archive.gz")
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	defer gzippedFile.Close()
+
+	// Create a new gzip writer
+	gzipWriter := gzip.NewWriter(gzippedFile)
+	defer gzipWriter.Close()
+
+	// Copy the contents of the file to the gzip writer
+	_, err = io.Copy(gzipWriter, file)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	// Create a zip archive.
-	buf := new(bytes.Buffer)
-	zipWriter := zip.NewWriter(buf)
+	// Flush the gzip writer to ensure all data is written
+	gzipWriter.Flush()
 
-	// Create a new file in the zip archive.
-	header, err := zip.FileInfoHeader(fileInfo)
+	// open archived file
+	archivedFile, err := os.Open("archive.gz")
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	header.Name = fileInfo.Name()
+	defer archivedFile.Close()
 
-	writer, err := zipWriter.CreateHeader(header)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+	// set filename and extension
+	fileName := "archive.gz"
+	contentType := "application/octet-stream"
 
-	// Copy the file content to the zip archive.
-	_, err = io.Copy(writer, file)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+	// set header response
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+fileName)
+	c.Writer.Header().Set("Content-Type", contentType)
 
-	// Close the zip archive.
-	err = zipWriter.Close()
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+	c.File(fileName)
 
-	// Set the response headers.
-	c.Header("Content-Type", "application/zip")
-	c.Header("Content-Disposition", "attachment; filename=archive.zip")
-
-	// Send the zip file to the user.
-	c.Data(http.StatusOK, "application/zip", buf.Bytes())
+	// Send the compressed zip file to the user.
+	// c.Data(http.StatusOK, "application/gzip", buf.Bytes())
 }
