@@ -3,6 +3,7 @@ package controllers
 import (
 	"archive/zip"
 	"bytes"
+	"compress/gzip"
 	"io"
 	config "motor/configs"
 	"motor/models"
@@ -86,26 +87,12 @@ func ExportHandler(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Get the file information.
-	fileInfo, err := file.Stat()
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
 	// Create a zip archive.
 	buf := new(bytes.Buffer)
 	zipWriter := zip.NewWriter(buf)
 
 	// Create a new file in the zip archive.
-	header, err := zip.FileInfoHeader(fileInfo)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	header.Name = fileInfo.Name()
-
-	writer, err := zipWriter.CreateHeader(header)
+	writer, err := zipWriter.Create(filepath)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -125,10 +112,21 @@ func ExportHandler(c *gin.Context) {
 		return
 	}
 
-	// Set the response headers.
-	c.Header("Content-Type", "application/zip")
-	c.Header("Content-Disposition", "attachment; filename=archive.zip")
+	// Compress the zip file.
+	compressedBuf := new(bytes.Buffer)
+	compressor := gzip.NewWriter(compressedBuf)
+	defer compressor.Close()
 
-	// Send the zip file to the user.
-	c.Data(http.StatusOK, "application/zip", buf.Bytes())
+	_, err = compressor.Write(buf.Bytes())
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Set the response headers.
+	c.Header("Content-Type", "application/gzip")
+	c.Header("Content-Disposition", "attachment; filename=archive.zip.gz")
+
+	// Send the compressed zip file to the user.
+	c.Data(http.StatusOK, "application/gzip", compressedBuf.Bytes())
 }
