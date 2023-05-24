@@ -40,23 +40,18 @@ func GetLeasing(c *gin.Context) {
 
 	if searchQuery != "" {
 		query = query.Where("leasing LIKE ? OR cabang LIKE ? OR nomorPolisi LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%", "%"+searchQuery+"%")
-	} else {
-		offset := (page - 1) * limit
-		query = query.Offset(offset).Limit(limit)
 	}
 
-	if searchQuery != "" {
-		if err := db.Model(&models.Leasing{}).Count(&total).Error; err != nil {
-			c.JSON(500, gin.H{"error": "Failed to retrieve leasing"})
-			return
-		}
-	} else {
-		if err := query.Find(&leasing).Count(&total).Error; err != nil {
-			c.JSON(500, gin.H{"error": "Failed to retrieve leasing"})
-			return
-		}
+	query.Find(&leasing)
 
+	if err := query.Model(&models.Leasing{}).Count(&total).Error; err != nil {
+		c.JSON(500, gin.H{"error": "Failed to retrieve leasing"})
+		return
 	}
+
+	offset := (page - 1) * limit
+	query = query.Offset(offset).Limit(limit)
+	query.Find(&leasing)
 
 	data := make(map[string]interface{})
 	data["total"] = total
