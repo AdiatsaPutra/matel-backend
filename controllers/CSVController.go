@@ -16,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -156,17 +157,17 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 			}()
 
 			conn, err := db.Conn(context.Background())
-			// logrus.Info(err)
+			logrus.Info(err)
 			query := fmt.Sprintf("INSERT INTO m_leasing (%s) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
 				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
 			)
 
-			// logrus.Info(query)
+			logrus.Info(query)
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			// logrus.Info("INSERT")
+			logrus.Info("INSERT")
 			if err != nil {
-				// logrus.Info(query)
+				logrus.Info(query)
 				log.Println(err)
 				log.Fatal(err.Error())
 			}
