@@ -157,7 +157,7 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 			}()
 
 			conn, err := db.Conn(context.Background())
-			logrus.Info(err)
+			// logrus.Info(err)
 			query := fmt.Sprintf("INSERT INTO m_leasing (%s) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
 				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
@@ -165,7 +165,7 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 
 			logrus.Info(query)
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			logrus.Info("INSERT")
+			// logrus.Info("INSERT")
 			if err != nil {
 				logrus.Info(query)
 				log.Println(err)
@@ -182,9 +182,9 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 		}
 	}
 
-	if counter%100 == 0 {
-		log.Println("=> worker", workerIndex, "inserted", counter, "data")
-	}
+	// if counter%100 == 0 {
+	// 	log.Println("=> worker", workerIndex, "inserted", counter, "data")
+	// }
 }
 
 func generateQuestionsMark(n int) []string {
