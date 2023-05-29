@@ -17,7 +17,7 @@ import (
 func ExportHandler(c *gin.Context) {
 	// Retrieve all data from the table
 	var data []models.Leasing
-	err := config.InitDB().Find(&data).Error
+	err := config.InitDB().Select("nomor_polisi, no_rangka, no_mesin").Find(&data).Error
 	if err != nil {
 		logrus.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
