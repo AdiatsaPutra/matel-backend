@@ -163,7 +163,7 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
 			)
 
-			logrus.Info(query)
+			// logrus.Info(query)
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			logrus.Info("INSERT")
 			if err != nil {
