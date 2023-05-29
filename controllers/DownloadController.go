@@ -17,7 +17,7 @@ import (
 func ExportHandler(c *gin.Context) {
 	// Retrieve all data from the table
 	var data []models.Leasing
-	err := config.InitDB().Select("nomor_polisi, no_rangka, no_mesin").Find(&data).Error
+	err := config.InitDB().Select("nomorPolisi, noRangka, noMesin").Find(&data).Error
 	if err != nil {
 		logrus.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -47,7 +47,7 @@ func ExportHandler(c *gin.Context) {
 	}
 
 	// AutoMigrate your model in the SQLite database
-	err = sqliteDB.AutoMigrate(&models.Leasing{})
+	err = sqliteDB.AutoMigrate(&models.LeasingToExport{})
 	if err != nil {
 		logrus.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -58,6 +58,16 @@ func ExportHandler(c *gin.Context) {
 	totalData := len(data)
 	batchCount := totalData / batchSize
 
+	// Convert data to the desired struct with selected fields
+	var leasingData []models.LeasingToExport
+	for _, d := range data {
+		leasingData = append(leasingData, models.LeasingToExport{
+			NomorPolisi: d.NomorPolisi,
+			NoRangka:    d.NoRangka,
+			NoMesin:     d.NoMesin,
+		})
+	}
+
 	// Insert data into the SQLite database in batches
 	for i := 0; i <= batchCount; i++ {
 		start := i * batchSize
@@ -66,7 +76,7 @@ func ExportHandler(c *gin.Context) {
 			end = totalData
 		}
 
-		batch := data[start:end]
+		batch := leasingData[start:end]
 		err = sqliteDB.Create(&batch).Error
 		if err != nil {
 			logrus.Error(err)
