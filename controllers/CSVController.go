@@ -63,7 +63,6 @@ func AddCSV(c *gin.Context) {
 
 	db, err := openDbConnection(c)
 	if err != nil {
-		logrus.Info("OPEN DB")
 		logrus.Info(err.Error())
 		exceptions.AppException(c, err.Error())
 		return
