@@ -73,6 +73,7 @@ func AddCSV(c *gin.Context) {
 	if err != nil {
 		logrus.Info("OPEN CSV")
 		logrus.Info(err.Error())
+		logrus.Info("OPEN CSV")
 		exceptions.AppException(c, err.Error())
 		return
 	}
