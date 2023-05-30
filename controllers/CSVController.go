@@ -10,6 +10,7 @@ import (
 	"math"
 	"mime/multipart"
 	"motor/exceptions"
+	"motor/payloads"
 	"strings"
 	"sync"
 	"time"
@@ -42,11 +43,12 @@ var (
 	}
 )
 
-func openDbConnection() (*sql.DB, error) {
-	log.Println("=> open db connection")
+func openDbConnection(c *gin.Context) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", dbConnString)
 	if err != nil {
+		logrus.Info(err)
+		exceptions.AppException(c, err.Error())
 		return nil, err
 	}
 
@@ -58,19 +60,24 @@ func openDbConnection() (*sql.DB, error) {
 
 func AddCSV(c *gin.Context) {
 	start := time.Now()
-	csvReader, csvFile, err := openCsvFile(c)
+
+	db, err := openDbConnection(c)
 	if err != nil {
 		log.Fatal(err.Error())
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	csvReader, csvFile, err := openCsvFile(c)
+	if err != nil {
+		logrus.Info(err)
+		exceptions.AppException(c, err.Error())
+		return
 	}
 	defer csvFile.Close()
 
 	jobs := make(chan []interface{}, 0)
 	wg := new(sync.WaitGroup)
-
-	db, err := openDbConnection()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 
 	go dispatchWorkers(c, db, jobs, wg)
 	readCsvFilePerLineThenSendToWorker(csvReader, jobs, wg)
@@ -78,7 +85,7 @@ func AddCSV(c *gin.Context) {
 	wg.Wait()
 
 	duration := time.Since(start)
-	log.Println(fmt.Println("done in", int(math.Ceil(duration.Seconds())), "seconds"))
+	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 
 }
 
@@ -87,19 +94,19 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
 	if err != nil {
-		// logrus.Info(err)
-		exceptions.BadRequest(c, "Masukkan data valid")
+		logrus.Info(err)
+		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
-	// logrus.Info(file)
 
 	// Open the uploaded file
 	csvFile, err := file.Open()
 	if err != nil {
-		exceptions.AppException(c, "Something went wrong")
+		logrus.Info(err)
+		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
-	defer csvFile.Close()
+	// defer csvFile.Close()
 
 	reader := csv.NewReader(csvFile)
 	return reader, csvFile, nil
@@ -152,31 +159,26 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 		func(outerError *error) {
 			defer func() {
 				if err := recover(); err != nil {
-					*outerError = fmt.Errorf("%v", err)
+					*outerError = fmt.Errorf("%v Error", err)
 				}
 			}()
 
 			conn, err := db.Conn(context.Background())
-			logrus.Info(err)
 			query := fmt.Sprintf("INSERT INTO m_leasing (%s) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
 				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
 			)
 
-			// logrus.Info(query)
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			logrus.Info("INSERT")
 			if err != nil {
+				logrus.Info(err)
 				exceptions.AppException(c, err.Error())
-				logrus.Info(query)
-				log.Println(err)
-				log.Fatal(err.Error())
 				return
 			}
 
 			err = conn.Close()
 			if err != nil {
-				log.Fatal(err.Error())
+				logrus.Info(err)
 				exceptions.AppException(c, err.Error())
 				return
 			}
