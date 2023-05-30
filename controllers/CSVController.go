@@ -72,7 +72,7 @@ func AddCSV(c *gin.Context) {
 		log.Fatal(err.Error())
 	}
 
-	go dispatchWorkers(db, jobs, wg)
+	go dispatchWorkers(c, db, jobs, wg)
 	readCsvFilePerLineThenSendToWorker(csvReader, jobs, wg)
 
 	wg.Wait()
@@ -105,13 +105,13 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	return reader, csvFile, nil
 }
 
-func dispatchWorkers(db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup) {
+func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup) {
 	for workerIndex := 0; workerIndex <= totalWorker; workerIndex++ {
 		go func(workerIndex int, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup) {
 			counter := 0
 
 			for job := range jobs {
-				doTheJob(workerIndex, counter, db, job)
+				doTheJob(c, workerIndex, counter, db, job)
 				wg.Done()
 				counter++
 			}
@@ -146,7 +146,7 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 	close(jobs)
 }
 
-func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
+func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) {
 	for {
 		var outerError error
 		func(outerError *error) {
@@ -167,14 +167,18 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			logrus.Info("INSERT")
 			if err != nil {
+				exceptions.AppException(c, err.Error())
 				logrus.Info(query)
 				log.Println(err)
 				log.Fatal(err.Error())
+				return
 			}
 
 			err = conn.Close()
 			if err != nil {
 				log.Fatal(err.Error())
+				exceptions.AppException(c, err.Error())
+				return
 			}
 		}(&outerError)
 		if outerError == nil {
@@ -182,9 +186,9 @@ func doTheJob(workerIndex, counter int, db *sql.DB, values []interface{}) {
 		}
 	}
 
-	// if counter%100 == 0 {
-	// 	log.Println("=> worker", workerIndex, "inserted", counter, "data")
-	// }
+	if counter%100 == 0 {
+		log.Println("=> worker", workerIndex, "inserted", counter, "data")
+	}
 }
 
 func generateQuestionsMark(n int) []string {
