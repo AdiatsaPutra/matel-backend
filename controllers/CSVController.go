@@ -6,7 +6,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	"mime/multipart"
 	"motor/exceptions"
@@ -174,7 +173,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			)
 
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			// logrus.Info("INSERT")
+			logrus.Info("INSERT")
 			if err != nil {
 				logrus.Info(err.Error())
 				exceptions.AppException(c, err.Error())
@@ -193,9 +192,9 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 		}
 	}
 
-	if counter%100 == 0 {
-		log.Println("=> worker", workerIndex, "inserted", counter, "data")
-	}
+	// if counter%100 == 0 {
+	// 	log.Println("=> worker", workerIndex, "inserted", counter, "data")
+	// }
 }
 
 func generateQuestionsMark(n int) []string {
