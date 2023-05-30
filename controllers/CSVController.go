@@ -47,7 +47,7 @@ func openDbConnection(c *gin.Context) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", dbConnString)
 	if err != nil {
-		logrus.Info(err)
+		logrus.Info(err.Error())
 		exceptions.AppException(c, err.Error())
 		return nil, err
 	}
@@ -63,18 +63,20 @@ func AddCSV(c *gin.Context) {
 
 	db, err := openDbConnection(c)
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Info("OPEN DB")
+		logrus.Info(err.Error())
 		exceptions.AppException(c, err.Error())
 		return
 	}
 
-	csvReader, csvFile, err := openCsvFile(c)
+	csvReader, _, err := openCsvFile(c)
 	if err != nil {
-		logrus.Info(err)
+		logrus.Info("OPEN CSV")
+		logrus.Info(err.Error())
 		exceptions.AppException(c, err.Error())
 		return
 	}
-	defer csvFile.Close()
+	// defer csvFile.Close()
 
 	jobs := make(chan []interface{}, 0)
 	wg := new(sync.WaitGroup)
@@ -94,7 +96,8 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
 	if err != nil {
-		logrus.Info(err)
+		logrus.Info("FILE")
+		logrus.Info(err.Error())
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
@@ -102,7 +105,8 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// Open the uploaded file
 	csvFile, err := file.Open()
 	if err != nil {
-		logrus.Info(err)
+		logrus.Info("ATTEMPT TO OPEN")
+		logrus.Info(err.Error())
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
@@ -172,14 +176,14 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			logrus.Info("INSERT")
 			if err != nil {
-				logrus.Info(err)
+				logrus.Info(err.Error())
 				exceptions.AppException(c, err.Error())
 				return
 			}
 
 			err = conn.Close()
 			if err != nil {
-				logrus.Info(err)
+				logrus.Info(err.Error())
 				exceptions.AppException(c, err.Error())
 				return
 			}
