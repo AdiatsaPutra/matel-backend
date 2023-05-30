@@ -175,7 +175,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			)
 
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			logrus.Info("INSERT")
+			// logrus.Info("INSERT")
 			if err != nil {
 				logrus.Info(err.Error())
 				exceptions.AppException(c, err.Error())
