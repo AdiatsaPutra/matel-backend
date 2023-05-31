@@ -43,7 +43,7 @@ func ExportHandler(c *gin.Context) {
 	}
 
 	// AutoMigrate your model in the SQLite database
-	err = sqliteDB.AutoMigrate(&models.LeasingToExport{})
+	err = sqliteDB.AutoMigrate(&models.Leasing{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -54,9 +54,9 @@ func ExportHandler(c *gin.Context) {
 	batchCount := totalData / batchSize
 
 	// Convert data to the desired struct with selected fields
-	var leasingData []models.LeasingToExport
+	var leasingData []models.Leasing
 	for _, d := range data {
-		leasingData = append(leasingData, models.LeasingToExport{
+		leasingData = append(leasingData, models.Leasing{
 			NomorPolisi: d.NomorPolisi,
 			NoRangka:    d.NoRangka,
 			NoMesin:     d.NoMesin,
