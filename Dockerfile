@@ -15,6 +15,7 @@ WORKDIR /app
 
 # Copy the Go module files and download dependencies
 COPY go.mod go.sum ./
+RUN go get github.com/githubnemo/CompileDaemon
 RUN go mod download
 
 # Copy the rest of the application source code
@@ -24,14 +25,9 @@ COPY . .
 # RUN go build -o matel-backend
 # RUN go run main.go
 
-ADD . .
-
 EXPOSE 8000
 
-ENTRYPOINT CompileDaemon --build-"go build main.go" --command=./main
-
-RUN go mod download
-RUN go get github.com/githubnemo/CompileDaemon
+ENTRYPOINT CompileDaemon --build="go build main.go" --command=./main
 
 
 # # Set the entrypoint command
