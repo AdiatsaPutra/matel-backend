@@ -20,8 +20,20 @@ RUN go mod download
 # Copy the rest of the application source code
 COPY . .
 
-# Build the Go application
-RUN go build -o myapp
+# # Build the Go application
+# RUN go build -o matel-backend
+# RUN go run main.go
 
-# Set the entrypoint command
-CMD ["./myapp"]
+ADD . .
+
+EXPOSE 8000
+
+ENTRYPOINT CompileDaemon --build-"go build main.go"
+--command=./main
+
+RUN go mod download
+RUN go get github.com/githubnemo/CompileDaemon
+
+
+# # Set the entrypoint command
+# CMD ["./matel-backend"]
