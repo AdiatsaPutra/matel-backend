@@ -189,7 +189,7 @@ func ExportHandlerNew(c *gin.Context) {
 	}
 
 	result := destinationDB.Clauses(
-		clause.Insert{Table: clause.Table{Name: "leasing_to_export"}},
+		clause.Insert{Table: clause.Table{Name: "leasing_to_exports"}},
 		clause.Values{
 			Columns: columns,
 			Values:  values,
