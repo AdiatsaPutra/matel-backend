@@ -24,7 +24,7 @@ COPY . .
 EXPOSE 8080
 
 # Build the Go application
-RUN go build -o app
+RUN go build -o main
 
 # Set the entrypoint command
-CMD ["./app"]
+CMD ["./main"]
