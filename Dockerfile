@@ -20,8 +20,10 @@ RUN go mod download
 # Copy the rest of the application source code
 COPY . .
 
+EXPOSE 8080
+
 # Build the Go application
-RUN go build -o myapp
+RUN go build -o app
 
 # Set the entrypoint command
-CMD ["./myapp"]
+CMD ["./app"]
