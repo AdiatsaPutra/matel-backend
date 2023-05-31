@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"time"
 	"archive/zip"
 	"io"
 
@@ -169,19 +171,39 @@ func ExportHandlerNew(c *gin.Context) {
 	// Migrate the schema in destination database
 	destinationDB.AutoMigrate(&models.LeasingToExport{})
 
-	// Read data from source database
-	var sourceUsers []models.Leasing
-	sourceDB.Find(&sourceUsers)
-
 	// Copy data to destination database
-	for _, sourceUser := range sourceUsers {
-		destinationUser := models.LeasingToExport{NomorPolisi: sourceUser.NomorPolisi, NoRangka: sourceUser.NoRangka, NoMesin: sourceUser.NoMesin}
-		result := destinationDB.Create(&destinationUser)
+	batchSize := 1000
+	startTime := time.Now()
+	offset := 0
+	for {
+		var sourceData []models.Leasing
+		result := sourceDB.Offset(offset).Limit(batchSize).Find(&sourceData)
 		if result.Error != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
+			fmt.Println("Failed to retrieve users:", result.Error)
+			break
 		}
+
+		// Copy data to destination database
+		for _, sourceUser := range sourceData {
+			destinationUser := models.LeasingToExport{NomorPolisi: sourceUser.NomorPolisi, NoMesin: sourceUser.NoMesin, NoRangka: sourceUser.NoRangka}
+			result := destinationDB.Create(&destinationUser)
+			if result.Error != nil {
+				fmt.Println("Failed to copy user:", result.Error)
+				break
+			}
+		}
+
+		// Check if all data has been processed
+		if len(sourceData) < batchSize {
+			break
+		}
+
+		offset += batchSize
 	}
+
+	elapsedTime := time.Since(startTime)
+	fmt.Printf("Table copied successfully in %s\n", elapsedTime)
+
 
 	payloads.HandleSuccess(c, "Berhasil update database", "Berhasil", 200)
 }
