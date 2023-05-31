@@ -152,6 +152,40 @@ func ExportHandler(c *gin.Context) {
 
 }
 
+func ExportHandlerNew(c *gin.Context) {
+
+	sourceDB := config.InitDB()
+	// if err != nil {
+	// 	c.AbortWithError(http.StatusInternalServerError, err)
+	// 	return
+	// }
+
+	destinationDB, err := gorm.Open(sqlite.Open("destination.db"), &gorm.Config{})
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Migrate the schema in destination database
+	destinationDB.AutoMigrate(&models.LeasingToExport{})
+
+	// Read data from source database
+	var sourceUsers []models.Leasing
+	sourceDB.Find(&sourceUsers)
+
+	// Copy data to destination database
+	for _, sourceUser := range sourceUsers {
+		destinationUser := models.LeasingToExport{NomorPolisi: sourceUser.NomorPolisi, NoRangka: sourceUser.NoRangka, NoMesin: sourceUser.NoMesin}
+		result := destinationDB.Create(&destinationUser)
+		if result.Error != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	payloads.HandleSuccess(c, "Berhasil update database", "Berhasil", 200)
+}
+
 func DownloadLeasing(c *gin.Context) {
 	zipFilePath := "archive.zip"
 

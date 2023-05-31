@@ -21,6 +21,7 @@ func main() {
 	r.GET("/leasing", controllers.GetLeasing)
 	r.POST("/upload-leasing", controllers.AddCSV)
 	r.GET("/export", controllers.ExportHandler)
+	r.GET("export-new", controllers.ExportHandlerNew)
 	r.GET("/download", controllers.DownloadLeasing)
 
 	r.GET("/province", controllers.GetProvince)
