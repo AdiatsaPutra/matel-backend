@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -49,13 +50,14 @@ func ExportHandler(c *gin.Context) {
 		return
 	}
 
-	batchSize := 10000 // Set the desired batch size for insertion
+	batchSize := 10 // Set the desired batch size for insertion
 	totalData := len(data)
 	batchCount := totalData / batchSize
 
 	// Convert data to the desired struct with selected fields
 	var leasingData []models.Leasing
 	for _, d := range data {
+		logrus.Info(d)
 		leasingData = append(leasingData, models.Leasing{
 			NomorPolisi: d.NomorPolisi,
 			NoRangka:    d.NoRangka,
