@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -19,7 +18,6 @@ func ExportHandler(c *gin.Context) {
 	var data []models.Leasing
 	err := config.InitDB().Select("nomorPolisi, noRangka, noMesin").Find(&data).Error
 	if err != nil {
-		logrus.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -32,7 +30,6 @@ func ExportHandler(c *gin.Context) {
 	// Create a new SQLite database file
 	sqliteDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
 	if err != nil {
-		logrus.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -41,7 +38,6 @@ func ExportHandler(c *gin.Context) {
 	// Clear existing data from the table
 	err = sqliteDB.Exec("DELETE FROM m_leasing").Error
 	if err != nil {
-		logrus.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -49,12 +45,11 @@ func ExportHandler(c *gin.Context) {
 	// AutoMigrate your model in the SQLite database
 	err = sqliteDB.AutoMigrate(&models.LeasingToExport{})
 	if err != nil {
-		logrus.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	batchSize := 100 // Set the desired batch size for insertion
+	batchSize := 10000 // Set the desired batch size for insertion
 	totalData := len(data)
 	batchCount := totalData / batchSize
 
@@ -79,7 +74,6 @@ func ExportHandler(c *gin.Context) {
 		batch := leasingData[start:end]
 		err = sqliteDB.Create(&batch).Error
 		if err != nil {
-			logrus.Error(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -89,7 +83,6 @@ func ExportHandler(c *gin.Context) {
 	filepath := "exported.db"
 	file, err := os.Open(filepath)
 	if err != nil {
-		logrus.Error(err)
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
