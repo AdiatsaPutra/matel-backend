@@ -1,0 +1,21 @@
+version: '3'
+services:
+  db:
+    image: mysql/mysql-server:8.0.33
+    ports:
+      - "3305:3306"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+      - "MYSQL_USER=root"
+      - "MYSQL_PASSWORD=root"
+      - "MYSQL_DATABASE=matel"
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ".:/app"
+    depends_on:
+      - db
+    links:
+      - "db:database"
