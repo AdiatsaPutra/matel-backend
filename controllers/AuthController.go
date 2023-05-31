@@ -37,17 +37,17 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	findUserFromDB, err := repository.GetUserByName(c, body.UserName)
-	if err != nil {
-		exceptions.AppException(c, "Something went wrong")
-		return
-	}
+	// findUserFromDB, err := repository.GetUserByName(c, body.UserName)
+	// if err != nil {
+	// 	exceptions.AppException(c, "Something went wrong")
+	// 	return
+	// }
 
-	emptyUser := models.User{}
-	if findUserFromDB != emptyUser {
-		exceptions.AppException(c, "Something went wrong")
-		return
-	}
+	// emptyUser := models.User{}
+	// if findUserFromDB != emptyUser {
+	// 	exceptions.AppException(c, "Something went wrong")
+	// 	return
+	// }
 
 	hash, err := security.HashPassword(body.Password)
 	if err != nil {
