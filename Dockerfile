@@ -15,7 +15,6 @@ WORKDIR /app
 
 # Copy the Go module files and download dependencies
 COPY go.mod go.sum ./
-RUN go get github.com/githubnemo/CompileDaemon
 RUN go mod download
 
 # Copy the rest of the application source code
@@ -25,6 +24,9 @@ EXPOSE 8080
 
 # Build the Go application
 RUN go build -o main
+
+# Run the database migrations
+RUN go run migration/migration.go
 
 # Set the entrypoint command
 CMD ["./main"]
