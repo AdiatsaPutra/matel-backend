@@ -13,7 +13,7 @@ services:
     build: .
     ports:
       # 80 on the host, 8080 on the guest. Websever listens on 8080
-      - "8080"
+      - "8080:80"
     volumes:
       - ".:/main"
     depends_on:
