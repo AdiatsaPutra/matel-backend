@@ -28,8 +28,7 @@ ADD . .
 
 EXPOSE 8000
 
-ENTRYPOINT CompileDaemon --build-"go build main.go"
---command=./main
+ENTRYPOINT CompileDaemon --build-"go build main.go" --command=./main
 
 RUN go mod download
 RUN go get github.com/githubnemo/CompileDaemon
