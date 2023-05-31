@@ -201,6 +201,66 @@ func ExportHandlerNew(c *gin.Context) {
 		return
 	}
 
+	// Set the response headers for file download
+	filepath := "exported.db"
+	file, err := os.Open(filepath)
+	if err != nil {
+		logrus.Error(err)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	defer file.Close()
+
+	// Get the file information.
+	fileInfo, err := file.Stat()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Create a zip archive.
+	zipFilePath := "archive.zip"
+	zipFile, err := os.Create(zipFilePath)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
+		return
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Create a new file in the zip archive.
+	header, err := zip.FileInfoHeader(fileInfo)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	header.Name = fileInfo.Name()
+
+	writer, err := zipWriter.CreateHeader(&zip.FileHeader{
+		Name:   filepath,
+		Method: zip.Deflate, // Menggunakan metode kompresi Deflate
+	})
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Copy the file content to the zip archive.
+	_, err = io.Copy(writer, file)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Close the zip archive.
+	err = zipWriter.Close()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	// insertStmt := clause.Insert{Table: clause.Table{Name: "m_leasing"}}
 	// // insertStmt.BeforeSave = func(*gorm.Statement) {
 	// // 	insertStmt.Table = clause.Table{Name: "destination_users"}
@@ -260,7 +320,6 @@ func ExportHandlerNew(c *gin.Context) {
 
 	payloads.HandleSuccess(c, "Berhasil update database", "Berhasil", 200)
 }
-
 
 func DownloadLeasing(c *gin.Context) {
 	zipFilePath := "archive.zip"
