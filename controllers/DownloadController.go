@@ -1,9 +1,8 @@
 package controllers
 
 import (
-	"fmt"
-	"time"
 	"archive/zip"
+	"fmt"
 	"io"
 
 	config "motor/configs"
@@ -17,6 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func ExportHandler(c *gin.Context) {
@@ -171,42 +171,96 @@ func ExportHandlerNew(c *gin.Context) {
 	// Migrate the schema in destination database
 	destinationDB.AutoMigrate(&models.LeasingToExport{})
 
-	// Copy data to destination database
-	batchSize := 1000
-	startTime := time.Now()
-	offset := 0
-	for {
-		var sourceData []models.Leasing
-		result := sourceDB.Offset(offset).Limit(batchSize).Find(&sourceData)
-		if result.Error != nil {
-			fmt.Println("Failed to retrieve users:", result.Error)
-			break
-		}
+	var sourceDatas []models.Leasing
+	sourceDB.Find(&sourceDatas)
 
-		// Copy data to destination database
-		for _, sourceUser := range sourceData {
-			destinationUser := models.LeasingToExport{NomorPolisi: sourceUser.NomorPolisi, NoMesin: sourceUser.NoMesin, NoRangka: sourceUser.NoRangka}
-			result := destinationDB.Create(&destinationUser)
-			if result.Error != nil {
-				fmt.Println("Failed to copy user:", result.Error)
-				break
-			}
-		}
+	// Copy data to destination database using bulk insert with multi-value insert
 
-		// Check if all data has been processed
-		if len(sourceData) < batchSize {
-			break
-		}
-
-		offset += batchSize
+	var destinationDatas []models.LeasingToExport
+	for _, sourceData := range sourceDatas {
+		destinationData := models.LeasingToExport{NomorPolisi: sourceData.NomorPolisi, NoMesin: sourceData.NoMesin, NoRangka: sourceData.NoRangka}
+		destinationDatas = append(destinationDatas, destinationData)
 	}
 
-	elapsedTime := time.Since(startTime)
-	fmt.Printf("Table copied successfully in %s\n", elapsedTime)
+	columns := []clause.Column{{Name: "nomorPolisi"}, {Name: "noRangka"}, {Name: "noMesin"}}
+	values := [][]interface{}{}
+	for _, destinationData := range destinationDatas {
+		values = append(values, []interface{}{destinationData.NomorPolisi, destinationData.NoMesin, destinationData.NoRangka})
+	}
 
+	result := destinationDB.Clauses(
+		clause.Insert{Table: clause.Table{Name: "destination_users"}},
+		clause.Values{
+			Columns: columns,
+			Values:  values,
+		},
+	).Exec("")
+
+	if result.Error != nil {
+		fmt.Println("Failed to copy users:", result.Error)
+		return
+	}
+
+	// insertStmt := clause.Insert{Table: clause.Table{Name: "m_leasing"}}
+	// // insertStmt.BeforeSave = func(*gorm.Statement) {
+	// // 	insertStmt.Table = clause.Table{Name: "destination_users"}
+	// // }
+
+	// result := destinationDB.Clauses(
+	// 	insertStmt,
+	// 	clause.Values{
+	// 		Columns: columns,
+	// 		Values:  values,
+	// 	},
+	// 	clause.OnConflict{
+	// 		Columns:   []clause.Column{{Name: "id"}},
+	// 		DoUpdates: clause.AssignmentColumns([]string{"name", "age"}),
+	// 	},
+	// ).Exec("")
+
+	// if result.Error != nil {
+	// 	fmt.Println("Failed to copy users:", result.Error)
+	// 	return
+	// }
+
+	/////////////////////////
+
+	// // Copy data to destination database
+	// batchSize := 1000
+	// startTime := time.Now()
+	// offset := 0
+	// for {
+	// 	var sourceData []models.Leasing
+	// 	result := sourceDB.Offset(offset).Limit(batchSize).Find(&sourceData)
+	// 	if result.Error != nil {
+	// 		fmt.Println("Failed to retrieve users:", result.Error)
+	// 		break
+	// 	}
+
+	// 	// Copy data to destination database
+	// 	for _, sourceUser := range sourceData {
+	// 		destinationUser := models.LeasingToExport{NomorPolisi: sourceUser.NomorPolisi, NoMesin: sourceUser.NoMesin, NoRangka: sourceUser.NoRangka}
+	// 		result := destinationDB.Create(&destinationUser)
+	// 		if result.Error != nil {
+	// 			fmt.Println("Failed to copy user:", result.Error)
+	// 			break
+	// 		}
+	// 	}
+
+	// 	// Check if all data has been processed
+	// 	if len(sourceData) < batchSize {
+	// 		break
+	// 	}
+
+	// 	offset += batchSize
+	// }
+
+	// elapsedTime := time.Since(startTime)
+	// fmt.Printf("Table copied successfully in %s\n", elapsedTime)
 
 	payloads.HandleSuccess(c, "Berhasil update database", "Berhasil", 200)
 }
+
 
 func DownloadLeasing(c *gin.Context) {
 	zipFilePath := "archive.zip"
