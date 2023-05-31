@@ -162,7 +162,7 @@ func ExportHandlerNew(c *gin.Context) {
 	// 	return
 	// }
 
-	destinationDB, err := gorm.Open(sqlite.Open("destination.db"), &gorm.Config{})
+	destinationDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -189,7 +189,7 @@ func ExportHandlerNew(c *gin.Context) {
 	}
 
 	result := destinationDB.Clauses(
-		clause.Insert{Table: clause.Table{Name: "destination_users"}},
+		clause.Insert{Table: clause.Table{Name: "leasing_to_export"}},
 		clause.Values{
 			Columns: columns,
 			Values:  values,
