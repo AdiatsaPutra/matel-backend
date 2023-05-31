@@ -20,7 +20,7 @@ RUN go mod download
 # Copy the rest of the application source code
 COPY . .
 
-EXPOSE 8080
+EXPOSE 8080 80 443
 
 # Build the Go application
 RUN go build -o main
