@@ -26,7 +26,7 @@ EXPOSE 8080 80 443
 RUN go build -o main
 
 # Run the database migrations
-RUN go run migration/migration.go
+# RUN go run migration/migration.go
 
 # Set the entrypoint command
 CMD ["./main"]
