@@ -66,10 +66,25 @@ func ExportHandler(c *gin.Context) {
 	// Convert data to the desired struct with selected fields
 	var leasingData []models.LeasingToExport
 	for _, d := range data {
+		nomorPolisi := d.NomorPolisi
+		if nomorPolisi == "" {
+			nomorPolisi = " "
+		}
+
+		noRangka := d.NoRangka
+		if noRangka == "" {
+			noRangka = " "
+		}
+
+		noMesin := d.NoMesin
+		if noMesin == "" {
+			noMesin = " "
+		}
+
 		leasingData = append(leasingData, models.LeasingToExport{
-			NomorPolisi: d.NomorPolisi,
-			NoRangka:    d.NoRangka,
-			NoMesin:     d.NoMesin,
+			NomorPolisi: nomorPolisi,
+			NoRangka:    noRangka,
+			NoMesin:     noMesin,
 		})
 	}
 
