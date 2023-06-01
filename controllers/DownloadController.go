@@ -34,6 +34,8 @@ func ExportHandler(c *gin.Context) {
 		return
 	}
 
+	// Continue with the remaining code...
+
 	// Create a new SQLite database file
 	sqliteDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
 	if err != nil {
@@ -41,15 +43,6 @@ func ExportHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	// defer sqliteDB.Close()
-
-	// // Clear existing data from the table
-	// err = sqliteDB.Exec("DELETE FROM m_leasing").Error
-	// if err != nil {
-	// 	logrus.Error(err)
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
 
 	// AutoMigrate your model in the SQLite database
 	err = sqliteDB.AutoMigrate(&models.LeasingToExport{})
@@ -83,8 +76,8 @@ func ExportHandler(c *gin.Context) {
 
 		leasingData = append(leasingData, models.LeasingToExport{
 			NomorPolisi: nomorPolisi,
-			NoRangka:    "",
-			NoMesin:     "",
+			NoRangka:    noRangka,
+			NoMesin:     noMesin,
 		})
 	}
 

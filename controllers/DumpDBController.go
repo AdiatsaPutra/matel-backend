@@ -7,6 +7,7 @@ import (
 	"os"
 
 	config "motor/configs"
+	"motor/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,16 +36,10 @@ func DumpSQLHandler(c *gin.Context) {
 	// Menginisialisasi string untuk menyimpan hasil dump
 	var dumpSQL string
 
-	// Mengambil hasil dump database menggunakan GORM
-	err = sourceDB.Raw("SHOW CREATE DATABASE matel;").Scan(&dumpSQL).Error
-	if err != nil {
-		log.Fatal("Failed to get create database statement:", err)
-	}
-
 	// Mengambil hasil dump tabel menggunakan GORM
-	err = sourceDB.Raw("SHOW CREATE TABLE m_leasing;").Scan(&dumpSQL).Error
+	err = sourceDB.Model(&models.Leasing{}).Select("nomor_polisi, no_mesin, no_rangka").Find(&[]models.Leasing{}).Error
 	if err != nil {
-		log.Fatal("Failed to get create table statement:", err)
+		log.Fatal("Failed to get dump table statement:", err)
 	}
 
 	// Menyimpan hasil dump ke dalam file
