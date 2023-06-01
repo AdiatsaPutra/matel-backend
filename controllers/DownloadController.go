@@ -276,7 +276,7 @@ func worker(sourceDB *gorm.DB, resultCh chan<- error, wg *sync.WaitGroup) {
 
 	// Salin data dari tabel sumber ke tabel tujuan
 	var mLeasings []models.Leasing
-	sourceDB.Select("nomor_polisi, no_mesin, no_rangka").Find(&mLeasings)
+	sourceDB.Select("nomorPolisi, noMesin, noRangka").Find(&mLeasings)
 	for _, mLeasing := range mLeasings {
 		exportedMLeasing := models.LeasingToExport{
 			NomorPolisi: mLeasing.NomorPolisi,
