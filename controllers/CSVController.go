@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	dbConnString = "root:root@tcp(172.17.0.1:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+	dbConnString = "root:root@tcp(host.docker.internal:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
 	// dbConnString   = "w08um7qaben07grspf9k:pscale_pw_VAkTxIR732WX6GQhmtlAamddhm7CSHSHhY69U2rjIm7@tcp(aws.connect.psdb.cloud)/matel?tls=true&charset=utf8mb4&parseTime=True&loc=Local"
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
