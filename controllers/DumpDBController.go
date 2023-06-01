@@ -37,7 +37,7 @@ func DumpSQLHandler(c *gin.Context) {
 	var dumpSQL string
 
 	// Mengambil hasil dump tabel menggunakan GORM
-	err = sourceDB.Model(&models.Leasing{}).Select("nomor_polisi, no_mesin, no_rangka").Find(&[]models.Leasing{}).Error
+	err = sourceDB.Model(&models.Leasing{}).Select("nomorPolisi, noMesin, noRangka").Find(&[]models.LeasingToExport{}).Error
 	if err != nil {
 		log.Fatal("Failed to get dump table statement:", err)
 	}
