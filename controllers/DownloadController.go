@@ -32,8 +32,6 @@ func ExportHandler(c *gin.Context) {
 		return
 	}
 
-	// Continue with the remaining code...
-
 	// Create a new SQLite database file
 	sqliteDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
 	if err != nil {
