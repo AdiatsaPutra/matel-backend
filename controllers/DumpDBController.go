@@ -113,7 +113,7 @@ func DumpSQLHandler(c *gin.Context) {
 	}
 
 	// Copy the file content to the zip archive.
-	_, err = io.Copy(writer, file)
+	_, err = io.Copy(writer, fileSource)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
