@@ -83,8 +83,8 @@ func ExportHandler(c *gin.Context) {
 
 		leasingData = append(leasingData, models.LeasingToExport{
 			NomorPolisi: nomorPolisi,
-			NoRangka:    noRangka,
-			NoMesin:     noMesin,
+			NoRangka:    "",
+			NoMesin:     "",
 		})
 	}
 
