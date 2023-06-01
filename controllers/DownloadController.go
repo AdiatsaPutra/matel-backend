@@ -264,7 +264,23 @@ func worker(sourceDB *gorm.DB, resultCh chan<- error, wg *sync.WaitGroup) {
 		wg.Done()
 		return
 	}
-	// defer destinationDB.Close()
+
+	rawSourceDB, err := sourceDB.DB()
+	if err != nil {
+		resultCh <- err
+		wg.Done()
+		return
+	}
+
+	rawDestinationDB, err := destinationDB.DB()
+	if err != nil {
+		resultCh <- err
+		wg.Done()
+		return
+	}
+
+	defer rawSourceDB.Close()
+	defer rawDestinationDB.Close()
 
 	// Migrate skema di database tujuan berdasarkan struktur skema dari database sumber
 	err = destinationDB.AutoMigrate(&models.LeasingToExport{})
