@@ -36,7 +36,7 @@ func DumpSQLHandler(c *gin.Context) {
 	var dumpSQL string
 
 	// Mengambil hasil dump database menggunakan GORM
-	err = sourceDB.Raw("SHOW CREATE DATABASE source_db;").Scan(&dumpSQL).Error
+	err = sourceDB.Raw("SHOW CREATE DATABASE matel;").Scan(&dumpSQL).Error
 	if err != nil {
 		log.Fatal("Failed to get create database statement:", err)
 	}
