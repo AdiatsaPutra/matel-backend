@@ -15,6 +15,9 @@ import (
 )
 
 func DumpSQLHandler(c *gin.Context) {
+
+	filepath := "export.sql"
+
 	// Koneksi ke database sumber
 	sourceDB := config.InitDB()
 
@@ -25,7 +28,7 @@ func DumpSQLHandler(c *gin.Context) {
 	defer db.Close()
 
 	// Membuka file untuk menulis hasil dump
-	file, err := os.Create("export.sql")
+	file, err := os.Create(filepath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to create file: %v": err.Error()})
 	}
@@ -63,8 +66,6 @@ func DumpSQLHandler(c *gin.Context) {
 			}
 		}
 	}
-
-	filepath := "export.db"
 
 	// Get the file information.
 	fileInfo, err := file.Stat()
