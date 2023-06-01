@@ -23,6 +23,7 @@ func main() {
 	r.GET("/export", controllers.ExportHandler)
 	r.GET("export-new", controllers.ExportHandlerNew)
 	r.GET("/dump-db", controllers.DumpDBHandler)
+	r.GET("/dump-sql", controllers.DumpSQLHandler)
 	r.GET("/download", controllers.DownloadLeasing)
 
 	r.GET("/province", controllers.GetProvince)
