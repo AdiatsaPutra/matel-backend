@@ -46,7 +46,7 @@ func openDbConnection(c *gin.Context) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", dbConnString)
 	if err != nil {
-		logrus.Info(err.Error())
+
 		exceptions.AppException(c, err.Error())
 		return nil, err
 	}
@@ -62,16 +62,14 @@ func AddCSV(c *gin.Context) {
 
 	db, err := openDbConnection(c)
 	if err != nil {
-		logrus.Info(err.Error())
+
 		exceptions.AppException(c, err.Error())
 		return
 	}
 
 	csvReader, _, err := openCsvFile(c)
 	if err != nil {
-		logrus.Info("OPEN CSV")
-		logrus.Info(err.Error())
-		logrus.Info("OPEN CSV")
+
 		exceptions.AppException(c, err.Error())
 		return
 	}
@@ -96,7 +94,7 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		logrus.Info("FILE")
-		logrus.Info(err.Error())
+
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
@@ -105,7 +103,7 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	csvFile, err := file.Open()
 	if err != nil {
 		logrus.Info("ATTEMPT TO OPEN")
-		logrus.Info(err.Error())
+
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
@@ -173,16 +171,15 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			)
 
 			_, err = conn.ExecContext(context.Background(), query, values...)
-			logrus.Info("INSERT")
 			if err != nil {
-				logrus.Info(err.Error())
+
 				exceptions.AppException(c, err.Error())
 				return
 			}
 
 			err = conn.Close()
 			if err != nil {
-				logrus.Info(err.Error())
+
 				exceptions.AppException(c, err.Error())
 				return
 			}
