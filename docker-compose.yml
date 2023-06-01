@@ -2,6 +2,7 @@ version: '3'
 services:
   db:
     image: mysql/mysql-server:latest
+    restart: always
     ports:
       - "3306:3306"
     environment:
@@ -9,10 +10,15 @@ services:
       - "MYSQL_USER=root"
       - "MYSQL_PASSWORD=root"
       - "MYSQL_DATABASE=matel"
-  web:
+    volumes:
+      - db:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  
+  api:
     build: .
+    image: matel-api
+    restart: always
     ports:
-      # 80 on the host, 8080 on the guest. Websever listens on 8080
       - "8080:8080"
     volumes:
       - ".:/main"
@@ -20,3 +26,8 @@ services:
       - db
     links:
       - "db:database"
+    network_mode: "host"
+
+volumes:
+  db:
+    driver: local
