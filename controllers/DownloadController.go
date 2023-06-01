@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"sync"
 
 	config "motor/configs"
 	"motor/models"
@@ -153,76 +154,145 @@ func ExportHandler(c *gin.Context) {
 
 }
 
+func DumpDBHandler(c *gin.Context) {
+	sourceDB := config.InitDB()
+
+	// Membuat channel untuk mengirim hasil dumping
+	resultCh := make(chan error)
+
+	// Membuat WaitGroup untuk menunggu selesainya semua worker
+	var wg sync.WaitGroup
+
+	// Jumlah worker yang akan digunakan
+	workerCount := 5
+
+	// Menginisialisasi worker
+	for i := 0; i < workerCount; i++ {
+		wg.Add(1)
+		go worker(sourceDB, resultCh, &wg)
+	}
+
+	// Menunggu selesainya semua worker
+	go func() {
+		wg.Wait()
+		close(resultCh)
+	}()
+
+	// Mengumpulkan hasil dumping
+	var dumpError error
+	for result := range resultCh {
+		if result != nil {
+			dumpError = result
+		}
+	}
+
+	if dumpError != nil {
+		c.AbortWithError(http.StatusInternalServerError, dumpError)
+		fmt.Println("Failed to dump database:", dumpError)
+	} else {
+		fmt.Println("Database dumped successfully")
+
+		// Set the response headers for file download
+		filepath := "exported.db"
+		file, err := os.Open(filepath)
+		if err != nil {
+			logrus.Error(err)
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		defer file.Close()
+
+		// Get the file information.
+		fileInfo, err := file.Stat()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		// Create a zip archive.
+		zipFilePath := "archive.zip"
+		zipFile, err := os.Create(zipFilePath)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to create ZIP file")
+			return
+		}
+		defer zipFile.Close()
+
+		zipWriter := zip.NewWriter(zipFile)
+		defer zipWriter.Close()
+
+		// Create a new file in the zip archive.
+		header, err := zip.FileInfoHeader(fileInfo)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		header.Name = fileInfo.Name()
+
+		writer, err := zipWriter.CreateHeader(&zip.FileHeader{
+			Name:   filepath,
+			Method: zip.Deflate, // Menggunakan metode kompresi Deflate
+		})
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		// Copy the file content to the zip archive.
+		_, err = io.Copy(writer, file)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		// Close the zip archive.
+		err = zipWriter.Close()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		payloads.HandleSuccess(c, "Berhasil update database", "Berhasil", 200)
+	}
+}
+
+func worker(sourceDB *gorm.DB, resultCh chan<- error, wg *sync.WaitGroup) {
+	// Koneksi ke database tujuan
+	destinationDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
+	if err != nil {
+		resultCh <- err
+		wg.Done()
+		return
+	}
+	// defer destinationDB.Close()
+
+	// Migrate skema di database tujuan berdasarkan struktur skema dari database sumber
+	err = destinationDB.AutoMigrate(&models.LeasingToExport{})
+	if err != nil {
+		resultCh <- err
+		wg.Done()
+		return
+	}
+
+	// Salin data dari tabel sumber ke tabel tujuan
+	var mLeasings []models.Leasing
+	sourceDB.Select("nomor_polisi, no_mesin, no_rangka").Find(&mLeasings)
+	for _, mLeasing := range mLeasings {
+		exportedMLeasing := models.LeasingToExport{
+			NomorPolisi: mLeasing.NomorPolisi,
+			NoMesin:     mLeasing.NoMesin,
+			NoRangka:    mLeasing.NoRangka,
+		}
+		destinationDB.Create(&exportedMLeasing)
+	}
+
+	wg.Done()
+	resultCh <- nil
+}
+
 func ExportHandlerNew(c *gin.Context) {
 
 	sourceDB := config.InitDB()
-	// if err != nil {
-	// 	c.AbortWithError(http.StatusInternalServerError, err)
-	// 	return
-	// }
-
-	// destinationDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
-	// if err != nil {
-	// 	c.AbortWithError(http.StatusInternalServerError, err)
-	// 	return
-	// }
-
-	// // Migrate the schema in destination database
-	// destinationDB.AutoMigrate(&models.LeasingToExport{})
-
-	// var sourceDatas []models.Leasing
-	// sourceDB.Find(&sourceDatas)
-
-	// // Copy data to destination database using bulk insert with multi-value insert
-
-	// var destinationDatas []models.LeasingToExport
-	// for _, sourceData := range sourceDatas {
-	// 	destinationData := models.LeasingToExport{NomorPolisi: sourceData.NomorPolisi, NoMesin: sourceData.NoMesin, NoRangka: sourceData.NoRangka}
-	// 	destinationDatas = append(destinationDatas, destinationData)
-	// }
-
-	// columns := []clause.Column{{Name: "nomorPolisi"}, {Name: "noRangka"}, {Name: "noMesin"}}
-	// values := [][]interface{}{}
-	// for _, destinationData := range destinationDatas {
-	// 	values = append(values, []interface{}{destinationData.NomorPolisi, destinationData.NoMesin, destinationData.NoRangka})
-	// }
-
-	// result := destinationDB.Clauses(
-	// 	clause.Insert{Table: clause.Table{Name: "leasing_to_exports"}},
-	// 	clause.Values{
-	// 		Columns: columns,
-	// 		Values:  values,
-	// 	},
-	// ).Exec("")
-
-	// if result.Error != nil {
-	// 	fmt.Println("Failed to copy users:", result.Error)
-	// 	return
-	// }
-
-	// insertStmt := clause.Insert{Table: clause.Table{Name: "m_leasing"}}
-	// // insertStmt.BeforeSave = func(*gorm.Statement) {
-	// // 	insertStmt.Table = clause.Table{Name: "destination_users"}
-	// // }
-
-	// result := destinationDB.Clauses(
-	// 	insertStmt,
-	// 	clause.Values{
-	// 		Columns: columns,
-	// 		Values:  values,
-	// 	},
-	// 	clause.OnConflict{
-	// 		Columns:   []clause.Column{{Name: "id"}},
-	// 		DoUpdates: clause.AssignmentColumns([]string{"name", "age"}),
-	// 	},
-	// ).Exec("")
-
-	// if result.Error != nil {
-	// 	fmt.Println("Failed to copy users:", result.Error)
-	// 	return
-	// }
-
-	/////////////////////////
 
 	destinationDB, err := gorm.Open(sqlite.Open("exported.db"), &gorm.Config{})
 	if err != nil {
