@@ -67,8 +67,17 @@ func DumpSQLHandler(c *gin.Context) {
 		}
 	}
 
+
+
+	fileSource, err := os.Open(filepath)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	defer fileSource.Close()
+
 	// Get the file information.
-	fileInfo, err := file.Stat()
+	fileInfo, err := fileSource.Stat()
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
