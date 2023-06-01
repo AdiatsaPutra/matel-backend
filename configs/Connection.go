@@ -14,7 +14,7 @@ func InitDB() *gorm.DB {
 	val.Add("parseTime", "True")
 	val.Add("loc", "Asia/Jakarta")
 
-	dsn := "root:root@tcp(host.docker.internal:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
 	// dsn := "w08um7qaben07grspf9k:pscale_pw_VAkTxIR732WX6GQhmtlAamddhm7CSHSHhY69U2rjIm7@tcp(aws.connect.psdb.cloud)/matel?tls=true&charset=utf8mb4&parseTime=True&loc=Local"
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
