@@ -24,8 +24,8 @@ func main() {
 	r.GET("/leasing", controllers.GetLeasing)
 	r.POST("/upload-leasing", controllers.AddCSV)
 	r.GET("/dump-sql", controllers.DumpSQLHandler)
-	r.GET("/update-dump-sql", controllers.UpdateSQLHandler)
-	r.GET("/download", controllers.DownloadLeasing)
+	r.GET("/download-update", controllers.UpdateSQLHandler)
+	r.GET("/download-all", controllers.DownloadLeasing)
 
 	r.GET("/province", controllers.GetProvince)
 	r.GET("/kabupaten/:province-id", controllers.GetKabupaten)
