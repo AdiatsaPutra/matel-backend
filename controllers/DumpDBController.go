@@ -131,7 +131,7 @@ func DumpSQLHandler(c *gin.Context) {
 
 func UpdateSQLHandler(c *gin.Context) {
 
-	filepath := "export.sql"
+	filepath := "export_new_only.sql"
 
 	// Get the date parameter from the request
 	dateParam := c.Query("date")
@@ -215,7 +215,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	// Create a zip archive.
-	zipFilePath := "archive.zip"
+	zipFilePath := "archive_new_only.zip"
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
@@ -257,5 +257,8 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	payloads.HandleSuccess(c, "Berhasil update database", "Berhasil", 200)
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+zipFilePath)
+	c.Writer.Header().Set("Content-Type", "application/zip")
+
+	c.File(zipFilePath)
 }
