@@ -170,7 +170,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	var leasings []models.LeasingToExport
 	err = sourceDB.Table("m_leasing").
 		Select("nomorPolisi, noMesin, noRangka").
-		Where("created_at <= ?", date).
+		Where("created_at >= ?", date).
 		Find(&leasings).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})

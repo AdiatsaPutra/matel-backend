@@ -15,6 +15,7 @@ func main() {
 
 	r.POST("/register", controllers.Register)
 	r.POST("/login", controllers.Login)
+	r.POST("/login-web", controllers.LoginWeb)
 
 	r.GET("/profil", security.AuthMiddleware(), controllers.GetProfile)
 

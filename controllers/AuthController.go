@@ -120,3 +120,48 @@ func Login(c *gin.Context) {
 		return
 	}
 }
+
+func LoginWeb(c *gin.Context) {
+	var body struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	c.ShouldBindJSON(&body)
+
+	findUserFromDB, _ := repository.GetUserByName(c, body.Email)
+
+	if findUserFromDB.UserName != "" {
+
+		hashPwd := findUserFromDB.Password
+		pwd := body.Password
+
+		hash := security.VerifyPassword(hashPwd, pwd)
+
+		if hash == nil {
+			token, err := security.GenerateToken(findUserFromDB.ID)
+
+			if err != nil {
+				exceptions.AppException(c, err.Error())
+				return
+			}
+
+			findUserFromDB.Token = token
+
+			tokenCreated, err := repository.SetToken(c, findUserFromDB)
+
+			if !tokenCreated {
+				exceptions.AppException(c, err.Error())
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"token": findUserFromDB.Token})
+		} else {
+			exceptions.AppException(c, "Wrong Data")
+			return
+		}
+	} else {
+		exceptions.AppException(c, "User not registered")
+		return
+	}
+}
