@@ -8,6 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetUserTotal(c *gin.Context) (uint, error) {
+	var user []models.User
+	result := config.InitDB().Find(&user)
+
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return uint(result.RowsAffected), nil
+
+}
+
 func GetUserByName(c *gin.Context, UserEmail string) (models.User, error) {
 	var user = models.User{Email: UserEmail}
 	result := config.InitDB().Where("email = ?", user.Email).First(&user)

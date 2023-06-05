@@ -16,12 +16,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
 )
 
 var (
-	dbConnString = "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
-	// dbConnString   = "w08um7qaben07grspf9k:pscale_pw_VAkTxIR732WX6GQhmtlAamddhm7CSHSHhY69U2rjIm7@tcp(aws.connect.psdb.cloud)/matel?tls=true&charset=utf8mb4&parseTime=True&loc=Local"
+	dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
+	// dbConnString = "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
 	totalWorker    = 100
@@ -38,7 +38,6 @@ var (
 		"noRangka",
 		"noMesin",
 		"pic",
-		"status",
 	}
 )
 
@@ -93,7 +92,6 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
 	if err != nil {
-		logrus.Info("FILE")
 
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
@@ -102,7 +100,6 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// Open the uploaded file
 	csvFile, err := file.Open()
 	if err != nil {
-		logrus.Info("ATTEMPT TO OPEN")
 
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
@@ -155,6 +152,14 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 }
 
 func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) {
+	// Append the current time as the "created_at" value to the values slice
+	now := time.Now()
+	values = append(values, now)
+
+	// Append the fixed value of 1 for the "status" column
+	values = append(values, 1)
+
+	// Rest of the code remains unchanged
 	for {
 		var outerError error
 		func(outerError *error) {
@@ -165,21 +170,19 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			}()
 
 			conn, err := db.Conn(context.Background())
-			query := fmt.Sprintf("INSERT INTO m_leasing (%s) VALUES (%s)",
+			query := fmt.Sprintf("INSERT INTO m_leasing (%s, created_at, status) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
-				strings.Join(generateQuestionsMark(len(dataHeaders)), ","),
+				strings.Join(generateQuestionsMark(len(dataHeaders)+2), ","),
 			)
 
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			if err != nil {
-
 				exceptions.AppException(c, err.Error())
 				return
 			}
 
 			err = conn.Close()
 			if err != nil {
-
 				exceptions.AppException(c, err.Error())
 				return
 			}

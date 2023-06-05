@@ -18,10 +18,12 @@ func main() {
 
 	r.GET("/profil", security.AuthMiddleware(), controllers.GetProfile)
 
+	r.GET("/home", controllers.GetHome)
+
 	r.GET("/leasing", controllers.GetLeasing)
 	r.POST("/upload-leasing", controllers.AddCSV)
-	r.GET("/export", controllers.ExportHandler)
 	r.GET("/dump-sql", controllers.DumpSQLHandler)
+	r.GET("/update-dump-sql", controllers.UpdateSQLHandler)
 	r.GET("/download", controllers.DownloadLeasing)
 
 	r.GET("/province", controllers.GetProvince)

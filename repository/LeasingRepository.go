@@ -1,22 +1,22 @@
 package repository
 
 import (
+	"database/sql"
 	config "motor/configs"
 	"motor/exceptions"
-	"motor/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetLeasing(c *gin.Context) ([]models.Leasing, error) {
-	var leasing []models.Leasing
-	result := config.InitDB().Find(&leasing)
+func GetLeasingTotal(c *gin.Context) (uint, error) {
+	var count sql.NullInt64
+	result := config.InitDB().Raw("SELECT COUNT(*) FROM m_leasing").Scan(&count)
 
 	if result.Error != nil {
 		exceptions.AppException(c, result.Error.Error())
-		return leasing, result.Error
+		return 0, result.Error
 	}
 
-	return leasing, nil
+	return uint(count.Int64), nil
 
 }
