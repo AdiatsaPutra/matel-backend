@@ -1,0 +1,28 @@
+{
+  "name": "motor",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt generate",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "type": "module",
+  "dependencies": {
+    "@nuxtjs/auth-next": "5.0.0-1667386184.dfbbb54",
+    "@nuxtjs/axios": "^5.13.6",
+    "axios": "^0.21.1",
+    "core-js": "^3.25.3",
+    "lodash": "^4.17.21",
+    "nuxt": "^2.16.3",
+    "vue": "^2.7.10",
+    "vue-server-renderer": "^2.7.10",
+    "vue-template-compiler": "^2.7.10",
+    "vuetify": "^2.6.10"
+  },
+  "devDependencies": {
+    "@nuxt/types": "~2.16.0",
+    "@nuxtjs/vuetify": "^1.12.3"
+  }
+}
