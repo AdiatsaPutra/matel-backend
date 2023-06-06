@@ -33,6 +33,7 @@ services:
       - "3000:3000"
     image: matel-web
     restart: always
+    command: "npm run start"
   nginx:
     image: nginx:latest
     restart: always

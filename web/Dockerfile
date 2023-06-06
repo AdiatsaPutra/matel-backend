@@ -1,17 +1,19 @@
-FROM node:latest
+FROM node:12.16.3-alpine3.9
+
+RUN mkdir -p /var/www/dockerize-nuxt/nuxt-app
+WORKDIR /var/www/dockerize-nuxt/nuxt-app
+
+COPY package*.json ./
+RUN npm install
 
 COPY . .
 
-# Install node modules
-RUN npm install
-
-# Create app directory
-RUN mkdir -p /app
-WORKDIR /app
+RUN npm run build
 
 EXPOSE 3000
 
-RUN npm run build
-# Install app dependencies
+ENV NUXT_HOST=0.0.0.0
 
-CMD [ "npm", "run", "start" ]
+ENV NUXT_PORT=3000
+
+CMD [ "npm", "start" ]
