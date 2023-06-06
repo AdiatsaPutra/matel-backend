@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/sirupsen/logrus"
 )
 
 func Register(c *gin.Context) {
@@ -37,17 +38,13 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// findUserFromDB, err := repository.GetUserByName(c, body.UserName)
-	// if err != nil {
-	// 	exceptions.AppException(c, "Something went wrong")
-	// 	return
-	// }
+	findUserFromDB, _ := repository.GetUserByEmail(c, body.Email)
+	logrus.Info(findUserFromDB.ID)
 
-	// emptyUser := models.User{}
-	// if findUserFromDB != emptyUser {
-	// 	exceptions.AppException(c, "Something went wrong")
-	// 	return
-	// }
+	if findUserFromDB.ID != 0 {
+		exceptions.AppException(c, "User sudah terdaftar")
+		return
+	}
 
 	hash, err := security.HashPassword(body.Password)
 	if err != nil {
@@ -73,7 +70,32 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	payloads.HandleSuccess(c, userResult, "Success Register", http.StatusOK)
+	u, _ := repository.GetUserByEmail(c, userResult.Email)
+	logrus.Info(u)
+
+	if u.UserName != "" {
+
+		token, err := security.GenerateToken(u.ID)
+
+		if err != nil {
+			exceptions.AppException(c, err.Error())
+			return
+		}
+
+		u.Token = token
+
+		tokenCreated, err := repository.SetToken(c, u)
+
+		if !tokenCreated {
+			exceptions.AppException(c, err.Error())
+			return
+		}
+
+		payloads.HandleSuccess(c, u, "Register Success", http.StatusOK)
+	} else {
+		exceptions.AppException(c, "Wrong Data")
+		return
+	}
 }
 
 func Login(c *gin.Context) {
@@ -84,7 +106,7 @@ func Login(c *gin.Context) {
 
 	c.ShouldBindJSON(&body)
 
-	findUserFromDB, _ := repository.GetUserByName(c, body.Email)
+	findUserFromDB, _ := repository.GetUserByEmail(c, body.Email)
 
 	if findUserFromDB.UserName != "" {
 
@@ -94,22 +116,26 @@ func Login(c *gin.Context) {
 		hash := security.VerifyPassword(hashPwd, pwd)
 
 		if hash == nil {
-			token, err := security.GenerateToken(findUserFromDB.ID)
+			if findUserFromDB.Token == "" {
 
-			if err != nil {
-				exceptions.AppException(c, err.Error())
-				return
+				token, err := security.GenerateToken(findUserFromDB.ID)
+
+				if err != nil {
+					exceptions.AppException(c, err.Error())
+					return
+				}
+
+				findUserFromDB.Token = token
+
+				tokenCreated, err := repository.SetToken(c, findUserFromDB)
+
+				if !tokenCreated {
+					exceptions.AppException(c, err.Error())
+					return
+				}
+
+				payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 			}
-
-			findUserFromDB.Token = token
-
-			tokenCreated, err := repository.SetToken(c, findUserFromDB)
-
-			if !tokenCreated {
-				exceptions.AppException(c, err.Error())
-				return
-			}
-
 			payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 		} else {
 			exceptions.AppException(c, "Wrong Data")
@@ -129,7 +155,7 @@ func LoginWeb(c *gin.Context) {
 
 	c.ShouldBindJSON(&body)
 
-	findUserFromDB, _ := repository.GetUserByName(c, body.Email)
+	findUserFromDB, _ := repository.GetUserByEmail(c, body.Email)
 
 	if findUserFromDB.UserName != "" {
 
@@ -139,22 +165,26 @@ func LoginWeb(c *gin.Context) {
 		hash := security.VerifyPassword(hashPwd, pwd)
 
 		if hash == nil {
-			token, err := security.GenerateToken(findUserFromDB.ID)
+			if findUserFromDB.Token == "" {
 
-			if err != nil {
-				exceptions.AppException(c, err.Error())
-				return
+				token, err := security.GenerateToken(findUserFromDB.ID)
+
+				if err != nil {
+					exceptions.AppException(c, err.Error())
+					return
+				}
+
+				findUserFromDB.Token = token
+
+				tokenCreated, err := repository.SetToken(c, findUserFromDB)
+
+				if !tokenCreated {
+					exceptions.AppException(c, err.Error())
+					return
+				}
+
+				c.JSON(http.StatusOK, gin.H{"token": findUserFromDB.Token})
 			}
-
-			findUserFromDB.Token = token
-
-			tokenCreated, err := repository.SetToken(c, findUserFromDB)
-
-			if !tokenCreated {
-				exceptions.AppException(c, err.Error())
-				return
-			}
-
 			c.JSON(http.StatusOK, gin.H{"token": findUserFromDB.Token})
 		} else {
 			exceptions.AppException(c, "Wrong Data")

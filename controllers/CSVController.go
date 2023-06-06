@@ -20,8 +20,8 @@ import (
 
 var (
 	// dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
-	// dbConnString = "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
-	dbConnString = "root:root@tcp(host.docker.internal:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+	dbConnString = "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+	// dbConnString = "root:root@tcp(host.docker.internal:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
 
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100

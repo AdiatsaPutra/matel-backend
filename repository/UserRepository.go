@@ -20,7 +20,7 @@ func GetUserTotal(c *gin.Context) (uint, error) {
 
 }
 
-func GetUserByName(c *gin.Context, UserEmail string) (models.User, error) {
+func GetUserByEmail(c *gin.Context, UserEmail string) (models.User, error) {
 	var user = models.User{Email: UserEmail}
 	result := config.InitDB().Where("email = ?", user.Email).First(&user)
 
