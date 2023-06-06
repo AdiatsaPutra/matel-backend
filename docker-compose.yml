@@ -27,6 +27,14 @@ services:
       - "db:database"
     extra_hosts:
      - "host.docker.internal:host-gateway"
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    image: matel-web
+    restart: always
   nginx:
     image: nginx:latest
     restart: always
