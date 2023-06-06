@@ -28,8 +28,7 @@ services:
     extra_hosts:
      - "host.docker.internal:host-gateway"
   nginx:
-    build: nginx:latest
-    image: matel-nginx
+    image: nginx:latest
     restart: always
     ports:
       - "80:80"
