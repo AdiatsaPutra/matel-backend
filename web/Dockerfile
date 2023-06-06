@@ -7,6 +7,8 @@ RUN npm install -g nodemon
 RUN mkdir -p /usr/src/app/
 WORKDIR /usr/src/app/
 
+COPY . .
+
 ONBUILD RUN npm install
 
 EXPOSE 3000
