@@ -20,7 +20,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - api:/main
+      - nginx:/
     depends_on:
       - api
     links:
