@@ -20,7 +20,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - nginx:/
+      - nginx:/etc/nginx/conf.d
     depends_on:
       - api
     links:
