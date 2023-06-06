@@ -34,9 +34,9 @@ func GetKabupaten(c *gin.Context, provinceID uint) ([]models.Kabupaten, error) {
 
 }
 
-func GetKecamatan(c *gin.Context, kecamatanID uint) ([]models.Kecamatan, error) {
+func GetKecamatan(c *gin.Context, KabupatenID uint) ([]models.Kecamatan, error) {
 	var kecamatan []models.Kecamatan
-	result := config.InitDB().Where(&models.Kecamatan{ProvinceID: kecamatanID}).Find(&kecamatan)
+	result := config.InitDB().Where(&models.Kecamatan{KabupatenID: KabupatenID}).Find(&kecamatan)
 
 	if result.Error != nil {
 		exceptions.AppException(c, result.Error.Error())

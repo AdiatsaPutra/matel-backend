@@ -45,17 +45,17 @@ func GetKabupaten(c *gin.Context) {
 
 func GetKecamatan(c *gin.Context) {
 
-	type kecamatanParam struct {
-		KecamatanID uint
+	type KecamatanParam struct {
+		KabupatenID uint
 	}
 
 	KecamatanID, _ := strconv.ParseUint(c.Param("kabupaten-id"), 10, 64)
 
-	uintKecamatanID := uint(KecamatanID)
+	uintKabupatenID := uint(KecamatanID)
 
-	var kecamatan = kecamatanParam{KecamatanID: uintKecamatanID}
+	var kecamatan = KecamatanParam{KabupatenID: uintKabupatenID}
 
-	kecamatanResult, err := repository.GetKecamatan(c, kecamatan.KecamatanID)
+	kecamatanResult, err := repository.GetKecamatan(c, kecamatan.KabupatenID)
 
 	if err != nil {
 		exceptions.AppException(c, "Cant create member")
