@@ -14,7 +14,7 @@ services:
       - db:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
   api:
-    build: .
+    build: ./api
     image: matel-api
     restart: always
     ports:
@@ -48,7 +48,6 @@ services:
       - "nginx:nginx"
 
 volumes:
-
   api:
   db:
     driver: local
