@@ -1,5 +1,7 @@
 FROM node:latest
 
+ENV HOST 0.0.0.0
+
 # Install node modules
 RUN npm install -g nodemon
 
@@ -13,6 +15,6 @@ ONBUILD RUN npm install
 
 EXPOSE 3000
 
-ENV HOST 0.0.0.0
+RUN npm run build
 # Install app dependencies
-CMD [ "npm", "run", "buildStart"]
+CMD [ "npm", "run", "start"]
