@@ -28,9 +28,7 @@ services:
     extra_hosts:
      - "host.docker.internal:host-gateway"
   web:
-    build:
-      context: ./web
-      dockerfile: Dockerfile
+    build: ./web
     ports:
       - "3000:3000"
     image: matel-web
@@ -47,6 +45,7 @@ services:
       - ./certbot/conf/:/etc/nginx/ssl/:ro
     links:
       - "api:api"
+      - "web:web"
   certbot:
     image: certbot/certbot:latest
     volumes:

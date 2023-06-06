@@ -1,17 +1,15 @@
 FROM node:latest
 
-ENV HOST 0.0.0.0
-
 COPY . .
 
 # Install node modules
 RUN npm install
 
 # Create app directory
-RUN mkdir -p /usr/src/app/
-WORKDIR /usr/src/app/
+RUN mkdir -p /app
+WORKDIR /app
 
-EXPOSE 8080
+EXPOSE 3000
 
 RUN npm run build
 # Install app dependencies
