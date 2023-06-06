@@ -13,7 +13,6 @@ services:
     volumes:
       - db:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-
   api:
     build: .
     image: matel-api
@@ -21,14 +20,35 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ".:/main"
+      - api:/main
     depends_on:
       - db
     links:
       - "db:database"
     extra_hosts:
      - "host.docker.internal:host-gateway"
+  nginx:
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+    links:
+      - "api:api"
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+    links:
+      - "nginx:nginx"
 
 volumes:
+  nginx:
+  api:
   db:
     driver: local
