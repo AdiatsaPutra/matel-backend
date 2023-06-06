@@ -1,4 +1,4 @@
-FROM node:latest-alpine
+FROM node:latest
 
 # Install node modules
 RUN npm install -g nodemon
