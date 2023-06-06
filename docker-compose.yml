@@ -13,20 +13,6 @@ services:
     volumes:
       - db:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-  nginx:
-    build: ./nginx
-    image: matel-nginx
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - nginx:/etc/nginx/conf.d
-    depends_on:
-      - api
-    links:
-      - "api:api"
-    extra_hosts:
-     - "host.docker.internal:host-gateway"
   api:
     build: .
     image: matel-api
@@ -41,6 +27,26 @@ services:
       - "db:database"
     extra_hosts:
      - "host.docker.internal:host-gateway"
+  nginx:
+    build: nginx:latest
+    image: matel-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+    links:
+      - "api:api"
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+    links:
+      - "nginx:nginx"
 
 volumes:
   nginx:
