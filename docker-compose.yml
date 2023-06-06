@@ -48,7 +48,7 @@ services:
       - "nginx:nginx"
 
 volumes:
-  nginx:
+
   api:
   db:
     driver: local
