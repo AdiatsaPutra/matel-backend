@@ -2,19 +2,18 @@ FROM node:latest
 
 ENV HOST 0.0.0.0
 
+COPY . .
+
 # Install node modules
-RUN npm install -g nodemon
+RUN npm install
 
 # Create app directory
 RUN mkdir -p /usr/src/app/
 WORKDIR /usr/src/app/
 
-COPY . .
-
-ONBUILD RUN npm install
-
-EXPOSE 3000
+EXPOSE 8080
 
 RUN npm run build
 # Install app dependencies
-CMD [ "npm", "run", "start"]
+
+CMD [ "npm", "run", "start" ]

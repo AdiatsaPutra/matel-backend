@@ -44,7 +44,7 @@ export default {
   },
 
   axios: {
-    baseURL: "http://localhost:8080/",
+    baseURL: "http://0.0.0.0:8080/",
     // baseURL: "http://167.172.69.241:8080/",
   },
 
