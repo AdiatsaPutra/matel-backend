@@ -1,5 +1,5 @@
 # Start with a base Go image
-FROM golang:1.20
+FROM golang:1.20.5-alpine
 
 # Set environment variables
 ENV CGO_ENABLED=1
