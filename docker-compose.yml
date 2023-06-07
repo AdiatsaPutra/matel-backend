@@ -63,7 +63,7 @@ services:
     ports:
       - 8888:8888
     environment:
-      DOZZLE_ADDR: localhost:8888
+      DOZZLE_BASE: /logs
       DOZZLE_NO_ANALYTICS: "true"
 volumes:
   api:
