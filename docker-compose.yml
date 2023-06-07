@@ -33,6 +33,8 @@ services:
       - "3000:3000"
     image: matel-web
     restart: always
+    volumes:
+      - web:/var/www/dockerize-nuxt/nuxt-app
     command: "npm run start"
   nginx:
     image: nginx:latest
@@ -60,5 +62,6 @@ services:
 
 volumes:
   api:
+  web:
   db:
     driver: local
