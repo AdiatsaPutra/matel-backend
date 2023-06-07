@@ -63,10 +63,8 @@ services:
     ports:
       - 8888:8888
     environment:
-      DOZZLE_ADDR: host.docker.internal:8888
+      DOZZLE_ADDR: 167.172.69.241:8888
       DOZZLE_NO_ANALYTICS: "true"
-    extra_hosts:
-     - "host.docker.internal:host-gateway"
 volumes:
   api:
   web:
