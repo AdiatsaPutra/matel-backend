@@ -49,13 +49,6 @@ services:
     links:
       - "api:api"
       - "web:web"
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - ./certbot/www:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/letsencrypt/:rw
-    links:
-      - "nginx:nginx"
   crontab:
     build: ./crontab
     restart: always
