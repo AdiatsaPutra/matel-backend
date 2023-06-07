@@ -38,7 +38,7 @@ func GetProfile(c *gin.Context) {
 		}
 
 	} else if newUser.Status == 1 {
-		targetDate := newUser.CreatedAt.AddDate(0, 0, int(newUser.SubscriptionMonth*30))
+		targetDate := newUser.CreatedAt.AddDate(0, 0, int((newUser.SubscriptionMonth*30)-1))
 
 		currentDate := time.Now()
 
