@@ -7,8 +7,7 @@ RUN apk add --update --no-cache bash dos2unix
 WORKDIR /usr/scheduler
 
 # Copy files
-COPY jobs/*.* ./jobs/
-COPY start.sh .
+COPY . .
 
 # Fix line endings && execute permissions
 RUN dos2unix *.sh jobs/*.* \
