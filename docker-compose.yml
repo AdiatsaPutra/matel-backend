@@ -54,6 +54,9 @@ services:
       - ./certbot/conf/:/etc/letsencrypt/:rw
     links:
       - "nginx:nginx"
+  crontab:
+    build: ./crontab
+    restart: always
 
 volumes:
   api:
