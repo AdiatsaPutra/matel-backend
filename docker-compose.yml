@@ -17,8 +17,6 @@ services:
     build: ./api
     image: matel-api
     restart: always
-    ports:
-      - "8080:8080"
     volumes:
       - api:/main
     depends_on:
@@ -29,8 +27,6 @@ services:
      - "host.docker.internal:host-gateway"
   web:
     build: ./web
-    ports:
-      - "3000:3000"
     image: matel-web
     restart: always
     volumes:
