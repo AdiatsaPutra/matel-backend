@@ -50,7 +50,7 @@ services:
       - backend
     environment:
       DOZZLE_NO_ANALYTICS: "true"
-      DOZZLE_ADDR: "localhost:8080"
+      DOZZLE_ADDR: "0.0.0.0:8080"
   nginx:
     image: nginx:latest
     restart: always
