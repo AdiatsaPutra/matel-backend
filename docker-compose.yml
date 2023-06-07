@@ -47,17 +47,21 @@ services:
     links:
       - "api:api"
       - "web:web"
-    environment:
-      - DOMAIN=taurusaplikasi.com
     volumes:
       - ./nginx/conf/:/etc/nginx/conf.d/:rw
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
-    command: ["/bin/bash", "-c", "export DOMAIN && envsubst '$$DOMAIN' < /etc/nginx/conf.d/nginx.conf > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'"]
-    
+    command: ["nginx", "-g", "daemon off;"]
   crontab:
     build: ./crontab
     restart: always
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9999:8080
 
 volumes:
   api:

@@ -18,6 +18,9 @@ RUN go mod download
 # Copy the rest of the application source code
 COPY . .
 
+# Set gin to production
+ENV GIN_MODE=release
+
 EXPOSE 8080
 
 # Build the Go application
