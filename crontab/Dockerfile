@@ -2,7 +2,7 @@
 FROM alpine:latest
 
 # Install required packages
-RUN apk add --update --no-cache bash dos2unix
+RUN apk add --update --no-cache curl bash dos2unix
 
 WORKDIR /usr/scheduler
 
