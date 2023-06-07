@@ -64,7 +64,7 @@ services:
       - 8888:8888
     environment:
       DOZZLE_ADDR: 8888
-      DOZZLE_NO_ANALYTICS: true
+      DOZZLE_NO_ANALYTICS: "true"
 volumes:
   api:
   web:
