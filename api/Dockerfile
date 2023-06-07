@@ -6,7 +6,7 @@ ENV CGO_ENABLED=1
 ENV GOOS=linux
 
 # Install any necessary system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     gcc \
     libc6-dev
 
