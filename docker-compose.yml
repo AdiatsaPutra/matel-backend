@@ -36,6 +36,8 @@ services:
     volumes:
       - web:/var/www/dockerize-nuxt/nuxt-app
     command: "npm run start"
+    extra_hosts:
+     - "host.docker.internal:host-gateway"
   nginx:
     image: nginx:latest
     restart: always
