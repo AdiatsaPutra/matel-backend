@@ -44,16 +44,20 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./nginx/conf/:/etc/nginx/conf.d/:ro
-      - ./certbot/www:/var/www/certbot/:ro
-      - ./certbot/conf/:/etc/nginx/ssl/:ro
     links:
       - "api:api"
       - "web:web"
     environment:
       - DOMAIN=taurusaplikasi.com
-    command: ["/bin/bash", "-c", "export DOMAIN && envsubst '$$DOMAIN' < /etc/nginx/nginx.conf > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+      - ./nginx/conf:/config.template
+      - ./nginx/entrypoint.sh:/entrypoint.sh
+    entrypoint: ["/entrypoint.sh"]
+    command: ["nginx", "-g", "daemon off;"]
+    
   crontab:
     build: ./crontab
     restart: always
