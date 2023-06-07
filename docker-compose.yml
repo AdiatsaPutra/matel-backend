@@ -46,6 +46,7 @@ services:
       - 4444:8080
     environment:
       DOZZLE_NO_ANALYTICS: "true"
+      DOZZLE_ADDR: 167.172.69.241:4444
   nginx:
     image: nginx:latest
     restart: always
