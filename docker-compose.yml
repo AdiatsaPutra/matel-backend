@@ -53,7 +53,6 @@ services:
       - ./nginx/conf/:/etc/nginx/conf.d/:ro
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
-    entrypoint: ["/entrypoint.sh"]
     command: ["/bin/bash", "-c", "export DOMAIN && envsubst '$$DOMAIN' < /etc/nginx/conf.d/nginx.conf > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'"]
     
   crontab:
