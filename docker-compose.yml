@@ -61,7 +61,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - 8081:8081
+      - 7000:7000
 
 volumes:
   api:
