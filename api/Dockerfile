@@ -6,7 +6,7 @@ ENV CGO_ENABLED=1
 ENV GOOS=linux
 
 # Install any necessary system dependencies
-RUN --update --no-cache gcc libc6-dev
+RUN apk add --update --no-cache gcc libc6-dev
 
 # Set the working directory
 WORKDIR /app
