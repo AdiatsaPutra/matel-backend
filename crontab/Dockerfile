@@ -6,6 +6,8 @@ RUN apk add --update --no-cache curl bash dos2unix
 
 WORKDIR /usr/scheduler
 
+ENV SCHEDULER_ENVIRONMENT=production
+
 # Copy files
 COPY . .
 
