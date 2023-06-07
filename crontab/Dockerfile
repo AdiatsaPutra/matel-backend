@@ -11,7 +11,7 @@ COPY jobs/*.* ./jobs/
 COPY start.sh .
 
 # Fix line endings && execute permissions
-RUN dos2unix crontab* *.sh jobs/*.* \
+RUN dos2unix *.sh jobs/*.* \
     && \
     find . -type f -iname "*.sh" -exec chmod +x {} \;
 
