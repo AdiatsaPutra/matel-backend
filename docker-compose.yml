@@ -38,6 +38,14 @@ services:
     command: "npm run start"
     extra_hosts:
      - "host.docker.internal:host-gateway"
+  dozzle:
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 4444:8080
+    environment:
+      DOZZLE_NO_ANALYTICS: "true"
   nginx:
     image: nginx:latest
     restart: always
@@ -55,14 +63,6 @@ services:
   crontab:
     build: ./crontab
     restart: always
-  dozzle:
-    image: amir20/dozzle:latest
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 4444:8080
-    environment:
-      DOZZLE_NO_ANALYTICS: "true"
 volumes:
   api:
   web:
