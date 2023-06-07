@@ -3,9 +3,7 @@ FROM node:16.20-alpine
 RUN mkdir -p /var/www/dockerize-nuxt/nuxt-app
 WORKDIR /var/www/dockerize-nuxt/nuxt-app
 
-COPY package*.json ./
-COPY . .
-
+RUN git clone https://github.com/AdiatsaPutra/matel-frontend . --depth=1
 
 RUN npm install
 
