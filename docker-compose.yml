@@ -51,6 +51,8 @@ services:
     links:
       - "api:api"
       - "web:web"
+    environment:
+      - "DOMAIN=taurusaplikasi.com"
   crontab:
     build: ./crontab
     restart: always
