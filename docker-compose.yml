@@ -3,10 +3,9 @@ services:
   db:
     image: mysql/mysql-server:latest
     restart: always
-    ports:
-      - "3306:3306"
+    ports: []
     networks:
-      - backend
+      - internal_network
     environment:
       - "MYSQL_ROOT_PASSWORD=root"
       - "MYSQL_USER=root"
@@ -19,8 +18,7 @@ services:
     build: ./api
     image: matel-api
     restart: always
-    ports:
-      - "8080:8080"
+    ports: []
     volumes:
       - api:/main
     depends_on:
@@ -28,11 +26,10 @@ services:
     links:
       - "db:database"
     networks:
-      - backend
+      - internal_network
   web:
     build: ./web
-    ports:
-      - "3000:3000"
+    ports: []
     image: matel-web
     restart: always
     networks:
@@ -44,10 +41,9 @@ services:
     image: amir20/dozzle:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 1212:1212
+    ports: []
     networks:
-      - backend
+      - internal_network
     environment:
       DOZZLE_NO_ANALYTICS: "true"
       DOZZLE_BASE: /logs
@@ -62,7 +58,7 @@ services:
       - "api:api"
       - "web:web"
     networks:
-      - backend
+      - external_network
     volumes:
       - ./nginx/conf/:/etc/nginx/conf.d/:rw
       - ./certbot/www:/var/www/certbot/:ro
@@ -71,8 +67,11 @@ services:
   crontab:
     build: ./crontab
     restart: always
+
 networks:
-  backend:
+  internal_network:
+  external_network:
+
 volumes:
   api:
   web:
