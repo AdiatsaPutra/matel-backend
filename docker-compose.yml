@@ -3,7 +3,6 @@ services:
   db:
     image: mysql/mysql-server:latest
     restart: always
-    ports: []
     networks:
       - internal_network
     environment:
@@ -14,22 +13,20 @@ services:
     volumes:
       - db:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
   api:
     build: ./api
     image: matel-api
     restart: always
-    ports: []
+    networks:
+      - internal_network
     volumes:
       - api:/main
     depends_on:
       - db
-    links:
-      - "db:database"
-    networks:
-      - internal_network
+
   web:
     build: ./web
-    ports: []
     image: matel-web
     restart: always
     networks:
@@ -37,33 +34,36 @@ services:
     volumes:
       - web:/var/www/dockerize-nuxt/nuxt-app
     command: "npm run start"
+
   dozzle:
     image: amir20/dozzle:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    ports: []
     networks:
       - internal_network
     environment:
       DOZZLE_NO_ANALYTICS: "true"
       DOZZLE_BASE: /logs
       DOZZLE_ADDR: "0.0.0.0:1212"
+
   nginx:
     image: nginx:latest
     restart: always
     ports:
       - "80:80"
       - "443:443"
-    links:
-      - "api:api"
-      - "web:web"
     networks:
+      - internal_network
       - external_network
     volumes:
       - ./nginx/conf/:/etc/nginx/conf.d/:rw
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
+    depends_on:
+      - api
+      - web
     command: ["nginx", "-g", "daemon off;"]
+
   crontab:
     build: ./crontab
     restart: always
