@@ -21,6 +21,8 @@ COPY . .
 # Set gin to production
 ENV GIN_MODE=release
 
+EXPOSE 8080
+
 # Build the Go application
 RUN go build -o main
 
