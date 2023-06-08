@@ -3,8 +3,6 @@ services:
   db:
     image: mysql/mysql-server:latest
     restart: always
-    ports:
-      - "3306:3306"
     networks:
       - backend
     environment:
@@ -19,8 +17,6 @@ services:
     build: ./api
     image: matel-api
     restart: always
-    ports:
-      - "8080:8080"
     volumes:
       - api:/main
     depends_on:
@@ -31,8 +27,6 @@ services:
       - backend
   web:
     build: ./web
-    ports:
-      - "3000:3000"
     image: matel-web
     restart: always
     networks:
