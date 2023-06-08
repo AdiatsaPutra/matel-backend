@@ -19,7 +19,7 @@ RUN go mod download
 COPY . .
 
 # Set gin to production
-ENV GIN_MODE=release
+ENV GIN_MODE=debug
 
 EXPOSE 8080
 
