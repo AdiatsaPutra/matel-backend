@@ -27,6 +27,8 @@ func main() {
 	r.GET("/download-update", controllers.UpdateSQLHandler)
 	r.GET("/download-all", controllers.DownloadLeasing)
 
+	r.GET("/member", security.AuthMiddleware(), controllers.GetMember)
+
 	r.GET("/province", controllers.GetProvince)
 	r.GET("/kabupaten/:province-id", controllers.GetKabupaten)
 	r.GET("/kecamatan/:kabupaten-id", controllers.GetKecamatan)

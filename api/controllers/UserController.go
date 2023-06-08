@@ -53,3 +53,27 @@ func GetProfile(c *gin.Context) {
 
 	payloads.HandleSuccess(c, newUser, "Success get data", http.StatusOK)
 }
+
+func GetMember(c *gin.Context) {
+	UserID := c.MustGet("user_id").(uint)
+
+	if UserID == 0 {
+		exceptions.AppException(c, "Not authorized")
+
+		return
+	}
+
+	user, err := repository.GetMember(c)
+
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	if len(user) == 0 {
+		payloads.HandleSuccess(c, nil, "User tidak ditemukan", http.StatusOK)
+		return
+	}
+
+	payloads.HandleSuccess(c, user, "Success get data", http.StatusOK)
+}

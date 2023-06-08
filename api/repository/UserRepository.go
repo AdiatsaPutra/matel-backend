@@ -58,6 +58,18 @@ func CreateUser(c *gin.Context, user models.User) (models.User, error) {
 
 }
 
+func GetMember(c *gin.Context) ([]models.User, error) {
+	var user = []models.User{}
+	result := config.InitDB().Where("is_admin = 0").Find(&user)
+
+	if result.Error != nil {
+		exceptions.AppException(c, result.Error.Error())
+		return user, result.Error
+	}
+
+	return user, nil
+}
+
 func UserProfile(c *gin.Context, user models.User) (models.User, error) {
 	var newUser = models.User{}
 	result := config.InitDB().First(&user)
