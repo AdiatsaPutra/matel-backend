@@ -3,6 +3,8 @@ services:
   db:
     image: mysql/mysql-server:latest
     restart: always
+    cap_add:
+      - SYS_NICE
     networks:
       - internal_network
     environment:
