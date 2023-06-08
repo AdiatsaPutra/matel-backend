@@ -13,6 +13,7 @@ services:
     volumes:
       - db:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --max_connections=10000
 
   api:
     build: ./api
