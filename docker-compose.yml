@@ -34,8 +34,6 @@ services:
     restart: always
     networks:
       - internal_network
-    volumes:
-      - web:/var/www/dockerize-nuxt/nuxt-app
     command: "npm run start"
 
   dozzle:
@@ -77,6 +75,5 @@ networks:
 
 volumes:
   api:
-  web:
   db:
     driver: local
