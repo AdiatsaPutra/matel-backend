@@ -31,8 +31,6 @@ services:
     restart: always
     networks:
       - internal_network
-    depends_on:
-      - db
     volumes:
       - web:/var/www/dockerize-nuxt/nuxt-app
     command: "npm run start"
