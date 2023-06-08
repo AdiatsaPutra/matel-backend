@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -21,7 +22,7 @@ import (
 var (
 	// dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
 	// dbConnString = "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
-	dbConnString = "root:root@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+	// dbConnString = "root:root@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
 
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
@@ -42,6 +43,14 @@ var (
 )
 
 func openDbConnection(c *gin.Context) (*sql.DB, error) {
+
+	dbConnString := ""
+
+	if os.Getenv("GIN_MODE") == "release" {
+		dbConnString = "root:root@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+	} else {
+		dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
+	}
 
 	db, err := sql.Open("mysql", dbConnString)
 	if err != nil {
