@@ -62,6 +62,7 @@ services:
       - ./nginx/conf/:/etc/nginx/conf.d/:rw
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
+      - ./nginx/cache/nginx/client_temp/:/var/cache/nginx/client_temp/:rw
     depends_on:
       - api
       - web
