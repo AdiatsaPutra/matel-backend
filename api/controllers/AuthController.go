@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/sirupsen/logrus"
 )
 
 func Register(c *gin.Context) {
@@ -39,10 +38,16 @@ func Register(c *gin.Context) {
 	}
 
 	findUserFromDB, _ := repository.GetUserByEmail(c, body.Email)
-	logrus.Info(findUserFromDB.ID)
 
 	if findUserFromDB.ID != 0 {
 		exceptions.AppException(c, "User sudah terdaftar")
+		return
+	}
+
+	findUserDeviceID, _ := repository.GetUserByDeviceID(c, body.DeviceID)
+
+	if findUserDeviceID.DeviceID == body.DeviceID {
+		exceptions.AppException(c, "Perangkat anda sudah terdaftar")
 		return
 	}
 
@@ -71,7 +76,6 @@ func Register(c *gin.Context) {
 	}
 
 	u, _ := repository.GetUserByEmail(c, userResult.Email)
-	logrus.Info(u)
 
 	if u.UserName != "" {
 
@@ -102,6 +106,7 @@ func Login(c *gin.Context) {
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
+		DeviceID string `json:"device_id"`
 	}
 
 	c.ShouldBindJSON(&body)
@@ -110,35 +115,40 @@ func Login(c *gin.Context) {
 
 	if findUserFromDB.UserName != "" {
 
-		hashPwd := findUserFromDB.Password
-		pwd := body.Password
+		if findUserFromDB.DeviceID == body.DeviceID || (findUserFromDB.DeviceID != body.DeviceID && findUserFromDB.Token == "") {
+			hashPwd := findUserFromDB.Password
+			pwd := body.Password
 
-		hash := security.VerifyPassword(hashPwd, pwd)
+			hash := security.VerifyPassword(hashPwd, pwd)
 
-		if hash == nil {
-			if findUserFromDB.Token == "" {
+			if hash == nil {
+				if findUserFromDB.Token == "" {
 
-				token, err := security.GenerateToken(findUserFromDB.ID)
+					token, err := security.GenerateToken(findUserFromDB.ID)
 
-				if err != nil {
-					exceptions.AppException(c, err.Error())
-					return
+					if err != nil {
+						exceptions.AppException(c, err.Error())
+						return
+					}
+
+					findUserFromDB.Token = token
+
+					tokenCreated, err := repository.SetToken(c, findUserFromDB)
+
+					if !tokenCreated {
+						exceptions.AppException(c, err.Error())
+						return
+					}
+
+					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 				}
-
-				findUserFromDB.Token = token
-
-				tokenCreated, err := repository.SetToken(c, findUserFromDB)
-
-				if !tokenCreated {
-					exceptions.AppException(c, err.Error())
-					return
-				}
-
 				payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
+			} else {
+				exceptions.AppException(c, "Wrong Data")
+				return
 			}
-			payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 		} else {
-			exceptions.AppException(c, "Wrong Data")
+			exceptions.AppException(c, "Data anda telah login")
 			return
 		}
 	} else {

@@ -32,6 +32,18 @@ func GetUserByEmail(c *gin.Context, UserEmail string) (models.User, error) {
 
 }
 
+func GetUserByDeviceID(c *gin.Context, DeviceID string) (models.User, error) {
+	var user = models.User{}
+	result := config.InitDB().Where("device_id = ?", DeviceID).First(&user)
+
+	if result.Error != nil {
+		return user, result.Error
+	}
+
+	return user, nil
+
+}
+
 func SetToken(c *gin.Context, user models.User) (bool, error) {
 	result := config.InitDB().Model(&user).Where("id = ?", user.ID).Update("token", user.Token)
 
@@ -75,11 +87,11 @@ func Logout(c *gin.Context, UserID uint) error {
 
 	err := config.InitDB().Model(&user).Where("id = ?", UserID).Update("token", "").Error
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 	return nil
-	
+
 }
 
 func UserProfile(c *gin.Context, user models.User) (models.User, error) {
