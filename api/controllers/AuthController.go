@@ -195,3 +195,16 @@ func LoginWeb(c *gin.Context) {
 		return
 	}
 }
+
+func Logout(c *gin.Context) {
+	UserID := c.MustGet("user_id").(uint)
+
+	err := repository.Logout(c, UserID)
+
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	payloads.HandleSuccess(c, "Success logout", "Success", 200)
+}

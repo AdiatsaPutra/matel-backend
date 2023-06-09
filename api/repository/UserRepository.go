@@ -70,6 +70,18 @@ func GetMember(c *gin.Context) ([]models.User, error) {
 	return user, nil
 }
 
+func Logout(c *gin.Context, UserID uint) error {
+	var user models.User
+
+	err := config.InitDB().Model(&user).Where("id = ?", UserID).Update("token", "").Error
+
+    if err != nil {
+        return err
+    }
+	return nil
+	
+}
+
 func UserProfile(c *gin.Context, user models.User) (models.User, error) {
 	var newUser = models.User{}
 	result := config.InitDB().First(&user)
