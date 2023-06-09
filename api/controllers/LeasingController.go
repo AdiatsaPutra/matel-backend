@@ -2,7 +2,6 @@ package controllers
 
 import (
 	config "matel/configs"
-	"matel/exceptions"
 	"matel/models"
 	"matel/payloads"
 	"net/http"
@@ -28,11 +27,16 @@ func GetLeasing(c *gin.Context) {
 	// }
 
 	var leasing []models.Leasing
-	result := config.InitDB().Find(&leasing).Where("leasing LIKE ? OR cabang LIKE ? OR nomorPolisi LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%", "%"+searchQuery+"%").Limit(1000)
 
-	if result.Error != nil {
-		exceptions.AppException(c, "Something went wrong")
-	}
+	query := config.InitDB().Limit(100)
+
+	if searchQuery != "" {
+        query = query.Find(&leasing).Where("leasing LIKE ? OR cabang LIKE ? OR nomorPolisi LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%", "%"+searchQuery+"%")
+    }
+
+	if err := query.Find(&leasing).Error; err != nil {
+        return
+    }
 
 	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
 }
