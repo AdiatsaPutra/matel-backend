@@ -1,1 +1,1 @@
-curl --location 'https://taurusaplikasi.com/api/dump-sql'
+curl -A 'FrontEnd/1.0' 'https://taurusaplikasi.com/api/dump-sql'
