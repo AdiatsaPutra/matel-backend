@@ -10,8 +10,8 @@ import (
 )
 
 func GetLeasing(c *gin.Context) {
-	pageStr := c.DefaultQuery("page", "1")    // Get the page parameter from the query string
-	limitStr := c.DefaultQuery("limit", "20") // Get the limit parameter from the query string
+	// pageStr := c.DefaultQuery("page", "1")    // Get the page parameter from the query string
+	// limitStr := c.DefaultQuery("limit", "20") // Get the limit parameter from the query string
 	searchQuery := c.Query("search")          // Get the search query from the query string
 
 	// page, err := strconv.Atoi(pageStr)
