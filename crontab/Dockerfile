@@ -2,11 +2,12 @@
 FROM alpine:latest
 
 # Install required packages
-RUN apk add --update --no-cache curl bash dos2unix
+RUN apk add --update --no-cache curl bash dos2unix tzdata
 
 WORKDIR /usr/scheduler
 
 ENV SCHEDULER_ENVIRONMENT=production
+ENV TZ=Asia/Jakarta
 
 # Copy files
 COPY . .
