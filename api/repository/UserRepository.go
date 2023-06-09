@@ -2,7 +2,6 @@ package repository
 
 import (
 	config "matel/configs"
-	"matel/exceptions"
 	"matel/models"
 
 	"github.com/gin-gonic/gin"
@@ -62,7 +61,6 @@ func CreateUser(c *gin.Context, user models.User) (models.User, error) {
 	newUser = user
 
 	if result.Error != nil {
-		exceptions.AppException(c, result.Error.Error())
 		return newUser, result.Error
 	}
 
@@ -75,7 +73,6 @@ func GetMember(c *gin.Context) ([]models.User, error) {
 	result := config.InitDB().Where("is_admin = 0").Find(&user)
 
 	if result.Error != nil {
-		exceptions.AppException(c, result.Error.Error())
 		return user, result.Error
 	}
 
@@ -101,7 +98,6 @@ func UserProfile(c *gin.Context, user models.User) (models.User, error) {
 	newUser = user
 
 	if result.Error != nil {
-		exceptions.AppException(c, result.Error.Error())
 		return newUser, result.Error
 	}
 

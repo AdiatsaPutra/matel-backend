@@ -59,7 +59,6 @@ func GetMember(c *gin.Context) {
 
 	if UserID == 0 {
 		exceptions.AppException(c, "Not authorized")
-
 		return
 	}
 

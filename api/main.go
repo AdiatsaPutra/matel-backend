@@ -23,6 +23,7 @@ func main() {
 	r.GET("/home", controllers.GetHome)
 
 	r.GET("/leasing", controllers.GetLeasing)
+	r.GET("/leasing/:id", security.AuthMiddleware(), controllers.GetLeasingDetail)
 	r.POST("/upload-leasing", controllers.AddCSV)
 	r.GET("/dump-sql", controllers.DumpSQLHandler)
 	r.GET("/download-update", controllers.UpdateSQLHandler)
