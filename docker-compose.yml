@@ -34,8 +34,6 @@ services:
     restart: always
     networks:
       - internal_network
-    volumes:
-      - web:/var/www/dockerize-nuxt/nuxt-app
     command: "npm run start"
 
   dozzle:
@@ -59,13 +57,9 @@ services:
       - internal_network
       - external_network
     volumes:
-      - ./nginx/conf/:/etc/nginx/conf.d/:rw
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
-      - ./nginx/cache/nginx/client_temp/:/var/cache/nginx/client_temp/:rw
-    depends_on:
-      - api
-      - web
     command: ["nginx", "-g", "daemon off;"]
 
   crontab:
@@ -78,6 +72,5 @@ networks:
 
 volumes:
   api:
-  web:
   db:
     driver: local

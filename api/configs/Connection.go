@@ -2,6 +2,7 @@ package config
 
 import (
 	"net/url"
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -14,9 +15,13 @@ func InitDB() *gorm.DB {
 	val.Add("parseTime", "True")
 	val.Add("loc", "Asia/Jakarta")
 
-	// dsn := "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
-	// dsn := "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
-	dsn := "root:root@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := ""
+
+	if os.Getenv("GIN_MODE") == "release" {
+		dsn = "root:root@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+	} else {
+		dsn = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
+	}
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
