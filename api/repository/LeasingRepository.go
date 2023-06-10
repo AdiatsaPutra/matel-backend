@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	config "matel/configs"
 	"matel/models"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,4 +43,25 @@ func UpdateSearched(c *gin.Context, LeasingID uint) error {
 	}
 	return nil
 
+}
+
+func GetLeasingByNopolHistory(c *gin.Context, UserID uint) ([]models.Leasing, error) {
+	var user models.User
+	var leasings []models.Leasing
+
+	err := config.InitDB().Model(&user).Where("id = ?", UserID).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	numbersViewed := user.NoPolHistory
+	numbers := strings.Split(numbersViewed, ",")
+
+	// Query the leasings with the given numbers
+	err = config.InitDB().Model(&models.Leasing{}).Where("id IN (?)", numbers).Find(&leasings).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return leasings, nil
 }

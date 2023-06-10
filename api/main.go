@@ -24,6 +24,7 @@ func main() {
 
 	r.GET("/leasing", controllers.GetLeasing)
 	r.GET("/leasing/:id", security.AuthMiddleware(), controllers.GetLeasingDetail)
+	r.GET("/leasing/history", security.AuthMiddleware(), controllers.GetLeasingHistory)
 	r.POST("/upload-leasing", controllers.AddCSV)
 	r.GET("/dump-sql", controllers.DumpSQLHandler)
 	r.GET("/download-update", controllers.UpdateSQLHandler)

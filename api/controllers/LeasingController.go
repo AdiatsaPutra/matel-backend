@@ -67,3 +67,21 @@ func GetLeasingDetail(c *gin.Context) {
 
 	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
 }
+
+func GetLeasingHistory(c *gin.Context) {
+	UserID := c.MustGet("user_id").(uint)
+
+	if UserID == 0 {
+		exceptions.AppException(c, "Not authorized")
+		return
+	}
+
+	leasing, err := repository.GetLeasingByNopolHistory(c, uint(UserID))
+
+	if err != nil {
+		exceptions.AppException(c, "Leasing tidak ditemukan")
+		return
+	}
+
+	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
+}
