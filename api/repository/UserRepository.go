@@ -3,6 +3,8 @@ package repository
 import (
 	config "matel/configs"
 	"matel/models"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -89,6 +91,45 @@ func Logout(c *gin.Context, UserID uint) error {
 	}
 	return nil
 
+}
+
+func AddSearchHistory(c *gin.Context, UserID uint, LeasingID uint) error {
+	var user models.User
+
+	err := config.InitDB().Model(&user).Where("id = ?", UserID).First(&user).Error
+	if err != nil {
+		return err
+	}
+
+	numbersViewed := user.NoPolHistory
+
+	// Check if LeasingID already exists in nopol_history
+	if !containsNumber(numbersViewed, int(LeasingID)) {
+		if numbersViewed != "" {
+			numbersViewed += ","
+		}
+
+		numbersViewed += strconv.Itoa(int(LeasingID))
+
+		err = config.InitDB().Model(&user).Where("id = ?", UserID).Update("nopol_history", numbersViewed).Error
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Helper function to check if a number exists in the given string
+func containsNumber(numbersViewed string, number int) bool {
+	numbers := strings.Split(numbersViewed, ",")
+	for _, numStr := range numbers {
+		num, err := strconv.Atoi(numStr)
+		if err == nil && num == number {
+			return true
+		}
+	}
+	return false
 }
 
 func UserProfile(c *gin.Context, user models.User) (models.User, error) {

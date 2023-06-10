@@ -18,7 +18,6 @@ type Leasing struct {
 	NoMesin     string `json:"no_mesin" gorm:"column:noMesin"`
 	PIC         string `json:"pic" gorm:"column:pic"`
 	Status      uint   `json:"status" gorm:"column:status"`
-	Searched    uint   `json:"searched" gorm:"column:searched"`
 	gorm.Model
 }
 

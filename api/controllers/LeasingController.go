@@ -58,14 +58,12 @@ func GetLeasingDetail(c *gin.Context) {
 		return
 	}
 
-	e := repository.UpdateSearched(c, uint(LeasingIDInt))
+	e := repository.AddSearchHistory(c, UserID, uint(LeasingIDInt))
 
 	if e != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
-
-	leasing.Searched = 1
 
 	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
 }

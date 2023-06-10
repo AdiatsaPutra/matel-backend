@@ -17,6 +17,7 @@ type User struct {
 	KecamatanID       uint   `json:"kecamatan_id" gorm:"column:kecamatan_id"`
 	Status            uint   `json:"status" gorm:"column:status"`
 	SubscriptionMonth uint   `json:"subscription_month" gorm:"column:subscription_month"`
+	NoPolHistory      string `json:"nopol_history" gorm:"column:nopol_history"`
 	Token             string `json:"token"`
 	gorm.Model
 }
