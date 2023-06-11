@@ -5,6 +5,7 @@ import (
 	"matel/payloads"
 	"matel/repository"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -75,4 +76,28 @@ func GetMember(c *gin.Context) {
 	}
 
 	payloads.HandleSuccess(c, user, "Success get data", http.StatusOK)
+}
+
+func SetUser(c *gin.Context) {
+	UserID := c.MustGet("user_id").(uint)
+
+	if UserID == 0 {
+		exceptions.AppException(c, "Not authorized")
+		return
+	}
+
+	UserIDParam := c.Query("user_id")
+	Status := c.Query("status")
+
+	UserIDParamUint, _ := strconv.Atoi(UserIDParam)
+	StatusUint, _ := strconv.Atoi(Status)
+
+	err := repository.SetUser(c, uint(UserIDParamUint), uint(StatusUint))
+
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	payloads.HandleSuccess(c, "Berhasil mengubah status", "Berhasil", http.StatusOK)
 }

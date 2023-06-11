@@ -113,6 +113,19 @@ func ResetDeviceID(c *gin.Context, UserID uint, DeviceID string) error {
 
 }
 
+func SetUser(c *gin.Context, UserID uint, Status uint) error {
+	var user models.User
+
+	e := config.InitDB().Model(&user).Where("id = ?", UserID).Update("status", Status).Error
+
+	if e != nil {
+		return e
+	}
+
+	return nil
+
+}
+
 func AddSearchHistory(c *gin.Context, UserID uint, LeasingID uint) error {
 	var user models.User
 
