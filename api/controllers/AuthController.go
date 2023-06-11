@@ -104,9 +104,9 @@ func Register(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	var body struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-		DeviceID string `json:"device_id"`
+		Email    string `json:"email" validate:"required"`
+		Password string `json:"password" validate:"required"`
+		DeviceID string `json:"device_id" validate:"required"`
 	}
 
 	c.ShouldBindJSON(&body)
