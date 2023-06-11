@@ -115,13 +115,22 @@ func Login(c *gin.Context) {
 
 	if findUserFromDB.UserName != "" {
 
-		if findUserFromDB.DeviceID == body.DeviceID || (findUserFromDB.DeviceID != body.DeviceID && findUserFromDB.Token == "") {
+		if findUserFromDB.DeviceID == body.DeviceID || (findUserFromDB.DeviceID != body.DeviceID && findUserFromDB.DeviceID == "") {
 			hashPwd := findUserFromDB.Password
 			pwd := body.Password
 
 			hash := security.VerifyPassword(hashPwd, pwd)
 
 			if hash == nil {
+				if findUserFromDB.DeviceID == ""{
+					err := repository.ResetDeviceID(c, findUserFromDB.ID, body.DeviceID)
+
+					if err != nil {
+						exceptions.AppException(c, err.Error())
+						return
+					}
+				}
+
 				if findUserFromDB.Token == "" {
 
 					token, err := security.GenerateToken(findUserFromDB.ID)
@@ -222,7 +231,7 @@ func Logout(c *gin.Context) {
 func ResetDeviceID(c *gin.Context) {
 	UserID := c.MustGet("user_id").(uint)
 
-	err := repository.ResetDeviceID(c, UserID)
+	err := repository.ResetDeviceID(c, UserID, "")
 
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")

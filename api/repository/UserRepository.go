@@ -100,10 +100,10 @@ func Logout(c *gin.Context, UserID uint) error {
 
 }
 
-func ResetDeviceID(c *gin.Context, UserID uint) error {
+func ResetDeviceID(c *gin.Context, UserID uint, DeviceID string ) error {
 	var user models.User
 
-	e := config.InitDB().Model(&user).Where("id = ?", UserID).Update("device_id", "").Error
+	e := config.InitDB().Model(&user).Where("id = ?", UserID).Update("device_id", DeviceID).Error
 
 	if e != nil {
 		return e
