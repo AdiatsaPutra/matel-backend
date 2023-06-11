@@ -115,7 +115,7 @@ func Login(c *gin.Context) {
 
 	if findUserFromDB.UserName != "" {
 
-		if findUserFromDB.DeviceID == body.DeviceID || (findUserFromDB.DeviceID != body.DeviceID && findUserFromDB.DeviceID == "") {
+		if findUserFromDB.DeviceID == body.DeviceID || (findUserFromDB.DeviceID != body.DeviceID && findUserFromDB.Token == "") {
 			hashPwd := findUserFromDB.Password
 			pwd := body.Password
 
