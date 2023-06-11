@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"matel/exceptions"
-	"matel/models"
 	"matel/payloads"
 	"matel/repository"
 	"net/http"
@@ -14,11 +13,12 @@ import (
 func GetProfile(c *gin.Context) {
 	UserID := c.MustGet("user_id").(uint)
 
-	user := models.User{
-		ID: UserID,
+	if UserID == 0 {
+		exceptions.AppException(c, "Not authorized")
+		return
 	}
 
-	newUser, err := repository.UserProfile(c, user)
+	newUser, err := repository.UserProfile(c)
 
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")

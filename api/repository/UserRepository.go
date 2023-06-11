@@ -95,12 +95,12 @@ func Logout(c *gin.Context, UserID uint) error {
 	if e != nil {
 		return e
 	}
-	
+
 	return nil
 
 }
 
-func ResetDeviceID(c *gin.Context, UserID uint, DeviceID string ) error {
+func ResetDeviceID(c *gin.Context, UserID uint, DeviceID string) error {
 	var user models.User
 
 	e := config.InitDB().Model(&user).Where("id = ?", UserID).Update("device_id", DeviceID).Error
@@ -152,15 +152,21 @@ func containsNumber(numbersViewed string, number int) bool {
 	return false
 }
 
-func UserProfile(c *gin.Context, user models.User) (models.User, error) {
-	var newUser = models.User{}
-	result := config.InitDB().First(&user)
+func UserProfile(c *gin.Context) (models.UserDetail, error) {
+	var user models.UserDetail
+	query := `
+		SELECT u.*, p.name AS province_name, k.name AS kabupaten_name, kc.name AS kecamatan_name
+		FROM m_users AS u
+		JOIN m_province AS p ON u.province_id = p.id
+		JOIN m_kabupaten AS k ON u.kabupaten_id = k.id
+		JOIN m_kecamatan AS kc ON u.kecamatan_id = kc.id
+	`
 
-	newUser = user
+	result := config.InitDB().Raw(query).Scan(&user)
 
 	if result.Error != nil {
-		return newUser, result.Error
+		return user, result.Error
 	}
 
-	return newUser, nil
+	return user, nil
 }
