@@ -111,6 +111,11 @@ func Login(c *gin.Context) {
 
 	c.ShouldBindJSON(&body)
 
+	if body.DeviceID == ""{
+		exceptions.AppException(c, "Please add device id")
+		return
+	}
+
 	findUserFromDB, _ := repository.GetUserByEmail(c, body.Email)
 
 	if findUserFromDB.UserName != "" {
@@ -150,8 +155,9 @@ func Login(c *gin.Context) {
 					}
 
 					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
+				}else{
+					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 				}
-				payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 			} else {
 				exceptions.AppException(c, "Wrong Data")
 				return
