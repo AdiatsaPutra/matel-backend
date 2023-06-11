@@ -37,13 +37,13 @@ func DumpSQLHandler(c *gin.Context) {
 	defer file.Close()
 
 	// Menulis header SQL ke file
-	_, err = file.WriteString("INSERT INTO m_leasing (nomorPolisi, noMesin, noRangka) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_leasing (id, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	var leasings []models.LeasingToExport
-	err = sourceDB.Table("m_leasing").Select("nomorPolisi, noMesin, noRangka").Find(&leasings).Error
+	err = sourceDB.Table("m_leasing").Select("id, nomorPolisi, noMesin, noRangka").Find(&leasings).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table: %v": err.Error()})
 	}
@@ -51,7 +51,7 @@ func DumpSQLHandler(c *gin.Context) {
 	// Menulis data ke file
 	for i, l := range leasings {
 		// log.Printf("Writing data %d of %d\n", i+1, len(leasings))
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s')", l.NomorPolisi, l.NoMesin, l.NoRangka))
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s')", l.ID, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
@@ -136,8 +136,6 @@ func UpdateSQLHandler(c *gin.Context) {
 	// Get the date parameter from the request
 	dateParam := c.Query("date")
 
-	logrus.Info(dateParam)
-
 	// Parse the date parameter into a time.Time object
 	date, err := time.Parse("2006-01-02", dateParam)
 	if err != nil {
@@ -162,14 +160,14 @@ func UpdateSQLHandler(c *gin.Context) {
 	defer file.Close()
 
 	// Menulis header SQL ke file
-	_, err = file.WriteString("INSERT INTO m_leasing (nomorPolisi, noMesin, noRangka) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_leasing (id, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	var leasings []models.LeasingToExport
 	err = sourceDB.Table("m_leasing").
-		Select("nomorPolisi, noMesin, noRangka").
+		Select("id, nomorPolisi, noMesin, noRangka").
 		Where("created_at >= ?", date).
 		Find(&leasings).Error
 	if err != nil {
@@ -182,7 +180,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	// Menulis data ke file
 	for i, l := range leasings {
 		// log.Printf("Writing data %d of %d\n", i+1, len(leasings))
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s')", l.NomorPolisi, l.NoMesin, l.NoRangka))
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s')", l.ID, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
