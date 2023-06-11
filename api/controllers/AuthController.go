@@ -218,3 +218,16 @@ func Logout(c *gin.Context) {
 
 	payloads.HandleSuccess(c, "Success logout", "Success", 200)
 }
+
+func ResetDeviceID(c *gin.Context) {
+	UserID := c.MustGet("user_id").(uint)
+
+	err := repository.ResetDeviceID(c, UserID)
+
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	payloads.HandleSuccess(c, "Success reset", "Success", 200)
+}

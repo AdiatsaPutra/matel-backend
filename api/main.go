@@ -17,6 +17,7 @@ func main() {
 	r.POST("/login", controllers.Login)
 	r.POST("/login-web", controllers.LoginWeb)
 	r.PATCH("/logout", security.AuthMiddleware(), controllers.Logout)
+	r.PATCH("/reset-device-id", security.AuthMiddleware(), controllers.ResetDeviceID)
 
 	r.GET("/profil", security.AuthMiddleware(), controllers.GetProfile)
 

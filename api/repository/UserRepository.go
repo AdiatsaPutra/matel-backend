@@ -89,6 +89,26 @@ func Logout(c *gin.Context, UserID uint) error {
 	if err != nil {
 		return err
 	}
+
+	e := config.InitDB().Model(&user).Where("id = ?", UserID).Update("device_id", "").Error
+
+	if e != nil {
+		return e
+	}
+	
+	return nil
+
+}
+
+func ResetDeviceID(c *gin.Context, UserID uint) error {
+	var user models.User
+
+	e := config.InitDB().Model(&user).Where("id = ?", UserID).Update("device_id", "").Error
+
+	if e != nil {
+		return e
+	}
+
 	return nil
 
 }
