@@ -17,7 +17,7 @@ func GetHome(c *gin.Context) {
 		return
 	}
 
-	userTotal, err := repository.GetUserTotal(c)
+	userTotal, err := repository.GetUserTotalInfo(c)
 
 	if err != nil {
 		payloads.HandleSuccess(c, nil, "User not found", http.StatusOK)

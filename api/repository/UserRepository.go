@@ -9,6 +9,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetUserTotalInfo(c *gin.Context) (models.HomeUserInfo, error) {
+	var user models.HomeUserInfo
+	query := `
+	SELECT
+		SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) AS trial_members,
+		SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS premium_members,
+		SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS expired_members
+	FROM
+    	m_users;
+	`
+	result := config.InitDB().Raw(query).Scan(&user)
+
+	if result.Error != nil {
+		return models.HomeUserInfo{}, result.Error
+	}
+
+	return user, nil
+
+}
+
 func GetUserTotal(c *gin.Context) (uint, error) {
 	var user []models.User
 	result := config.InitDB().Find(&user)
