@@ -26,7 +26,9 @@ func GetHome(c *gin.Context) {
 
 	data := make(map[string]interface{})
 	data["leasing"] = leasingTotal
-	data["user"] = userTotal
+	data["trial_members"] = userTotal.TrialMembers
+	data["premium_members"] = userTotal.PremiumMembers
+	data["expired_members"] = userTotal.ExpiredMembers
 
 	payloads.HandleSuccess(c, data, "Data found", http.StatusOK)
 }
