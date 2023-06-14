@@ -6,17 +6,19 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"log"
 	"matel/exceptions"
 	"matel/payloads"
 	"math"
 	"mime/multipart"
+	"os"
 	"strings"
 	"sync"
 	"time"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -77,7 +79,6 @@ func AddCSV(c *gin.Context) {
 
 	csvReader, _, err := openCsvFile(c)
 	if err != nil {
-
 		exceptions.AppException(c, err.Error())
 		return
 	}
@@ -97,11 +98,9 @@ func AddCSV(c *gin.Context) {
 }
 
 func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
-
 	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
 	if err != nil {
-
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
@@ -109,14 +108,51 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// Open the uploaded file
 	csvFile, err := file.Open()
 	if err != nil {
-
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
-	// defer csvFile.Close()
 
 	reader := csv.NewReader(csvFile)
+
+	firstLine, err := reader.Read()
+	if err != nil {
+		log.Fatal(err)
+	}
+	firstLineString := strings.Join(firstLine, ",")
+	logrus.Info(firstLineString)
+	// delimiter := getDelimiter(firstLineString)
+
+	// if delimiter == 44 {
+	// 	reader.Comma = ','
+	// } else if delimiter == 57 {
+	// 	reader.Comma = ';'
+	// }
+	reader.Comma = ','
+
 	return reader, csvFile, nil
+}
+
+func getDelimiter(line string) rune {
+	// Try different delimiters and check if they exist in the line
+	delimiters := []rune{',', ';', '\t'}
+
+	for _, delimiter := range delimiters {
+		if strings.ContainsRune(line, delimiter) {
+			return delimiter
+		}
+	}
+
+	// If no delimiter is found, return a default delimiter (comma)
+	return ','
+}
+
+func containsDelimiter(line []string, delimiter rune) bool {
+	for _, field := range line {
+		if strings.ContainsRune(field, delimiter) {
+			return true
+		}
+	}
+	return false
 }
 
 func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup) {
