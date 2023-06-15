@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
 	"matel/exceptions"
 	"matel/payloads"
 	"math"
@@ -18,7 +18,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -96,7 +95,6 @@ func AddCSV(c *gin.Context) {
 	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 
 }
-
 func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
@@ -112,47 +110,40 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 		return nil, nil, err
 	}
 
-	reader := csv.NewReader(csvFile)
-
-	firstLine, err := reader.Read()
+	// Read the first few bytes of the file to determine the delimiter
+	sniffer := make([]byte, 4096)
+	_, err = csvFile.Read(sniffer)
 	if err != nil {
-		log.Fatal(err)
+		exceptions.AppException(c, err.Error())
+		return nil, nil, err
 	}
-	firstLineString := strings.Join(firstLine, ",")
-	logrus.Info(firstLineString)
-	// delimiter := getDelimiter(firstLineString)
 
-	// if delimiter == 44 {
-	// 	reader.Comma = ','
-	// } else if delimiter == 57 {
-	// 	reader.Comma = ';'
-	// }
-	reader.Comma = ','
+	// Reset the file pointer to the beginning
+	_, err = csvFile.Seek(0, io.SeekStart)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return nil, nil, err
+	}
+
+	// Determine the delimiter based on the sniffed content
+	delimiter := detectDelimiter(sniffer)
+
+	reader := csv.NewReader(csvFile)
+	reader.Comma = delimiter
 
 	return reader, csvFile, nil
 }
 
-func getDelimiter(line string) rune {
-	// Try different delimiters and check if they exist in the line
-	delimiters := []rune{',', ';', '\t'}
-
-	for _, delimiter := range delimiters {
-		if strings.ContainsRune(line, delimiter) {
-			return delimiter
-		}
+func detectDelimiter(content []byte) rune {
+	// Check for the presence of common delimiters in the content
+	if bytes.Contains(content, []byte(";")) {
+		return ';'
+	} else if bytes.Contains(content, []byte("\t")) {
+		return '\t'
 	}
 
-	// If no delimiter is found, return a default delimiter (comma)
+	// Fallback to comma "," if no known delimiter is detected
 	return ','
-}
-
-func containsDelimiter(line []string, delimiter rune) bool {
-	for _, field := range line {
-		if strings.ContainsRune(field, delimiter) {
-			return true
-		}
-	}
-	return false
 }
 
 func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup) {
@@ -236,10 +227,6 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			break
 		}
 	}
-
-	// if counter%100 == 0 {
-	// 	log.Println("=> worker", workerIndex, "inserted", counter, "data")
-	// }
 }
 
 func generateQuestionsMark(n int) []string {
