@@ -95,22 +95,20 @@ func AddCSV(c *gin.Context) {
 	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 
 }
+
 func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
-	// Retrieve the uploaded file
 	file, err := c.FormFile("file")
 	if err != nil {
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
 
-	// Open the uploaded file
 	csvFile, err := file.Open()
 	if err != nil {
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
 
-	// Read the first few bytes of the file to determine the delimiter
 	sniffer := make([]byte, 4096)
 	_, err = csvFile.Read(sniffer)
 	if err != nil {
@@ -118,14 +116,12 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 		return nil, nil, err
 	}
 
-	// Reset the file pointer to the beginning
 	_, err = csvFile.Seek(0, io.SeekStart)
 	if err != nil {
 		exceptions.AppException(c, err.Error())
 		return nil, nil, err
 	}
 
-	// Determine the delimiter based on the sniffed content
 	delimiter := detectDelimiter(sniffer)
 
 	reader := csv.NewReader(csvFile)
@@ -135,14 +131,12 @@ func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
 }
 
 func detectDelimiter(content []byte) rune {
-	// Check for the presence of common delimiters in the content
 	if bytes.Contains(content, []byte(";")) {
 		return ';'
 	} else if bytes.Contains(content, []byte("\t")) {
 		return '\t'
 	}
 
-	// Fallback to comma "," if no known delimiter is detected
 	return ','
 }
 
@@ -188,14 +182,11 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 }
 
 func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) {
-	// Append the current time as the "created_at" value to the values slice
 	now := time.Now()
 	values = append(values, now)
 
-	// Append the fixed value of 1 for the "status" column
 	values = append(values, 1)
 
-	// Rest of the code remains unchanged
 	for {
 		var outerError error
 		func(outerError *error) {
