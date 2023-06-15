@@ -12,6 +12,7 @@ import (
 	"math"
 	"mime/multipart"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -183,6 +184,16 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 
 func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) {
 	now := time.Now()
+
+	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
+
+	for i := 4; i < 7; i++ {
+		if str, ok := values[i].(string); ok {
+			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
+			values[i] = filteredStr
+		}
+	}
+
 	values = append(values, now)
 
 	values = append(values, 1)
