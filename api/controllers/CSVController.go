@@ -194,8 +194,18 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 		}
 	}
 
-	values = append(values, now)
+	leasingName := c.PostForm("leasing_name")
+	cabangName := c.PostForm("cabang_name")
 
+	if leasingName != "" {
+		values[0] = leasingName
+	}
+
+	if cabangName != "" {
+		values[1] = cabangName
+	}
+
+	values = append(values, now)
 	values = append(values, 1)
 
 	for {
@@ -208,7 +218,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			}()
 
 			conn, err := db.Conn(context.Background())
-			query := fmt.Sprintf("INSERT INTO m_leasing (%s, created_at, status) VALUES (%s)",
+			query := fmt.Sprintf("INSERT INTO m_kendaraan (%s, created_at, status) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
 				strings.Join(generateQuestionsMark(len(dataHeaders)+2), ","),
 			)
@@ -221,8 +231,8 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 
 			err = conn.Close()
 			if err != nil {
-				exceptions.AppException(c, err.Error())
-				return
+					exceptions.AppException(c, err.Error())
+					return
 			}
 		}(&outerError)
 		if outerError == nil {

@@ -111,7 +111,7 @@ func Login(c *gin.Context) {
 
 	c.ShouldBindJSON(&body)
 
-	if body.DeviceID == ""{
+	if body.DeviceID == "" {
 		exceptions.AppException(c, "Please add device id")
 		return
 	}
@@ -127,7 +127,7 @@ func Login(c *gin.Context) {
 			hash := security.VerifyPassword(hashPwd, pwd)
 
 			if hash == nil {
-				if findUserFromDB.DeviceID == ""{
+				if findUserFromDB.DeviceID == "" {
 					err := repository.ResetDeviceID(c, findUserFromDB.ID, body.DeviceID)
 
 					if err != nil {
@@ -155,7 +155,7 @@ func Login(c *gin.Context) {
 					}
 
 					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
-				}else{
+				} else {
 					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 				}
 			} else {

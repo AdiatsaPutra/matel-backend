@@ -12,10 +12,10 @@ type BadRequestError struct {
 	Data    interface{} `json:"data"`
 }
 
-func BadRequest(c *gin.Context, message string) {
+func BadRequest(c *gin.Context) {
 	res := BadRequestError{
 		Success: false,
-		Message: message,
+		Message: "Bad Request",
 		Data:    nil,
 	}
 
