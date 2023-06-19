@@ -188,6 +188,13 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 		}
 	}
 
+	for i := 8; i < 10; i++ {
+		if str, ok := values[i].(string); ok {
+			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
+			values[i] = filteredStr
+		}
+	}
+
 	leasingName := c.PostForm("leasing_name")
 	cabangName := c.PostForm("cabang_name")
 
