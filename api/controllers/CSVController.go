@@ -54,17 +54,6 @@ func AddCSV(c *gin.Context) {
 		exceptions.AppException(c, err.Error())
 		return
 	}
-
-	headers, err := csvReader.Read()
-	if err != nil {
-		exceptions.AppException(c, err.Error())
-		return
-	}
-
-	if !validateHeaders(headers) {
-		exceptions.AppException(c, "Invalid CSV headers")
-		return
-	}
 	
 	jobs := make(chan []interface{}, 0)
 	wg := new(sync.WaitGroup)
@@ -76,20 +65,6 @@ func AddCSV(c *gin.Context) {
 	
 	duration := time.Since(start)
 	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
-}
-
-func validateHeaders(csvHeaders []string) bool {
-	if len(csvHeaders) != len(dataHeaders) {
-		return false
-	}
-
-	for i, header := range csvHeaders {
-		if header != dataHeaders[i] {
-			return false
-		}
-	}
-
-	return true
 }
 
 func openDbConnection(c *gin.Context) (*sql.DB, error) {
