@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"io"
 	config "matel/configs"
 	"matel/exceptions"
 	"matel/models"
 	"matel/payloads"
 	"matel/repository"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -43,8 +45,32 @@ func GetKendaraan(c *gin.Context) {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
-
+	
 	payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
+}
+
+func DownloadTemplate(c *gin.Context){
+	// Open the file
+	filePath := "leasing-template.csv"
+	file, err := os.Open(filePath)
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+	defer file.Close()
+	
+	// Set the appropriate headers
+	fileInfo, _ := file.Stat()
+	c.Header("Content-Disposition", "attachment; filename="+fileInfo.Name())
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
+	
+	// Stream the file to the response
+	_, err = io.Copy(c.Writer, file)
+	if err != nil {
+		exceptions.AppException(c, "Failed to download file")
+		return
+	}
 }
 
 func GetLeasing(c *gin.Context) {

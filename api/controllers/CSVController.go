@@ -22,10 +22,6 @@ import (
 )
 
 var (
-	// dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
-	// dbConnString = "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
-	// dbConnString = "root:root@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
-
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
 	totalWorker    = 100
@@ -44,8 +40,59 @@ var (
 	}
 )
 
-func openDbConnection(c *gin.Context) (*sql.DB, error) {
+func AddCSV(c *gin.Context) {
+	start := time.Now()
 
+	db, err := openDbConnection(c)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	csvReader, _, err := openCsvFile(c)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	headers, err := csvReader.Read()
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	if !validateHeaders(headers) {
+		exceptions.AppException(c, "Invalid CSV headers")
+		return
+	}
+	
+	jobs := make(chan []interface{}, 0)
+	wg := new(sync.WaitGroup)
+	
+	go dispatchWorkers(c, db, jobs, wg)
+	readCsvFilePerLineThenSendToWorker(csvReader, jobs, wg)
+	
+	wg.Wait()
+	
+	duration := time.Since(start)
+	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
+}
+
+func validateHeaders(csvHeaders []string) bool {
+	if len(csvHeaders) != len(dataHeaders) {
+		return false
+	}
+
+	for i, header := range csvHeaders {
+		if header != dataHeaders[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func openDbConnection(c *gin.Context) (*sql.DB, error) {
 	dbConnString := ""
 
 	if os.Getenv("GIN_MODE") == "release" {
@@ -56,7 +103,6 @@ func openDbConnection(c *gin.Context) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", dbConnString)
 	if err != nil {
-
 		exceptions.AppException(c, err.Error())
 		return nil, err
 	}
@@ -65,36 +111,6 @@ func openDbConnection(c *gin.Context) (*sql.DB, error) {
 	db.SetMaxIdleConns(dbMaxIdleConns)
 
 	return db, nil
-}
-
-func AddCSV(c *gin.Context) {
-	start := time.Now()
-
-	db, err := openDbConnection(c)
-	if err != nil {
-
-		exceptions.AppException(c, err.Error())
-		return
-	}
-
-	csvReader, _, err := openCsvFile(c)
-	if err != nil {
-		exceptions.AppException(c, err.Error())
-		return
-	}
-	// defer csvFile.Close()
-
-	jobs := make(chan []interface{}, 0)
-	wg := new(sync.WaitGroup)
-
-	go dispatchWorkers(c, db, jobs, wg)
-	readCsvFilePerLineThenSendToWorker(csvReader, jobs, wg)
-
-	wg.Wait()
-
-	duration := time.Since(start)
-	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
-
 }
 
 func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
@@ -147,7 +163,10 @@ func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan []interface{}, wg *
 			counter := 0
 
 			for job := range jobs {
-				doTheJob(c, workerIndex, counter, db, job)
+				err := doTheJob(c, workerIndex, counter, db, job)
+				if err != nil {
+					exceptions.AppException(c, err.Error())
+				}
 				wg.Done()
 				counter++
 			}
@@ -182,7 +201,7 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 	close(jobs)
 }
 
-func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) {
+func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) error {
 	now := time.Now()
 
 	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
@@ -226,19 +245,22 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			if err != nil {
 				exceptions.AppException(c, err.Error())
+				*outerError = err
 				return
 			}
 
 			err = conn.Close()
 			if err != nil {
-					exceptions.AppException(c, err.Error())
-					return
+				exceptions.AppException(c, err.Error())
+				*outerError = err
+				return
 			}
 		}(&outerError)
 		if outerError == nil {
 			break
 		}
 	}
+	return nil
 }
 
 func generateQuestionsMark(n int) []string {
