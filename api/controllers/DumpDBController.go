@@ -37,13 +37,13 @@ func DumpSQLHandler(c *gin.Context) {
 	defer file.Close()
 
 	// Menulis header SQL ke file
-	_, err = file.WriteString("INSERT INTO m_leasing (id, nomorPolisi, noMesin, noRangka) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_kendaraan (id, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	var leasings []models.LeasingToExport
-	err = sourceDB.Table("m_leasing").Select("id, nomorPolisi, noMesin, noRangka").Find(&leasings).Error
+	err = sourceDB.Table("m_kendaraan").Select("id, nomorPolisi, noMesin, noRangka").Find(&leasings).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table: %v": err.Error()})
 	}
@@ -160,13 +160,13 @@ func UpdateSQLHandler(c *gin.Context) {
 	defer file.Close()
 
 	// Menulis header SQL ke file
-	_, err = file.WriteString("INSERT INTO m_leasing (id, nomorPolisi, noMesin, noRangka) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_kendaraan (id, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	var leasings []models.LeasingToExport
-	err = sourceDB.Table("m_leasing").
+	err = sourceDB.Table("m_kendaraan").
 		Select("id, nomorPolisi, noMesin, noRangka").
 		Where("created_at >= ?", date).
 		Find(&leasings).Error
