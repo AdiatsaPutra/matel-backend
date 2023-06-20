@@ -21,12 +21,12 @@ func GetLeasingTotal(c *gin.Context) (uint, error) {
 
 }
 
-func GetLeasingByID(c *gin.Context, LeasingID uint) (models.Leasing, error) {
-	var leasing = models.Leasing{}
+func GetLeasingByID(c *gin.Context, LeasingID uint) (models.Kendaraan, error) {
+	var leasing = models.Kendaraan{}
 	result := config.InitDB().First(&leasing, LeasingID)
 
 	if result.Error != nil {
-		return models.Leasing{}, result.Error
+		return models.Kendaraan{}, result.Error
 	}
 
 	return leasing, nil
@@ -34,7 +34,7 @@ func GetLeasingByID(c *gin.Context, LeasingID uint) (models.Leasing, error) {
 }
 
 func UpdateSearched(c *gin.Context, LeasingID uint) error {
-	var user models.Leasing
+	var user models.Kendaraan
 
 	err := config.InitDB().Model(&user).Where("id = ?", LeasingID).Update("searched", 1).Error
 
@@ -45,9 +45,9 @@ func UpdateSearched(c *gin.Context, LeasingID uint) error {
 
 }
 
-func GetLeasingByNopolHistory(c *gin.Context, UserID uint) ([]models.Leasing, error) {
+func GetLeasingByNopolHistory(c *gin.Context, UserID uint) ([]models.Kendaraan, error) {
 	var user models.User
-	var leasings []models.Leasing
+	var leasings []models.Kendaraan
 
 	err := config.InitDB().Model(&user).Where("id = ?", UserID).First(&user).Error
 	if err != nil {
@@ -58,7 +58,7 @@ func GetLeasingByNopolHistory(c *gin.Context, UserID uint) ([]models.Leasing, er
 	numbers := strings.Split(numbersViewed, ",")
 
 	// Query the leasings with the given numbers
-	err = config.InitDB().Model(&models.Leasing{}).Where("id IN (?)", numbers).Find(&leasings).Error
+	err = config.InitDB().Model(&models.Kendaraan{}).Where("id IN (?)", numbers).Find(&leasings).Error
 	if err != nil {
 		return nil, err
 	}

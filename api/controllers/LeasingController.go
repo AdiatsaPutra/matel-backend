@@ -1,33 +1,94 @@
 package controllers
 
 import (
+	"io"
 	config "matel/configs"
 	"matel/exceptions"
 	"matel/models"
 	"matel/payloads"
 	"matel/repository"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
+func GetKendaraan(c *gin.Context) {
+	pageNumber, _ := strconv.Atoi(c.Query("page"))
+	if pageNumber <= 0 {
+		pageNumber = 1
+	}
+
+	limit, _ := strconv.Atoi(c.Query("limit"))
+	if limit <= 0 {
+		limit = 10
+	}
+
+	query := config.InitDB().Model(&models.Kendaraan{})
+
+	if leasing := c.Query("leasing"); leasing != "" {
+		query = query.Where("leasing LIKE ?", "%"+leasing+"%")
+	}
+
+	if cabang := c.Query("cabang"); cabang != "" {
+		query = query.Where("cabang LIKE ?", "%"+cabang+"%")
+	}
+
+	query = query.Order("created_at ASC")
+
+	var kendaraans []models.Kendaraan
+	offset := (pageNumber - 1) * limit
+
+	result := query.Offset(offset).Limit(limit).Find(&kendaraans)
+	if result.Error != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+	
+	payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
+}
+
+func DownloadTemplate(c *gin.Context){
+	// Open the file
+	filePath := "leasing-template.csv"
+	file, err := os.Open(filePath)
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+	defer file.Close()
+	
+	// Set the appropriate headers
+	fileInfo, _ := file.Stat()
+	c.Header("Content-Disposition", "attachment; filename="+fileInfo.Name())
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
+	
+	// Stream the file to the response
+	_, err = io.Copy(c.Writer, file)
+	if err != nil {
+		exceptions.AppException(c, "Failed to download file")
+		return
+	}
+}
+
 func GetLeasing(c *gin.Context) {
 	searchQuery := c.Query("search") // Get the search query from the query string
 
-	var leasing []models.Leasing
+	var kendaraan []models.Kendaraan
 
 	query := config.InitDB().Limit(100)
 
 	if searchQuery != "" {
-		query = query.Find(&leasing).Where("leasing LIKE ? OR cabang LIKE ? OR nomorPolisi LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%", "%"+searchQuery+"%")
+		query = query.Find(&kendaraan).Where("leasing LIKE ? OR cabang LIKE ? OR nomorPolisi LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%", "%"+searchQuery+"%")
 	}
 
-	if err := query.Find(&leasing).Error; err != nil {
+	if err := query.Find(&kendaraan).Error; err != nil {
 		return
 	}
 
-	payloads.HandleSuccess(c, leasing, "Leasing found", http.StatusOK)
+	payloads.HandleSuccess(c, kendaraan, "Leasing found", http.StatusOK)
 }
 
 func GetLeasingDetail(c *gin.Context) {

@@ -12,6 +12,7 @@ import (
 	"math"
 	"mime/multipart"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -21,10 +22,6 @@ import (
 )
 
 var (
-	// dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
-	// dbConnString = "root:root@tcp(167.172.69.241:3306)/matel?charset=utf8mb4&parseTime=True&loc=Local"
-	// dbConnString = "root:root@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
-
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
 	totalWorker    = 100
@@ -43,8 +40,34 @@ var (
 	}
 )
 
-func openDbConnection(c *gin.Context) (*sql.DB, error) {
+func AddCSV(c *gin.Context) {
+	start := time.Now()
 
+	db, err := openDbConnection(c)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	csvReader, _, err := openCsvFile(c)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+	
+	jobs := make(chan []interface{}, 0)
+	wg := new(sync.WaitGroup)
+	
+	go dispatchWorkers(c, db, jobs, wg)
+	readCsvFilePerLineThenSendToWorker(csvReader, jobs, wg)
+	
+	wg.Wait()
+	
+	duration := time.Since(start)
+	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
+}
+
+func openDbConnection(c *gin.Context) (*sql.DB, error) {
 	dbConnString := ""
 
 	if os.Getenv("GIN_MODE") == "release" {
@@ -55,7 +78,6 @@ func openDbConnection(c *gin.Context) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", dbConnString)
 	if err != nil {
-
 		exceptions.AppException(c, err.Error())
 		return nil, err
 	}
@@ -64,36 +86,6 @@ func openDbConnection(c *gin.Context) (*sql.DB, error) {
 	db.SetMaxIdleConns(dbMaxIdleConns)
 
 	return db, nil
-}
-
-func AddCSV(c *gin.Context) {
-	start := time.Now()
-
-	db, err := openDbConnection(c)
-	if err != nil {
-
-		exceptions.AppException(c, err.Error())
-		return
-	}
-
-	csvReader, _, err := openCsvFile(c)
-	if err != nil {
-		exceptions.AppException(c, err.Error())
-		return
-	}
-	// defer csvFile.Close()
-
-	jobs := make(chan []interface{}, 0)
-	wg := new(sync.WaitGroup)
-
-	go dispatchWorkers(c, db, jobs, wg)
-	readCsvFilePerLineThenSendToWorker(csvReader, jobs, wg)
-
-	wg.Wait()
-
-	duration := time.Since(start)
-	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
-
 }
 
 func openCsvFile(c *gin.Context) (*csv.Reader, multipart.File, error) {
@@ -146,7 +138,10 @@ func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan []interface{}, wg *
 			counter := 0
 
 			for job := range jobs {
-				doTheJob(c, workerIndex, counter, db, job)
+				err := doTheJob(c, workerIndex, counter, db, job)
+				if err != nil {
+					exceptions.AppException(c, err.Error())
+				}
 				wg.Done()
 				counter++
 			}
@@ -181,10 +176,37 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 	close(jobs)
 }
 
-func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) {
+func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) error {
 	now := time.Now()
-	values = append(values, now)
 
+	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
+
+	for i := 4; i < 7; i++ {
+		if str, ok := values[i].(string); ok {
+			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
+			values[i] = filteredStr
+		}
+	}
+
+	for i := 8; i < 10; i++ {
+		if str, ok := values[i].(string); ok {
+			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
+			values[i] = filteredStr
+		}
+	}
+
+	leasingName := c.PostForm("leasing_name")
+	cabangName := c.PostForm("cabang_name")
+
+	if leasingName != "" {
+		values[0] = leasingName
+	}
+
+	if cabangName != "" {
+		values[1] = cabangName
+	}
+
+	values = append(values, now)
 	values = append(values, 1)
 
 	for {
@@ -197,7 +219,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			}()
 
 			conn, err := db.Conn(context.Background())
-			query := fmt.Sprintf("INSERT INTO m_leasing (%s, created_at, status) VALUES (%s)",
+			query := fmt.Sprintf("INSERT INTO m_kendaraan (%s, created_at, status) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
 				strings.Join(generateQuestionsMark(len(dataHeaders)+2), ","),
 			)
@@ -205,12 +227,14 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			if err != nil {
 				exceptions.AppException(c, err.Error())
+				*outerError = err
 				return
 			}
 
 			err = conn.Close()
 			if err != nil {
 				exceptions.AppException(c, err.Error())
+				*outerError = err
 				return
 			}
 		}(&outerError)
@@ -218,6 +242,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			break
 		}
 	}
+	return nil
 }
 
 func generateQuestionsMark(n int) []string {

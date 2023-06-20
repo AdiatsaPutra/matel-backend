@@ -24,6 +24,19 @@ func main() {
 
 	r.GET("/home", controllers.GetHome)
 
+	r.GET("/leasing-master", controllers.GetLeasingMaster)
+	r.POST("/leasing-master", controllers.CreateLeasing)
+	r.PUT("/leasing-master/:id", controllers.UpdateLeasing)
+	r.DELETE("/leasing-master/:id", controllers.DeleteLeasing)
+
+	r.GET("/cabang", controllers.GetCabang)
+	r.POST("/cabang", controllers.CreateCabang)
+	r.PUT("/cabang/:id", controllers.UpdateCabang)
+	r.DELETE("/cabang/:id", controllers.DeleteCabang)
+
+	r.GET("/kendaraan", controllers.GetKendaraan)
+	r.GET("/download-template", controllers.DownloadTemplate)
+
 	r.GET("/leasing", controllers.GetLeasing)
 	r.GET("/leasing/:id", security.AuthMiddleware(), controllers.GetLeasingDetail)
 	r.GET("/leasing/history", security.AuthMiddleware(), controllers.GetLeasingHistory)
