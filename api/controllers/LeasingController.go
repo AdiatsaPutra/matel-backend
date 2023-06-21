@@ -40,11 +40,21 @@ func GetKendaraan(c *gin.Context) {
 	var kendaraans []models.Kendaraan
 	offset := (pageNumber - 1) * limit
 
-	result := query.Offset(offset).Limit(limit).Find(&kendaraans)
-	if result.Error != nil {
-		exceptions.AppException(c, "Something went wrong")
-		return
+	if(limit == -1){
+		result := query.Offset(offset).Find(&kendaraans)
+		if result.Error != nil {
+			exceptions.AppException(c, "Something went wrong")
+			return
+		}
+		}else{
+		result := query.Offset(offset).Limit(limit).Find(&kendaraans)
+		if result.Error != nil {
+			exceptions.AppException(c, "Something went wrong")
+			return
+		}
+		
 	}
+
 	
 	payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
 }

@@ -185,7 +185,7 @@ func containsNumber(numbersViewed string, number int) bool {
 	return false
 }
 
-func UserProfile(c *gin.Context) (models.UserDetail, error) {
+func UserProfile(c *gin.Context, userId uint) (models.UserDetail, error) {
 	var user models.UserDetail
 	query := `
 		SELECT u.*, p.name AS province_name, k.name AS kabupaten_name, kc.name AS kecamatan_name
@@ -193,9 +193,10 @@ func UserProfile(c *gin.Context) (models.UserDetail, error) {
 		JOIN m_province AS p ON u.province_id = p.id
 		JOIN m_kabupaten AS k ON u.kabupaten_id = k.id
 		JOIN m_kecamatan AS kc ON u.kecamatan_id = kc.id
+		WHERE u.id = ?
 	`
 
-	result := config.InitDB().Raw(query).Scan(&user)
+	result := config.InitDB().Raw(query, userId).Scan(&user)
 
 	if result.Error != nil {
 		return user, result.Error

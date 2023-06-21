@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func CreateCabang(c *gin.Context) {
@@ -24,6 +25,8 @@ func CreateCabang(c *gin.Context) {
 	}
 
 	result := config.InitDB().Create(&cabang)
+	logrus.Info(result.Error)
+	logrus.Info(cabang)
 	if result.Error != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return

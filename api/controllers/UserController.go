@@ -19,7 +19,7 @@ func GetProfile(c *gin.Context) {
 		return
 	}
 
-	newUser, err := repository.UserProfile(c)
+	newUser, err := repository.UserProfile(c, UserID)
 
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
