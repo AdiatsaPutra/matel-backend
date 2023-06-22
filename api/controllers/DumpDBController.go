@@ -154,9 +154,10 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 	defer file.Close()
 
-	err = sourceDB.Exec("DELETE FROM m_kendaraan WHERE created_at >= ?", date).Error
+	deleteQuery := fmt.Sprintf("DELETE FROM m_kendaraan WHERE created_at >= '%s';\n", date.Format("2006-01-02 15:04:05"))
+	_, err = file.WriteString(deleteQuery)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to delete data from table": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 		return
 	}
 
