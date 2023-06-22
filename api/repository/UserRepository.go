@@ -5,6 +5,7 @@ import (
 	"matel/models"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -137,17 +138,31 @@ func ResetDeviceID(c *gin.Context, UserID uint, DeviceID string) error {
 
 }
 
-func SetUser(c *gin.Context, UserID uint, Status uint) error {
+func SetUser(c *gin.Context, userID uint, subscriptionMonths uint) error {
 	var user models.User
 
-	e := config.InitDB().Model(&user).Where("id = ?", UserID).Update("status", Status).Error
+	db := config.InitDB()
 
-	if e != nil {
-		return e
+	if err := db.First(&user, userID).Error; err != nil {
+		return err
+	}
+
+	now := time.Now()
+
+	endSubscription := now.AddDate(0, int(subscriptionMonths), 0)
+
+	startSubscriptionStr := now.Format("2006-01-02")
+	endSubscriptionStr := endSubscription.Format("2006-01-02")
+
+	if err := db.Model(&user).Updates(models.User{
+		StartSubscription: startSubscriptionStr,
+		EndSubscription:   endSubscriptionStr,
+		Status:            1,
+	}).Error; err != nil {
+		return err
 	}
 
 	return nil
-
 }
 
 func AddSearchHistory(c *gin.Context, UserID uint, LeasingID uint) error {
