@@ -13,7 +13,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func DumpSQLHandler(c *gin.Context) {
@@ -141,8 +140,6 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	logrus.Info(date)
-
 	sourceDB := config.InitDB()
 
 	db, err := sourceDB.DB()
@@ -151,25 +148,17 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 	defer db.Close()
 
-	os.Remove(filepath)
-
 	file, err := os.Create(filepath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to create file: %v": err.Error()})
 	}
 	defer file.Close()
 
-	// err = file.Truncate(0)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"failed to clear file content: %v": err.Error()})
-	// 	return
-	// }
-
-	// _, err = file.Seek(0, 0)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"failed to reset file pointer: %v": err.Error()})
-	// 	return
-	// }
+	err = sourceDB.Exec("DELETE FROM m_kendaraan WHERE created_at >= ?", date).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to delete data from table": err.Error()})
+		return
+	}
 
 	_, err = file.WriteString("INSERT INTO m_kendaraan (id, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
