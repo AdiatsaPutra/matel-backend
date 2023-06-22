@@ -17,6 +17,20 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --max_connections=10000
 
+  phpmyadmin:
+    links:
+      - db:db
+    image: phpmyadmin:5.2.1-apache
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+      UPLOAD_LIMIT: 200M
+      PMA_ABSOLUTE_URI: https://taurusaplikasi.com/phpmyadmin/
+    networks:
+      - internal_network
+
   api:
     build: ./api
     image: matel-api
