@@ -46,6 +46,7 @@ func main() {
 	r.GET("/download-all", controllers.DownloadLeasing)
 
 	r.GET("/member", security.AuthMiddleware(), controllers.GetMember)
+	r.POST("/update-member", security.AuthMiddleware(), controllers.SetUser)
 
 	r.GET("/province", controllers.GetProvince)
 	r.GET("/kabupaten/:province-id", controllers.GetKabupaten)

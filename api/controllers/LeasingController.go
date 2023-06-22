@@ -40,27 +40,38 @@ func GetKendaraan(c *gin.Context) {
 	var kendaraans []models.Kendaraan
 	offset := (pageNumber - 1) * limit
 
-	if(limit == -1){
+	if limit == -1 {
 		result := query.Offset(offset).Find(&kendaraans)
 		if result.Error != nil {
 			exceptions.AppException(c, "Something went wrong")
 			return
 		}
-		}else{
+	} else {
 		result := query.Offset(offset).Limit(limit).Find(&kendaraans)
 		if result.Error != nil {
 			exceptions.AppException(c, "Something went wrong")
 			return
 		}
-		
+
 	}
 
-	
 	payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
 }
 
-func DownloadTemplate(c *gin.Context){
-	// Open the file
+func DeleteAndReplaceKendaraan(c *gin.Context) {
+	leasing := c.Query("leasing")
+	cabang := c.Query("cabang")
+
+	deleteResult := config.InitDB().Where("leasing = ? AND cabang = ?", leasing, cabang).Delete(&models.Kendaraan{})
+	if deleteResult.Error != nil {
+		exceptions.AppException(c, "Failed to delete Kendaraan")
+		return
+	}
+
+	payloads.HandleSuccess(c, "Success", "Success", http.StatusOK)
+}
+
+func DownloadTemplate(c *gin.Context) {
 	filePath := "leasing-template.csv"
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -68,14 +79,12 @@ func DownloadTemplate(c *gin.Context){
 		return
 	}
 	defer file.Close()
-	
-	// Set the appropriate headers
+
 	fileInfo, _ := file.Stat()
 	c.Header("Content-Disposition", "attachment; filename="+fileInfo.Name())
 	c.Header("Content-Type", "application/octet-stream")
 	c.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
-	
-	// Stream the file to the response
+
 	_, err = io.Copy(c.Writer, file)
 	if err != nil {
 		exceptions.AppException(c, "Failed to download file")

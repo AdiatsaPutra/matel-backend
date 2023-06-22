@@ -69,13 +69,12 @@ func GetMember(c *gin.Context) {
 		payloads.HandleSuccess(c, nil, "User tidak ditemukan", http.StatusOK)
 		return
 	}
-	
+
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
 
-	
 	payloads.HandleSuccess(c, user, "Success get data", http.StatusOK)
 }
 
@@ -88,12 +87,12 @@ func SetUser(c *gin.Context) {
 	}
 
 	UserIDParam := c.Query("user_id")
-	Status := c.Query("status")
+	SunscriptionMonth := c.Query("subscription_month")
 
 	UserIDParamUint, _ := strconv.Atoi(UserIDParam)
-	StatusUint, _ := strconv.Atoi(Status)
+	SubscriptionMonthInt, _ := strconv.Atoi(SunscriptionMonth)
 
-	err := repository.SetUser(c, uint(UserIDParamUint), uint(StatusUint))
+	err := repository.SetUser(c, uint(UserIDParamUint), uint(SubscriptionMonthInt))
 
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
