@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: mysql/mysql-server:latest
+    image: mysql:8.0.33-debian
     restart: always
     cap_add:
       - SYS_NICE
@@ -14,8 +14,27 @@ services:
       - "MYSQL_DATABASE=matel"
     volumes:
       - db:/var/lib/mysql
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --max_connections=10000
+      # - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: [
+        '--max_connections=10000',
+        '--default_authentication_plugin=mysql_native_password',
+        '--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci'
+    ]
+
+  phpmyadmin:
+    links:
+      - db:db
+    image: phpmyadmin:5.2.1-apache
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+      UPLOAD_LIMIT: 200M
+      PMA_ABSOLUTE_URI: https://taurusaplikasi.com/phpmyadmin/
+    networks:
+      - internal_network
 
   api:
     build: ./api
