@@ -54,5 +54,3 @@ func main() {
 
 	r.Run()
 }
-
-// http://localhost:8080/download-update?date=2023-06-07-15-04-05
