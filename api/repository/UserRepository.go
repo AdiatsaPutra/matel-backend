@@ -94,6 +94,10 @@ func GetMember(c *gin.Context) ([]models.User, error) {
 	var user = []models.User{}
 	result := config.InitDB().Where("is_admin = 0").Find(&user)
 
+	if len(user) == 0 {
+		return user, nil
+	}
+
 	if result.Error != nil {
 		return user, result.Error
 	}

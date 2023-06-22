@@ -65,16 +65,17 @@ func GetMember(c *gin.Context) {
 
 	user, err := repository.GetMember(c)
 
+	if len(user) == 0 {
+		payloads.HandleSuccess(c, nil, "User tidak ditemukan", http.StatusOK)
+		return
+	}
+	
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
 
-	if len(user) == 0 {
-		payloads.HandleSuccess(c, nil, "User tidak ditemukan", http.StatusOK)
-		return
-	}
-
+	
 	payloads.HandleSuccess(c, user, "Success get data", http.StatusOK)
 }
 

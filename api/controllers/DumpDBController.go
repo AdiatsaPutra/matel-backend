@@ -137,7 +137,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	dateParam := c.Query("date")
 
 	// Parse the date parameter into a time.Time object
-	date, err := time.Parse("2006-01-02", dateParam)
+	date, err := time.Parse("2006-01-02-15-04-05", dateParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
 		return
