@@ -161,14 +161,14 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	_, err = file.WriteString("INSERT INTO m_kendaraan (id, nomorPolisi, noMesin, noRangka) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_kendaraan (id, nomorPolisi, noMesin, noRangka, created_at) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	var leasings []models.LeasingToExport
 	err = sourceDB.Table("m_kendaraan").
-		Select("id, nomorPolisi, noMesin, noRangka").
+		Select("id, nomorPolisi, noMesin, noRangka, created_at").
 		Where("created_at >= ?", date).
 		Find(&leasings).Error
 	if err != nil {
