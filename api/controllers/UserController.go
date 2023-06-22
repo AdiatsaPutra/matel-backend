@@ -5,7 +5,6 @@ import (
 	"matel/payloads"
 	"matel/repository"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -79,20 +78,14 @@ func GetMember(c *gin.Context) {
 }
 
 func SetUser(c *gin.Context) {
-	UserID := c.MustGet("user_id").(uint)
-
-	if UserID == 0 {
-		exceptions.AppException(c, "Not authorized")
-		return
+	type SetUserReq struct {
+		UserID            uint `json:"user_id" validate:"required"`
+		SubscriptionMonth uint `json:"subscription_month" validate:"required"`
 	}
+	var req SetUserReq
+	c.BindJSON(&req)
 
-	UserIDParam := c.Query("user_id")
-	SunscriptionMonth := c.Query("subscription_month")
-
-	UserIDParamUint, _ := strconv.Atoi(UserIDParam)
-	SubscriptionMonthInt, _ := strconv.Atoi(SunscriptionMonth)
-
-	err := repository.SetUser(c, uint(UserIDParamUint), uint(SubscriptionMonthInt))
+	err := repository.SetUser(c, req.UserID, req.SubscriptionMonth)
 
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")

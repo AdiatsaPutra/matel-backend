@@ -46,7 +46,7 @@ func main() {
 	r.GET("/download-all", controllers.DownloadLeasing)
 
 	r.GET("/member", security.AuthMiddleware(), controllers.GetMember)
-	r.POST("/update-member", security.AuthMiddleware(), controllers.SetUser)
+	r.POST("/update-member", controllers.SetUser)
 
 	r.GET("/province", controllers.GetProvince)
 	r.GET("/kabupaten/:province-id", controllers.GetKabupaten)
@@ -54,3 +54,5 @@ func main() {
 
 	r.Run()
 }
+
+// http://localhost:8080/download-update?date=2023-06-07-15-04-05
