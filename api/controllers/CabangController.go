@@ -109,10 +109,7 @@ func UpdateCabang(c *gin.Context) {
 	payloads.HandleSuccess(c, cabang, "Success", 200)
 }
 
-func SetVersiCabang(c *gin.Context) {
-	LeasingID := c.Query("leasing_id")
-	CabangName := c.Query("cabang_name")
-
+func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string) {
 	var cabang models.Cabang
 	result := config.InitDB().Where("leasing_id = ? AND nama_cabang = ? AND deleted_at IS NULL", LeasingID, CabangName).Find(&cabang)
 	if result.Error != nil {
@@ -130,7 +127,7 @@ func SetVersiCabang(c *gin.Context) {
 		return
 	}
 
-	payloads.HandleSuccess(c, cabang, "Success", 200)
+	// payloads.HandleSuccess(c, cabang, "Success", 200)
 }
 
 func DeleteCabang(c *gin.Context) {

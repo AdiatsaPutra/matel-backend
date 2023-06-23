@@ -32,7 +32,6 @@ func main() {
 	r.GET("/cabang", controllers.GetCabang)
 	r.POST("/cabang", controllers.CreateCabang)
 	r.PUT("/cabang/:id", controllers.UpdateCabang)
-	r.PUT("/set-versi-cabang", controllers.SetVersiCabang)
 	r.DELETE("/cabang/:id", controllers.DeleteCabang)
 
 	r.GET("/kendaraan", controllers.GetKendaraan)

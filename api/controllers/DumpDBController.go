@@ -326,6 +326,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		Select("id, cabang, nomorPolisi, noMesin, noRangka").
 		// Where("cabang = ?", cb).
 		Where("created_at >= ?", date).
+		Where("deleted_at = NULL").
 		Find(&leasings).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
