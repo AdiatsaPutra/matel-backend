@@ -97,7 +97,7 @@ services:
     privileged: true
     user: root
     volumes:
-      - /home/${myname}/jenkins_compose/jenkins_configuration:/var/jenkins_home
+      - /home/yunus/jenkins_compose/jenkins_configuration:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - internal_network
