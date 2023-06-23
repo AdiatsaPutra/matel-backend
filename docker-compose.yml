@@ -91,6 +91,31 @@ services:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
 
+  jenkins:
+    image: jenkins/jenkins:lts
+    privileged: true
+    restart: always
+    user: root
+    volumes:
+      - /home/yunus/jenkins_compose/jenkins_configuration:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - JENKINS_OPTS="--prefix=/jenkins"
+    networks:
+      - internal_network
+
+  agent:
+    image: jenkins/ssh-agent:jdk11
+    privileged: true
+    restart: always
+    user: root
+    expose:
+      - 22
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEyRJN5jO1w+UOejJNJJOHXOgHQEYNTY378ML6dF2Cz6 yunus@ubuntu-s-2vcpu-4gb-intel-sgp1-01-betaeagle
+    networks:
+      - internal_network
+
 networks:
   internal_network:
   external_network:
