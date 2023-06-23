@@ -36,13 +36,13 @@ func DumpSQLHandler(c *gin.Context) {
 	defer file.Close()
 
 	// Menulis header SQL ke file
-	_, err = file.WriteString("INSERT INTO m_kendaraan (id, nomorPolisi, noMesin, noRangka) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_kendaraan (id, cabang, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	var leasings []models.LeasingToExport
-	err = sourceDB.Table("m_kendaraan").Select("id, nomorPolisi, noMesin, noRangka").Find(&leasings).Error
+	err = sourceDB.Table("m_kendaraan").Select("id, cabang, nomorPolisi, noMesin, noRangka").Find(&leasings).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table: %v": err.Error()})
 	}
@@ -50,7 +50,7 @@ func DumpSQLHandler(c *gin.Context) {
 	// Menulis data ke file
 	for i, l := range leasings {
 		// log.Printf("Writing data %d of %d\n", i+1, len(leasings))
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s')", l.ID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
@@ -178,7 +178,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	for i, l := range leasings {
-		_, err = file.WriteString(fmt.Sprintf("('%s','%s', '%s', '%s', '%s')", l.Cabang, l.ID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+		_, err = file.WriteString(fmt.Sprintf("('%s','%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
