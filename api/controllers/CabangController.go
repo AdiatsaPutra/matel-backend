@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func CreateCabang(c *gin.Context) {
@@ -20,13 +19,11 @@ func CreateCabang(c *gin.Context) {
 	}
 
 	cabang := models.Cabang{
-		LeasingID: payload.LeasingID,
+		LeasingID:  payload.LeasingID,
 		NamaCabang: payload.NamaCabang,
 	}
 
 	result := config.InitDB().Create(&cabang)
-	logrus.Info(result.Error)
-	logrus.Info(cabang)
 	if result.Error != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
@@ -44,7 +41,7 @@ func GetCabang(c *gin.Context) {
 
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil {
-		limit = 0 
+		limit = 0
 	}
 
 	search := c.Query("search")

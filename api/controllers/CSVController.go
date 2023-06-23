@@ -54,15 +54,15 @@ func AddCSV(c *gin.Context) {
 		exceptions.AppException(c, err.Error())
 		return
 	}
-	
+
 	jobs := make(chan []interface{}, 0)
 	wg := new(sync.WaitGroup)
-	
+
 	go dispatchWorkers(c, db, jobs, wg)
 	readCsvFilePerLineThenSendToWorker(csvReader, jobs, wg)
-	
+
 	wg.Wait()
-	
+
 	duration := time.Since(start)
 	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 }

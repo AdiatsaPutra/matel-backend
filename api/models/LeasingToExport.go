@@ -6,4 +6,5 @@ type LeasingToExport struct {
 	NomorPolisi string `gorm:"column:nomorPolisi"`
 	NoRangka    string `gorm:"column:noRangka"`
 	NoMesin     string `gorm:"column:noMesin"`
+	Versi       string `gorm:"column:versi"`
 }

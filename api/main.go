@@ -43,7 +43,7 @@ func main() {
 	r.GET("/leasing/history", security.AuthMiddleware(), controllers.GetLeasingHistory)
 	r.POST("/upload-leasing", controllers.AddCSV)
 	r.GET("/dump-sql", controllers.DumpSQLHandler)
-	r.GET("/download-update", controllers.UpdateSQLHandler)
+	r.POST("/download-update", controllers.UpdateSQLHandler)
 	r.GET("/download-all", controllers.DownloadLeasing)
 
 	r.GET("/member", security.AuthMiddleware(), controllers.GetMember)
