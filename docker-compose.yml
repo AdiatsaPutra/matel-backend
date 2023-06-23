@@ -94,6 +94,7 @@ services:
   jenkins:
     image: jenkins/jenkins:lts
     privileged: true
+    restart: always
     user: root
     volumes:
       - /home/yunus/jenkins_compose/jenkins_configuration:/var/jenkins_home
@@ -106,6 +107,7 @@ services:
   agent:
     image: jenkins/ssh-agent:jdk11
     privileged: true
+    restart: always
     user: root
     expose:
       - 22
