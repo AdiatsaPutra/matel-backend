@@ -114,7 +114,7 @@ func SetVersiCabang(c *gin.Context) {
 	CabangName := c.Param("cabang_name")
 
 	var cabang models.Cabang
-	result := config.InitDB().Where("leasing_id = ?", LeasingID).Where("nama_cabang = ?", CabangName).Find(&cabang)
+	result := config.InitDB().Where("leasing_id = %v", LeasingID).Where("nama_cabang = %v", CabangName).Find(&cabang)
 	if result.Error != nil {
 		payloads.HandleSuccess(c, "Leasing not found", "Success", 200)
 		return
