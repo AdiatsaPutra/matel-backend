@@ -238,7 +238,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	for i := range cabangForm {
 		versi := existingCabangMap[cabangForm[i].Name]
 		if versi == 0 {
-			cabangForm[i].Versi = 1
+			cabangForm[i].Versi = cabangForm[i].Versi + 1
 		} else {
 			cabangForm[i].Versi = versi
 		}
@@ -289,25 +289,25 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	// _, err = file.WriteString("DELETE FROM m_kendaraan;\n")
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-	// 	return
-	// }
+	_, err = file.WriteString("DELETE FROM m_kendaraan;\n")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+		return
+	}
 
 	_, err = file.WriteString("\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
-	_, err = file.WriteString("INSERT INTO m_kendaraan (id, nomorPolisi, noMesin, noRangka) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_kendaraan (id, cabang, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	var leasings []models.LeasingToExport
 	err = sourceDB.Table("m_kendaraan").
-		Select("id, nomorPolisi, noMesin, noRangka").
+		Select("id, cabang, nomorPolisi, noMesin, noRangka").
 		Where("created_at >= ?", date).
 		Find(&leasings).Error
 	if err != nil {
@@ -316,7 +316,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	for i, l := range leasings {
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s')", l.ID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
