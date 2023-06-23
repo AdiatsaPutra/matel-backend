@@ -155,7 +155,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 	defer file.Close()
 
-	deleteQuery := fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang >= '%s';\n", cabangParam)
+	deleteQuery := fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang = '%s';\n", cabangParam)
 	_, err = file.WriteString(deleteQuery)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})

@@ -58,7 +58,7 @@ func GetKendaraan(c *gin.Context) {
 	payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
 }
 
-func DeleteAndReplaceKendaraan(c *gin.Context) {
+func DeleteKendaraan(c *gin.Context) {
 	leasing := c.Query("leasing")
 	cabang := c.Query("cabang")
 
