@@ -110,7 +110,7 @@ func UpdateCabang(c *gin.Context) {
 }
 
 func SetVersiCabang(c *gin.Context) {
-	LeasingID := c.Param("leasing_id")
+	LeasingID := c.Query("leasing_id")
 	CabangName := c.Param("cabang_name")
 
 	var cabang models.Cabang
