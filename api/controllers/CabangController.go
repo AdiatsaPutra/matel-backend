@@ -110,10 +110,11 @@ func UpdateCabang(c *gin.Context) {
 }
 
 func SetVersiCabang(c *gin.Context) {
+	LeasingID := c.Param("leasing_id")
 	CabangName := c.Param("cabang_name")
 
 	var cabang models.Cabang
-	result := config.InitDB().First(&cabang, CabangName)
+	result := config.InitDB().Where("leasing_id = ?", LeasingID).Where("nama_cabang = ?", CabangName).Find(&cabang)
 	if result.Error != nil {
 		payloads.HandleSuccess(c, "Leasing not found", "Success", 200)
 		return
