@@ -244,6 +244,18 @@ func UpdateSQLHandler(c *gin.Context) {
 		}
 	}
 
+	_, err = file.WriteString("DELETE FROM m_cabang\n")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+		return
+	}
+
+	_, err = file.WriteString("\n")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+		return
+	}
+
 	// Insert cabangForm into m_cabang
 
 	_, err = file.WriteString("INSERT INTO m_cabang (nama_cabang, versi) VALUES\n")
