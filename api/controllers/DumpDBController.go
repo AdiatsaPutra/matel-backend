@@ -133,6 +133,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	filepath := "export_new_only.sql"
 
 	dateParam := c.Query("date")
+	cabangParam := c.Query("cabang")
 
 	date, err := time.Parse("2006-01-02-15-04-05", dateParam)
 	if err != nil {
@@ -154,21 +155,21 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 	defer file.Close()
 
-	deleteQuery := fmt.Sprintf("DELETE FROM m_kendaraan WHERE created_at >= '%s';\n", date.Format("2006-01-02 15:04:05"))
+	deleteQuery := fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang >= '%s';\n", cabangParam)
 	_, err = file.WriteString(deleteQuery)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 		return
 	}
 
-	_, err = file.WriteString("INSERT INTO m_kendaraan (id, nomorPolisi, noMesin, noRangka, created_at) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_kendaraan (id, cabang, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	var leasings []models.LeasingToExport
 	err = sourceDB.Table("m_kendaraan").
-		Select("id, nomorPolisi, noMesin, noRangka, created_at").
+		Select("id, cabang, nomorPolisi, noMesin, noRangka").
 		Where("created_at >= ?", date).
 		Find(&leasings).Error
 	if err != nil {
@@ -177,7 +178,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	for i, l := range leasings {
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s')", l.ID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+		_, err = file.WriteString(fmt.Sprintf("('%s','%s', '%s', '%s', '%s')", l.Cabang, l.ID, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
