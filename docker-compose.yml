@@ -101,8 +101,7 @@ services:
       - /home/yunus/jenkins_compose/jenkins_configuration:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - JAVA_OPTS=-Dhudson.model.DirectoryBrowserSupport.CSP= \
-                   -Dhudson.model.DirectoryBrowserSupport.CSP="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';"
+      JAVA_OPTS: "-Dhudson.model.DirectoryBrowserSupport.CSP=\"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';\" -Djenkins.model.DirectoryBrowserSupport.CSP=\"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';\""
     networks:
       - internal_network
 
