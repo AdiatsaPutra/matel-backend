@@ -12,7 +12,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func GetKendaraan(c *gin.Context) {
@@ -62,9 +61,6 @@ func GetKendaraan(c *gin.Context) {
 func DeleteKendaraan(c *gin.Context) {
 	leasing := c.Query("leasing")
 	cabang := c.Query("cabang")
-
-	logrus.Info(leasing)
-	logrus.Info(cabang)
 
 	deleteResult := config.InitDB().Where("leasing = ? AND cabang = ?", leasing, cabang).Delete(&models.Kendaraan{})
 	if deleteResult.Error != nil {
