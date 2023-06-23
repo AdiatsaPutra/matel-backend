@@ -72,12 +72,6 @@ func DumpSQLHandler(c *gin.Context) {
 		}
 	}
 
-	_, err = file.WriteString("\n=======\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-		return
-	}
-
 	// Menulis header SQL ke file
 	_, err = file.WriteString("INSERT INTO m_kendaraan (id, cabang, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
@@ -269,12 +263,6 @@ func UpdateSQLHandler(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 			}
 		}
-	}
-
-	_, err = file.WriteString("\n=======\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-		return
 	}
 
 	_, err = file.WriteString("DELETE FROM m_kendaraan\n")
