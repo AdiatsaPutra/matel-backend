@@ -110,7 +110,7 @@ services:
     expose:
       - 22
     environment:
-      - JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCnH8kVGOW86zZl+tP0HA3CkpEIkaEvsy8pr/U6HfitU3wA/9xdWjIQMI0UChLB6rONC3xG2IOTxasxv7WK9aOE++whDzHgYuGuvhTfavtIkCtXNBMr5mnEuSnGFYTlc4ixzZzCtmGbytjONsDdeOlV/ZH2ufMXtSQQSHEi8xDwW+mwOTRj4ZCGMZtjE2Gnc76ChtY/DWxSQMXX4vPfVZRO4q379/tgZeBLRMLpyqFd9LIoF9ow+oiJguV4BYtB9L7xuwMszbZVnbjrgUdukTOHYljZZcpf7kPnqU3/vnOQEM+6b3EZXxlJcROggMiKijNadQ57RDSmhUr6w8R3aWs9nN5wt3fMsckmIJOnYfHJu6I65ttgbz5eE4JRlfZaGHjdWQ+Howt/fTiY6WWwi6cbkEREctXPM8kiQsHBI2Dev0/Uw764Vfrh2IlPa+4/ftwnuPsVZ2H0rqls8kYCXOUP+owhktKb/UsYWO8FER7iwJ6oQyhW/G8q/CSeBf6z4tE= yunus@ubuntu-s-2vcpu-4gb-intel-sgp1-01-betaeagle
+      - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEyRJN5jO1w+UOejJNJJOHXOgHQEYNTY378ML6dF2Cz6 yunus@ubuntu-s-2vcpu-4gb-intel-sgp1-01-betaeagle
     networks:
       - internal_network
 
