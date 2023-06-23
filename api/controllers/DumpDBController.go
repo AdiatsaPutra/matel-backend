@@ -244,7 +244,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		}
 	}
 
-	_, err = file.WriteString("DELETE FROM m_cabang\n")
+	_, err = file.WriteString("DELETE FROM m_cabang;\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 		return
@@ -289,11 +289,11 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	_, err = file.WriteString("DELETE FROM m_kendaraan\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-		return
-	}
+	// _, err = file.WriteString("DELETE FROM m_kendaraan;\n")
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+	// 	return
+	// }
 
 	_, err = file.WriteString("\n")
 	if err != nil {
