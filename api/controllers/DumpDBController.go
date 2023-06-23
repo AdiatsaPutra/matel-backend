@@ -36,6 +36,48 @@ func DumpSQLHandler(c *gin.Context) {
 	}
 	defer file.Close()
 
+	// Get Cabang With Version
+	var cabang []models.Cabang
+	err = sourceDB.Table("m_cabang").
+		Select("nama_cabang, versi").
+		Find(&cabang).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
+		return
+	}
+
+	// Insert cabangForm into m_cabang
+
+	_, err = file.WriteString("INSERT INTO m_cabang (nama_cabang, versi) VALUES\n")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+	}
+
+	for i, cb := range cabang {
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.NamaCabang, cb.Versi))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+		}
+
+		if i < len(cabang)-1 {
+			_, err = file.WriteString(",\n")
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+			}
+		} else {
+			_, err = file.WriteString(";")
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+			}
+		}
+	}
+
+	_, err = file.WriteString("\n=======\n")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+		return
+	}
+
 	// Menulis header SQL ke file
 	_, err = file.WriteString("INSERT INTO m_kendaraan (id, cabang, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
