@@ -240,7 +240,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		if versi == 0 {
 			cabangForm[i].Versi = cabangForm[i].Versi + 1
 		} else {
-			cabangForm[i].Versi = versi
+			cabangForm[i].Versi = versi + 1
 		}
 	}
 
@@ -289,7 +289,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	_, err = file.WriteString("DELETE FROM m_kendaraan;\n")
+	_, err = file.WriteString("DELETE FROM m_kendaraan WHERE ;\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 		return
