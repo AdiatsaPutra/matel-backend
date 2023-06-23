@@ -111,7 +111,7 @@ func UpdateCabang(c *gin.Context) {
 
 func SetVersiCabang(c *gin.Context) {
 	LeasingID := c.Query("leasing_id")
-	CabangName := c.Param("cabang_name")
+	CabangName := c.Query("cabang_name")
 
 	var cabang models.Cabang
 	result := config.InitDB().Where("leasing_id = ? AND nama_cabang = ? AND deleted_at IS NULL", LeasingID, CabangName).Find(&cabang)
