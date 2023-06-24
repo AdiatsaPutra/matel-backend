@@ -43,8 +43,8 @@ services:
     networks:
       - internal_network
     volumes:
-      - api:/main
-      - ./app:/main
+      - ./api:/app
+      - ./app:/app
     depends_on:
       - db
 
@@ -122,6 +122,5 @@ networks:
   external_network:
 
 volumes:
-  api:
   db:
     driver: local
