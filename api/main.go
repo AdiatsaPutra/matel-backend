@@ -45,6 +45,7 @@ func main() {
 	r.GET("/dump-sql", controllers.DumpSQLHandler)
 	r.POST("/download-update", controllers.UpdateSQLHandler)
 	r.GET("/download-all", controllers.DownloadLeasing)
+	r.GET("/download-app", controllers.DownloadApk)
 
 	r.GET("/member", security.AuthMiddleware(), controllers.GetMember)
 	r.POST("/update-member", controllers.SetUser)
