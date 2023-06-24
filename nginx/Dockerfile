@@ -12,6 +12,7 @@ RUN apt-get update \
     unzip \
     wget \
     liblua5.1-dev \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and extract OpenResty
@@ -20,7 +21,7 @@ RUN wget https://openresty.org/download/openresty-1.19.3.2.tar.gz \
     && rm openresty-1.19.3.2.tar.gz
 
 # Download and move ngx_http_lua_module
-RUN git clone https://github.com/openresty/lua-nginx-module.git \
+RUN git clone https://github.com/openresty/lua-nginx-module.git --depth=1 \
     && mv lua-nginx-module openresty-1.19.3.2/
 
 # Build and install OpenResty with ngx_http_lua_module
