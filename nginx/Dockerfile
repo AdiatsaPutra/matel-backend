@@ -8,10 +8,11 @@ RUN apt-get update \
     gnupg \
     ca-certificates
 
-RUN wget -O - https://openresty.org/package/pubkey.gpg | apt-key add -
+RUN wget -qO - https://openresty.org/package/pubkey.gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/openresty.gpg
 
-RUN codename=$(grep -Po 'VERSION="[0-9]+ \(\K[^)]+' /etc/os-release) \
-    && echo "deb http://openresty.org/package/debian $codename openresty" > /etc/apt/sources.list.d/openresty.list
+RUN codename=$(grep -Po 'VERSION="[0-9]+ \(\K[^)]+' /etc/os-release)
+
+RUN echo "deb http://openresty.org/package/debian $codename openresty" > /etc/apt/sources.list.d/openresty.list
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
