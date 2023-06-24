@@ -336,6 +336,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	for i, l := range leasings {
+		logrus.Info(leasings)
 		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
