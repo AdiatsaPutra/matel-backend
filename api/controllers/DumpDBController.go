@@ -353,6 +353,11 @@ func UpdateSQLHandler(c *gin.Context) {
 				}
 			}
 		}
+
+		_, err = file.WriteString("\n")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+		}
 	}
 
 	fileSource, err := os.Open(filepath)
