@@ -10,6 +10,7 @@ RUN apt-get update \
     libxslt1-dev \
     zlib1g-dev \
     unzip \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and extract OpenResty
