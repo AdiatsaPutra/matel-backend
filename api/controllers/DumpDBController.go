@@ -14,7 +14,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func DumpSQLHandler(c *gin.Context) {
@@ -293,7 +292,6 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	var comparedCabangForm []CabangForm
-	logrus.Info(cabangFormUnupdated)
 	for _, cf := range cabangForm {
 		for _, cfu := range cabangFormUnupdated {
 			if cf.Name == cfu.Name && cf.Versi != cfu.Versi {
@@ -323,34 +321,33 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	var leasings []models.LeasingToExport
 	for _, cc := range comparedCabangForm {
-		logrus.Info(cc.Name)
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
 			Where("cabang = ?", cc.Name).
 			Where("created_at >= ?", date).
 			Find(&leasings).Error
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
 			return
 		}
-	}
 
-	for i, l := range leasings {
-		logrus.Info(leasings)
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-		}
-
-		if i < len(leasings)-1 {
-			_, err = file.WriteString(",\n")
+		for i, l := range leasings {
+			_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 			}
-		} else {
-			_, err = file.WriteString(";")
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+
+			if i < len(leasings)-1 {
+				_, err = file.WriteString(",\n")
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				}
+			} else {
+				_, err = file.WriteString(";")
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				}
 			}
 		}
 	}
