@@ -8,4 +8,5 @@ RUN cd luarocks-3.9.2 && ./configure && make build && make install
 RUN rm -rf luarocks-3.9.2 luarocks-3.9.2.tar.gz
 
 # Install Lua module (resty.http)
-RUN luarocks install lua-resty-http
+ENV ROCKS_SERVER="https://luarocks.org/mirror"
+RUN luarocks install lua-resty-http 0.11.2
