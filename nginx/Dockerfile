@@ -18,6 +18,8 @@ LABEL resty_apt_pgp="${RESTY_APT_PGP}"
 LABEL resty_deb_flavor="${RESTY_DEB_FLAVOR}"
 LABEL resty_deb_version="${RESTY_DEB_VERSION}"
 
+ARG RESTY_LUAROCKS_VERSION="3.9.0"
+
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -45,6 +47,28 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && mkdir -p /var/run/openresty \
     && ln -sf /dev/stdout /usr/local/openresty${RESTY_DEB_FLAVOR}/nginx/logs/access.log \
     && ln -sf /dev/stderr /usr/local/openresty${RESTY_DEB_FLAVOR}/nginx/logs/error.log
+
+
+# install LuaRocks
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    curl \
+    make \
+    unzip \
+    wget \
+    && cd /tmp \
+    && curl -fSL https://luarocks.github.io/luarocks/releases/luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz -o luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
+    && tar xzf luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
+    && cd luarocks-${RESTY_LUAROCKS_VERSION} \
+    && ./configure \
+    --prefix=/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit \
+    --with-lua=/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit \
+    --lua-suffix=jit-2.1.0-beta3 \
+    --with-lua-include=/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/include/luajit-2.1 \
+    && make build \
+    && make install \
+    && cd /tmp \
+    && rm -rf luarocks-${RESTY_LUAROCKS_VERSION} luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz
 
 # Install LuaRocks
 RUN /usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/bin/luarocks install lua-resty-http
