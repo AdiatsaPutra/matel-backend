@@ -109,6 +109,27 @@ func UpdateCabang(c *gin.Context) {
 	payloads.HandleSuccess(c, cabang, "Success", 200)
 }
 
+func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string) {
+	var cabang models.Cabang
+	result := config.InitDB().Where("leasing_id = ? AND nama_cabang = ? AND deleted_at IS NULL", LeasingID, CabangName).Find(&cabang)
+	if result.Error != nil {
+		payloads.HandleSuccess(c, "Leasing not found", "Success", 200)
+		return
+	}
+
+	versi, _ := strconv.Atoi(cabang.Versi)
+
+	cabang.Versi = strconv.Itoa(versi + 1)
+
+	result = config.InitDB().Save(&cabang)
+	if result.Error != nil {
+		exceptions.AppException(c, result.Error.Error())
+		return
+	}
+
+	// payloads.HandleSuccess(c, cabang, "Success", 200)
+}
+
 func DeleteCabang(c *gin.Context) {
 
 	cabangID := c.Param("id")

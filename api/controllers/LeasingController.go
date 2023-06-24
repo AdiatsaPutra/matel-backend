@@ -61,17 +61,22 @@ func GetKendaraan(c *gin.Context) {
 
 func DeleteKendaraan(c *gin.Context) {
 	leasing := c.Query("leasing")
+	leasingID := c.Query("leasing_id")
 	cabang := c.Query("cabang")
-
+	
 	logrus.Info(leasing)
-	logrus.Info(cabang)
+	
+	leasingIDInt, _ := strconv.Atoi(leasingID)
+	SetVersiCabang(c, uint(leasingIDInt) , cabang )
 
-	deleteResult := config.InitDB().Where("leasing = ? AND cabang = ?", leasing, cabang).Delete(&models.Kendaraan{})
+	var kendaraan models.Kendaraan
+	
+	deleteResult := config.InitDB().Where("leasing = ? AND cabang = ?", leasing, cabang).Delete(&kendaraan)
 	if deleteResult.Error != nil {
 		exceptions.AppException(c, "Failed to delete Kendaraan")
 		return
 	}
-
+	
 	payloads.HandleSuccess(c, "Success", "Success", http.StatusOK)
 }
 

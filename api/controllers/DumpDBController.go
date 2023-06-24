@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func DumpSQLHandler(c *gin.Context) {
@@ -183,11 +184,14 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	var cabangForm []CabangForm
+	var cabangFormUnupdated []CabangForm
 
 	if err := c.BindJSON(&cabangForm); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	cabangFormUnupdated = append(cabangFormUnupdated, cabangForm...)
 
 	date, err := time.Parse("2006-01-02-15-04-05", dateParam)
 	if err != nil {
@@ -238,19 +242,18 @@ func UpdateSQLHandler(c *gin.Context) {
 	for i := range cabangForm {
 		versi := existingCabangMap[cabangForm[i].Name]
 		if versi == 0 {
-			cabangForm[i].Versi = cabangForm[i].Versi + 1
+			cabangForm[i].Versi = 1
 		} else {
-			cabangForm[i].Versi = versi + 1
+			cabangForm[i].Versi = versi
 		}
 	}
 
-	_, err = file.WriteString("DELETE FROM m_cabang;\n")
+	_, err = file.WriteString("DELETE FROM m_cabang;")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-		return
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
-	_, err = file.WriteString("\n")
+	_, err = file.WriteString("\n\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 		return
@@ -289,10 +292,22 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	_, err = file.WriteString("DELETE FROM m_kendaraan WHERE ;\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-		return
+	var comparedCabangForm []CabangForm
+	for _, cf := range cabangForm {
+		for _, cfu := range cabangFormUnupdated {
+			if cf.Name == cfu.Name && cf.Versi != cfu.Versi {
+				comparedCabangForm = append(comparedCabangForm, cf)
+				break
+			}
+		}
+	}
+
+	for _, cc := range comparedCabangForm {
+		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang = '%s';\n", cc.Name))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+			return
+		}
 	}
 
 	_, err = file.WriteString("\n")
@@ -305,31 +320,37 @@ func UpdateSQLHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
-	var leasings []models.LeasingToExport
-	err = sourceDB.Table("m_kendaraan").
-		Select("id, cabang, nomorPolisi, noMesin, noRangka").
-		Where("created_at >= ?", date).
-		Find(&leasings).Error
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
-		return
-	}
+	for _, cc := range comparedCabangForm {
+		var leasings []models.LeasingToExport
+		err = sourceDB.Table("m_kendaraan").
+			Select("id, cabang, nomorPolisi, noMesin, noRangka").
+			Where("cabang = ?", cc.Name).
+			Where("created_at >= ?", date).
+			Find(&leasings).Error
 
-	for i, l := range leasings {
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
+			return
 		}
 
-		if i < len(leasings)-1 {
-			_, err = file.WriteString(",\n")
+		logrus.Info(leasings)
+		for i, l := range leasings {
+			logrus.Info("LOOP")
+			_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 			}
-		} else {
-			_, err = file.WriteString(";")
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+
+			if i < len(leasings)-1 {
+				_, err = file.WriteString(",\n")
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				}
+			} else {
+				_, err = file.WriteString(";")
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				}
 			}
 		}
 	}
