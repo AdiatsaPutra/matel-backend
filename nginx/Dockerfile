@@ -13,9 +13,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and extract OpenResty
-RUN wget https://openresty.org/download/openresty-1.19.3.2.tar.gz \
+RUN /bin/bash -c "wget https://openresty.org/download/openresty-1.19.3.2.tar.gz \
     && tar -xzf openresty-1.19.3.2.tar.gz \
-    && rm openresty-1.19.3.2.tar.gz
+    && rm openresty-1.19.3.2.tar.gz"
 
 # Build and install OpenResty
 RUN cd openresty-1.19.3.2 \
