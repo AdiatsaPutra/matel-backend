@@ -39,7 +39,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     wget \
     && DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    openresty${RESTY_DEB_FLAVOR}${RESTY_DEB_VERSION} \
+    openresty${RESTY_DEB_VERSION} \
     && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/run/openresty \
@@ -47,12 +47,12 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && ln -sf /dev/stderr /usr/local/openresty${RESTY_DEB_FLAVOR}/nginx/logs/error.log
 
 # Install LuaRocks
-RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-http
-RUN /usr/local/openresty/luajit/bin/luarocks install lua-cjson
+RUN /usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/bin/luarocks install lua-resty-http
+RUN /usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/bin/luarocks install lua-cjson
 
 # Add additional binaries into PATH for convenience
-ENV PATH=$PATH:/usr/local/openresty/luajit/bin:/usr/local/openresty/nginx/sbin:/usr/local/openresty/bin
-ENV LUA_PATH="/usr/local/openresty/site/lualib/?.ljbc;/usr/local/openresty/site/lualib/?/init.ljbc;/usr/local/openresty/lualib/?.ljbc;/usr/local/openresty/lualib/?/init.ljbc;/usr/local/openresty/site/lualib/?.lua;/usr/local/openresty/site/?.lua;/usr/local/openresty/site/lualib/?/init.lua;/usr/local/openresty/site/?/init.lua;/usr/local/openresty/lualib/?.lua;/usr/local/openresty/lualib/?/init.lua;./?.lua;/usr/local/openresty/luajit/share/luajit-2.1.0-beta3/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/local/openresty/luajit/share/lua/5.1/?.lua;/usr/local/openresty/luajit/share/lua/5.1/?/init.lua"
-ENV LUA_CPATH="/usr/local/openresty/site/lualib/?.so;/usr/local/openresty/lualib/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/openresty/luajit/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so;/usr/local/openresty/luajit/lib/lua/5.1/?.so"
+ENV PATH=$PATH:/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/bin:/usr/local/openresty${RESTY_DEB_FLAVOR}/nginx/sbin:/usr/local/openresty${RESTY_DEB_FLAVOR}/bin
+ENV LUA_PATH="/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?.ljbc;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?/init.ljbc;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?.ljbc;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?/init.ljbc;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?/init.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/?/init.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?/init.lua;./?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/share/luajit-2.1.0-beta3/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/share/lua/5.1/?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/share/lua/5.1/?/init.lua"
+ENV LUA_CPATH="/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?.so;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/lib/lua/5.1/?.so"
 
-CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
+CMD ["/usr/local/openresty${RESTY_DEB_FLAVOR}/bin/openresty", "-g", "daemon off;"]
