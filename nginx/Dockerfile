@@ -1,7 +1,8 @@
 FROM openresty/openresty:1.21.4.1-0-focal
 
 # Install LuaRocks
-RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-http
+RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-http lua-cjson
+RUN /usr/local/openresty/luajit/bin/luarocks install lua-cjson
 
 # Add additional binaries into PATH for convenience
 ENV PATH=$PATH:/usr/local/openresty/luajit/bin:/usr/local/openresty/nginx/sbin:/usr/local/openresty/bin
