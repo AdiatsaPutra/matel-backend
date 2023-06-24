@@ -10,7 +10,7 @@ RUN apt-get update \
 
 RUN wget -qO - https://openresty.org/package/pubkey.gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/openresty.gpg
 
-RUN codename=$(awk -F'["()]' '/VERSION=/{print $2}' /etc/os-release) \
+RUN codename=`grep -Po 'VERSION="[0-9]+ \(\K[^)]+' /etc/os-release` \
     && echo "deb http://openresty.org/package/debian $codename openresty" > /etc/apt/sources.list.d/openresty.list
 
 RUN apt-get update \
