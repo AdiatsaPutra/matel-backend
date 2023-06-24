@@ -1,4 +1,4 @@
-FROM openresty/openresty:1.21.7.1-alpine
+FROM openresty/openresty:1.21.4.1-0-alpine
 
 # Install LuaRocks
 RUN apk --no-cache add curl
