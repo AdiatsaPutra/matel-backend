@@ -6,7 +6,7 @@ FROM ${RESTY_IMAGE_BASE}:${RESTY_IMAGE_TAG}
 # RESTY_DEB_FLAVOR build argument is used to select other
 # OpenResty Debian package variants.
 # For example: "-debug" or "-valgrind"
-ARG RESTY_DEB_FLAVOR="debug"
+ARG RESTY_DEB_FLAVOR="-debug"
 ARG RESTY_DEB_VERSION="=1.21.4.1-1~bullseye1"
 ARG RESTY_APT_REPO="https://openresty.org/package/debian"
 ARG RESTY_APT_PGP="https://openresty.org/package/pubkey.gpg"
