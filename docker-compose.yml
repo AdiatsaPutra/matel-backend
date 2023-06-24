@@ -68,7 +68,7 @@ services:
       DOZZLE_ADDR: "0.0.0.0:1212"
 
   nginx:
-    image: nginx:latest
+    build: ./nginx
     restart: always
     ports:
       - "80:80"
