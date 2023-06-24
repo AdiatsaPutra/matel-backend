@@ -322,9 +322,10 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	var leasings []models.LeasingToExport
-	err = sourceDB.Table("m_kendaraan").
+	for _, cc := range comparedCabangForm {
+		err = sourceDB.Table("m_kendaraan").
 		Select("id, cabang, nomorPolisi, noMesin, noRangka").
-		// Where("cabang = ?", cb).
+		Where("cabang = ?", cc.Name).
 		Where("created_at >= ?", date).
 		Where("deleted_at = NULL").
 		Find(&leasings).Error
@@ -332,6 +333,8 @@ func UpdateSQLHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
 		return
 	}
+	}
+	
 
 	for i, l := range leasings {
 		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
