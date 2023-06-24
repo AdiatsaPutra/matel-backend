@@ -320,8 +320,8 @@ func UpdateSQLHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
-	var leasings []models.LeasingToExport
 	for _, cc := range comparedCabangForm {
+		var leasings []models.LeasingToExport
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
 			Where("cabang = ?", cc.Name).
