@@ -79,7 +79,7 @@ services:
       - ./nginx/conf/:/etc/nginx/conf.d/:ro
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
-      - ./app:/var/www/html/:rw
+      - ./app/:/var/www/html/:rw
     command: ["nginx", "-g", "daemon off;"]
 
   crontab:
