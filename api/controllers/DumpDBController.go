@@ -323,6 +323,7 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	var leasings []models.LeasingToExport
 	for _, cc := range comparedCabangForm {
+		logrus.Info(cc.Name)
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
 			Where("cabang = ?", cc.Name).
@@ -332,22 +333,23 @@ func UpdateSQLHandler(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
 			return
 		}
-		for i, l := range leasings {
-			_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
+	}
+
+	for i, l := range leasings {
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+		}
+
+		if i < len(leasings)-1 {
+			_, err = file.WriteString(",\n")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 			}
-
-			if i < len(leasings)-1 {
-				_, err = file.WriteString(",\n")
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-				}
-			} else {
-				_, err = file.WriteString(";")
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-				}
+		} else {
+			_, err = file.WriteString(";")
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 			}
 		}
 	}
