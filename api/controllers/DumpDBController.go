@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func DumpSQLHandler(c *gin.Context) {
@@ -332,7 +333,9 @@ func UpdateSQLHandler(c *gin.Context) {
 			return
 		}
 
+		logrus.Info(leasings)
 		for i, l := range leasings {
+			logrus.Info("LOOP")
 			_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.Cabang, l.NomorPolisi, l.NoMesin, l.NoRangka))
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
