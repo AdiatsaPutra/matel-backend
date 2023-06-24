@@ -2,7 +2,7 @@
 FROM nginx:latest
 
 # Update paket dan instal dependensi yang diperlukan
-RUN apt-get update && apt-get install -y libpcre3-dev libssl-dev zlib1g-dev
+RUN apt-get update && apt-get install -y libpcre3-dev libssl-dev zlib1g-dev wget
 
 # Unduh sumber modul Lua
 RUN wget https://github.com/openresty/lua-nginx-module/archive/v0.10.20.tar.gz && tar -xzvf v0.10.20.tar.gz
