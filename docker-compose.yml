@@ -68,7 +68,7 @@ services:
       DOZZLE_ADDR: "0.0.0.0:1212"
 
   nginx:
-    build: ./nginx
+    image: openresty/openresty:1.21.4.1-0-alpine
     restart: always
     ports:
       - "80:80"
