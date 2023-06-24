@@ -39,7 +39,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     wget \
     && DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    openresty${RESTY_DEB_VERSION} \
+    openresty${RESTY_DEB_FLAVOR}${RESTY_DEB_VERSION} \
     && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/run/openresty \
