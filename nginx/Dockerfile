@@ -1,20 +1,27 @@
-# Base image menggunakan image Nginx resmi
 FROM nginx:latest
 
-# Update paket dan instal dependensi yang diperlukan
-RUN apt-get update && apt-get install -y libpcre3-dev libssl-dev zlib1g-dev wget build-essential
+# Install dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpcre3-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Unduh sumber modul Lua
-RUN wget https://github.com/openresty/lua-nginx-module/archive/v0.10.20.tar.gz && tar -xzvf v0.10.20.tar.gz
+# Download and extract OpenResty
+RUN wget https://openresty.org/download/openresty-1.19.3.2.tar.gz \
+    && tar -xzf openresty-1.19.3.2.tar.gz \
+    && rm openresty-1.19.3.2.tar.gz
 
-# Unduh sumber LuaJIT
-RUN wget http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz && tar -xzvf LuaJIT-2.1.0-beta3.tar.gz
+# Build and install OpenResty
+RUN cd openresty-1.19.3.2 \
+    && ./configure --with-http_stub_status_module --with-http_realip_module --add-module=/path/to/ngx_http_lua_module \
+    && make \
+    && make install
 
-# Kompilasi dan instalasi LuaJIT
-RUN cd LuaJIT-2.1.0-beta3 && make && make install
-
-# Kompilasi dan instalasi modul Lua pada Nginx
-RUN cd lua-nginx-module-0.10.20 && cp -r * /etc/nginx/modules/
-
-# Tambahkan modul Lua ke dalam konfigurasi Nginx
-RUN echo "load_module modules/ngx_http_lua_module.so;" >> /etc/nginx/nginx.conf
+# Copy nginx configuration file
+# COPY ./nginx.conf /etc/nginx/nginx.conf
