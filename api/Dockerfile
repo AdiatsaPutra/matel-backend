@@ -12,11 +12,11 @@ RUN apk add --update --no-cache gcc libc-dev
 WORKDIR /app
 
 # Copy the Go module files and download dependencies
-# COPY go.mod go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the rest of the application source code
-# COPY . .
+COPY . .
 
 # Set gin to production
 ENV GIN_MODE=release
