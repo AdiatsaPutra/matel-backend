@@ -44,7 +44,7 @@ services:
       - internal_network
     volumes:
       - api:/main
-      - ./app/:/main/app
+      - ./app:/main
     depends_on:
       - db
 
