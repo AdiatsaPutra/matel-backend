@@ -72,7 +72,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && rm -rf luarocks-${RESTY_LUAROCKS_VERSION} luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz
 
 # Install LuaRocks
-RUN /usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/bin/luarocks install lua-resty-http
+RUN /usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/bin/luarocks install lua-resty-http2
 RUN /usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/bin/luarocks install lua-cjson
 
 # Add additional binaries into PATH for convenience
