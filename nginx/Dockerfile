@@ -80,6 +80,9 @@ ENV PATH=$PATH:/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/bin:/usr/local/ope
 ENV LUA_PATH="/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?.ljbc;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?/init.ljbc;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?.ljbc;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?/init.ljbc;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?/init.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/site/?/init.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?/init.lua;./?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/share/luajit-2.1.0-beta3/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/share/lua/5.1/?.lua;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/share/lua/5.1/?/init.lua"
 ENV LUA_CPATH="/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?.so;/usr/local/openresty${RESTY_DEB_FLAVOR}/lualib/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so;/usr/local/openresty${RESTY_DEB_FLAVOR}/luajit/lib/lua/5.1/?.so"
 
+
+RUN cp ./cert/github.com.cer /etc/ssl/certs/ca-certificates.pem
+
 # Update CA certificates di dalam container
 RUN update-ca-certificates
 
