@@ -83,7 +83,6 @@ ENV LUA_CPATH="/usr/local/openresty${RESTY_DEB_FLAVOR}/site/lualib/?.so;/usr/loc
 
 
 RUN cp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.pem
-# RUN cp ./cert/github.com.cer /etc/ssl/certs/ca-certificates.pem
 
 # Update CA certificates di dalam container
 RUN update-ca-certificates
