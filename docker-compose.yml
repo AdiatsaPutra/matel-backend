@@ -43,8 +43,8 @@ services:
     networks:
       - internal_network
     volumes:
-      - api:/main
-      - ./app/app-release.apk:/main/app-release.apk
+      - api:/app
+      - ./app:/app/app
     depends_on:
       - db
 
