@@ -159,7 +159,7 @@ func Login(c *gin.Context) {
 					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 				}
 			} else {
-				exceptions.AppException(c, "Wrong Data")
+				exceptions.AppException(c, hash.Error())
 				return
 			}
 		} else {
