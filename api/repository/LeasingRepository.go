@@ -11,7 +11,19 @@ import (
 
 func GetLeasingTotal(c *gin.Context) (uint, error) {
 	var count sql.NullInt64
-	result := config.InitDB().Raw("SELECT COUNT(*) FROM m_leasing").Scan(&count)
+	result := config.InitDB().Raw("SELECT COUNT(*) FROM m_leasing WHERE deleted_at IS NULL").Scan(&count)
+
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return uint(count.Int64), nil
+
+}
+
+func GetKendaraanTotal(c *gin.Context) (uint, error) {
+	var count sql.NullInt64
+	result := config.InitDB().Raw("SELECT COUNT(*) FROM m_kendaraan WHERE deleted_at IS NULL").Scan(&count)
 
 	if result.Error != nil {
 		return 0, result.Error
