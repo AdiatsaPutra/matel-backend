@@ -53,7 +53,7 @@ func GetLeasingMaster(c *gin.Context) {
 	}
 
 	query = query.Order("created_at ASC")
-	
+
 	query.Count(&count)
 
 	result := query.Offset(offset).Limit(limit).Find(&leasings)
@@ -106,6 +106,20 @@ func DeleteLeasing(c *gin.Context) {
 	var leasing models.Leasing
 	result := config.InitDB().First(&leasing, leasingID)
 	if result.Error != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	var kendaraan models.Kendaraan
+	deleteResult := config.InitDB().Where("leasing = ?", leasing.NamaLeasing).Delete(&kendaraan)
+	if deleteResult.Error != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	var cabang models.Cabang
+	cabangDeleteResult := config.InitDB().Where("leasing_id = ?", leasing.ID).Delete(&cabang)
+	if cabangDeleteResult.Error != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}

@@ -36,7 +36,7 @@ func GetKendaraan(c *gin.Context) {
 		query = query.Where("cabang LIKE ?", "%"+cabang+"%")
 	}
 
-	query = query.Order("created_at ASC")
+	query = query.Order("created_at DESC")
 
 	var kendaraans []models.Kendaraan
 	offset := (pageNumber - 1) * limit
@@ -63,20 +63,20 @@ func DeleteKendaraan(c *gin.Context) {
 	leasing := c.Query("leasing")
 	leasingID := c.Query("leasing_id")
 	cabang := c.Query("cabang")
-	
+
 	logrus.Info(leasing)
-	
+
 	leasingIDInt, _ := strconv.Atoi(leasingID)
-	SetVersiCabang(c, uint(leasingIDInt) , cabang )
+	SetVersiCabang(c, uint(leasingIDInt), cabang)
 
 	var kendaraan models.Kendaraan
-	
+
 	deleteResult := config.InitDB().Where("leasing = ? AND cabang = ?", leasing, cabang).Delete(&kendaraan)
 	if deleteResult.Error != nil {
 		exceptions.AppException(c, "Failed to delete Kendaraan")
 		return
 	}
-	
+
 	payloads.HandleSuccess(c, "Success", "Success", http.StatusOK)
 }
 
