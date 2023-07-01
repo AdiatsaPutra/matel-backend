@@ -22,7 +22,7 @@ func GetKendaraan(c *gin.Context) {
 	}
 
 	limit, _ := strconv.Atoi(c.Query("limit"))
-	if limit <= 0 {
+	if limit <= 0 && limit != -1 {
 		limit = 10
 	}
 
