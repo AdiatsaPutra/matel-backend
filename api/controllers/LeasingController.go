@@ -12,9 +12,32 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func GetKendaraan(c *gin.Context) {
+	search := c.Query("search")
+
+	logrus.Info(search)
+
+	if search != "" {
+		query := config.InitDB().Model(&models.Kendaraan{}).
+			Where("leasing LIKE ?", "%"+search+"%").
+			Or("cabang LIKE ?", "%"+search+"%").
+			Order("created_at DESC")
+
+		var kendaraans []models.Kendaraan
+
+		result := query.Find(&kendaraans)
+		if result.Error != nil {
+			exceptions.AppException(c, "Something went wrong")
+			return
+		}
+
+		payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
+		return
+	}
+
 	pageNumber, _ := strconv.Atoi(c.Query("page"))
 	if pageNumber <= 0 {
 		pageNumber = 1
