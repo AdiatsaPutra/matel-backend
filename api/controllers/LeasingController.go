@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -79,7 +78,7 @@ func DeleteKendaraan(c *gin.Context) {
 }
 
 func DeleteAllKendaraan(c *gin.Context) {
-	deleteResult := config.InitDB().Exec("UPDATE m_kendaraan SET deleted_at = ? WHERE deleted_at IS NULL", time.Now())
+	deleteResult := config.InitDB().Exec("DELETE from m_kendaraan")
 	if deleteResult.Error != nil {
 		exceptions.AppException(c, "Failed to delete Kendaraan")
 		return
