@@ -6,11 +6,20 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func GetHome(c *gin.Context) {
 
 	kendaraanTotal, err := repository.GetKendaraanTotal(c)
+
+	if err != nil {
+		payloads.HandleSuccess(c, nil, "Leasing not found", http.StatusOK)
+		return
+	}
+
+	leasingChart, err := repository.GetLeasingChart(c)
+	logrus.Info(leasingChart)
 
 	if err != nil {
 		payloads.HandleSuccess(c, nil, "Leasing not found", http.StatusOK)
@@ -37,6 +46,7 @@ func GetHome(c *gin.Context) {
 	data["trial_members"] = userTotal.TrialMembers
 	data["premium_members"] = userTotal.PremiumMembers
 	data["expired_members"] = userTotal.ExpiredMembers
+	data["leasing_chart"] = leasingChart
 
 	payloads.HandleSuccess(c, data, "Data found", http.StatusOK)
 }

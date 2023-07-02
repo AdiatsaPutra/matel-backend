@@ -21,6 +21,21 @@ func GetLeasingTotal(c *gin.Context) (uint, error) {
 
 }
 
+func GetLeasingChart(c *gin.Context) ([]models.LeasingChart, error) {
+	var leasingChart []models.LeasingChart
+	query := `SELECT leasing AS leasing_name, COUNT(*) AS count
+	FROM m_kendaraan
+	GROUP BY leasing;`
+	result := config.InitDB().Raw(query).Scan(&leasingChart)
+
+	if result.Error != nil {
+		return leasingChart, result.Error
+	}
+
+	return leasingChart, nil
+
+}
+
 func GetKendaraanTotal(c *gin.Context) (uint, error) {
 	var count sql.NullInt64
 	result := config.InitDB().Raw("SELECT COUNT(*) FROM m_kendaraan WHERE deleted_at IS NULL").Scan(&count)
