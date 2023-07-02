@@ -91,13 +91,17 @@ func CreateUser(c *gin.Context, user models.User) (models.User, error) {
 
 }
 
-func GetMember(c *gin.Context) ([]models.User, error) {
-	var user = []models.User{}
-	result := config.InitDB().Where("is_admin = 0").Find(&user)
+func GetMember(c *gin.Context, keyword string) ([]models.User, error) {
+	var user []models.User
+	db := config.InitDB()
 
-	if len(user) == 0 {
-		return user, nil
+	if keyword != "" {
+		db = db.Where("is_admin = 0").Where("name LIKE ? OR email LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+	} else {
+		db = db.Where("is_admin = 0")
 	}
+
+	result := db.Find(&user)
 
 	if result.Error != nil {
 		return user, result.Error

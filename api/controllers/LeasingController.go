@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func GetKendaraan(c *gin.Context) {
@@ -64,14 +64,22 @@ func DeleteKendaraan(c *gin.Context) {
 	leasingID := c.Query("leasing_id")
 	cabang := c.Query("cabang")
 
-	logrus.Info(leasing)
-
 	leasingIDInt, _ := strconv.Atoi(leasingID)
 	SetVersiCabang(c, uint(leasingIDInt), cabang)
 
 	var kendaraan models.Kendaraan
 
 	deleteResult := config.InitDB().Where("leasing = ? AND cabang = ?", leasing, cabang).Delete(&kendaraan)
+	if deleteResult.Error != nil {
+		exceptions.AppException(c, "Failed to delete Kendaraan")
+		return
+	}
+
+	payloads.HandleSuccess(c, "Success", "Success", http.StatusOK)
+}
+
+func DeleteAllKendaraan(c *gin.Context) {
+	deleteResult := config.InitDB().Exec("UPDATE m_kendaraan SET deleted_at = ? WHERE deleted_at IS NULL", time.Now())
 	if deleteResult.Error != nil {
 		exceptions.AppException(c, "Failed to delete Kendaraan")
 		return

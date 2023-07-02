@@ -56,13 +56,14 @@ func GetProfile(c *gin.Context) {
 
 func GetMember(c *gin.Context) {
 	UserID := c.MustGet("user_id").(uint)
+	search := c.Query("search")
 
 	if UserID == 0 {
 		exceptions.AppException(c, "Not authorized")
 		return
 	}
 
-	user, err := repository.GetMember(c)
+	user, err := repository.GetMember(c, search)
 
 	if len(user) == 0 {
 		payloads.HandleSuccess(c, nil, "User tidak ditemukan", http.StatusOK)
