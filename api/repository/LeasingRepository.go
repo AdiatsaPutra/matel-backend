@@ -38,10 +38,7 @@ func GetLeasingChart(c *gin.Context) ([]models.LeasingChart, error) {
 
 func GetKendaraanTotal(c *gin.Context) (uint, error) {
 	var count sql.NullInt64
-	query := `SELECT Data_length
-	FROM information_schema.tables
-	WHERE table_name = 'm_kendaraan';`
-	result := config.InitDB().Raw(query).Scan(&count)
+	result := config.InitDB().Raw("SELECT COUNT(*) FROM m_kendaraan WHERE id > 0;").Scan(&count)
 
 	if result.Error != nil {
 		return 0, result.Error
