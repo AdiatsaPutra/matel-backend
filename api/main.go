@@ -37,6 +37,7 @@ func main() {
 
 	r.GET("/kendaraan", controllers.GetKendaraan)
 	r.GET("/download-template", controllers.DownloadTemplate)
+	r.GET("/download-template-cabang", controllers.DownloadTemplateCabang)
 	r.DELETE("/delete-kendaraan", controllers.DeleteKendaraan)
 	r.DELETE("/delete-all-kendaraan", controllers.DeleteAllKendaraan)
 

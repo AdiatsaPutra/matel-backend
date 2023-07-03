@@ -131,6 +131,27 @@ func DownloadTemplate(c *gin.Context) {
 	}
 }
 
+func DownloadTemplateCabang(c *gin.Context) {
+	filePath := "leasing-template-cabang.csv"
+	file, err := os.Open(filePath)
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+	defer file.Close()
+
+	fileInfo, _ := file.Stat()
+	c.Header("Content-Disposition", "attachment; filename="+fileInfo.Name())
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
+
+	_, err = io.Copy(c.Writer, file)
+	if err != nil {
+		exceptions.AppException(c, "Failed to download file")
+		return
+	}
+}
+
 func GetLeasing(c *gin.Context) {
 	searchQuery := c.Query("search") // Get the search query from the query string
 
