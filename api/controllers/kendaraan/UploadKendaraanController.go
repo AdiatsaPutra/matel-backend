@@ -12,6 +12,7 @@ import (
 	"math"
 	"mime/multipart"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -177,22 +178,6 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) error {
 	now := time.Now()
 
-	// var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
-
-	// for i := 4; i < 7; i++ {
-	// 	if str, ok := values[i].(string); ok {
-	// 		filteredStr := alphanumericRegex.ReplaceAllString(str, "")
-	// 		values[i] = filteredStr
-	// 	}
-	// }
-
-	// for i := 8; i < 10; i++ {
-	// 	if str, ok := values[i].(string); ok {
-	// 		filteredStr := alphanumericRegex.ReplaceAllString(str, "")
-	// 		values[i] = filteredStr
-	// 	}
-	// }
-
 	leasingName := c.PostForm("leasing_name")
 	cabangName := c.PostForm("cabang_name")
 
@@ -200,6 +185,22 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 	values = append([]interface{}{leasingName}, values...)
 	values = append(values, now)
 	values = append(values, 1)
+
+	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
+
+	for i := 4; i < 7; i++ {
+		if str, ok := values[i].(string); ok {
+			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
+			values[i] = filteredStr
+		}
+	}
+
+	for i := 8; i < 10; i++ {
+		if str, ok := values[i].(string); ok {
+			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
+			values[i] = filteredStr
+		}
+	}
 	logrus.Info(values)
 
 	for {
