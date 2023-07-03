@@ -2,6 +2,7 @@ package main
 
 import (
 	"matel/controllers"
+	"matel/controllers/kendaraan"
 	"matel/middlewares"
 	"matel/security"
 
@@ -43,6 +44,7 @@ func main() {
 	r.GET("/leasing/:id", security.AuthMiddleware(), controllers.GetLeasingDetail)
 	r.GET("/leasing/history", security.AuthMiddleware(), controllers.GetLeasingHistory)
 	r.POST("/upload-leasing", controllers.AddCSV)
+	r.POST("/upload-leasing-per-cabang", kendaraan.AddCSVPerCabang)
 	r.GET("/dump-sql", controllers.DumpSQLHandler)
 	r.POST("/download-update", controllers.UpdateSQLHandler)
 	r.GET("/download-all", controllers.DownloadLeasing)
