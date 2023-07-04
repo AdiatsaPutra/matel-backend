@@ -54,7 +54,8 @@ func DumpSQLHandler(c *gin.Context) {
 	}
 
 	for i, cb := range cabang {
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.NamaCabang, cb.Versi))
+		versi := strconv.Itoa(cb.Versi)
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.NamaCabang, versi))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
@@ -230,11 +231,9 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cb := range cabang {
 		if _, ok := existingCabangMap[cb.NamaCabang]; !ok {
-			versi, _ := strconv.Atoi(cb.Versi)
-			cabangForm = append(cabangForm, CabangForm{Name: cb.NamaCabang, Versi: versi})
+			cabangForm = append(cabangForm, CabangForm{Name: cb.NamaCabang, Versi: cb.Versi})
 		} else {
-			versi, _ := strconv.Atoi(cb.Versi)
-			existingCabangMap[cb.NamaCabang] = versi
+			existingCabangMap[cb.NamaCabang] = cb.Versi
 		}
 	}
 

@@ -117,9 +117,7 @@ func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string) {
 		return
 	}
 
-	versi, _ := strconv.Atoi(cabang.Versi)
-
-	cabang.Versi = strconv.Itoa(versi + 1)
+	cabang.Versi = cabang.Versi + 1
 
 	result = config.InitDB().Save(&cabang)
 	if result.Error != nil {
