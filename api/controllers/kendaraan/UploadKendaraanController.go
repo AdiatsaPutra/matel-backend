@@ -7,7 +7,9 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	config "matel/configs"
 	"matel/exceptions"
+	"matel/models"
 	"matel/payloads"
 	"math"
 	"mime/multipart"
@@ -63,6 +65,16 @@ func AddCSVPerCabang(c *gin.Context) {
 	wg.Wait()
 
 	duration := time.Since(start)
+
+	var count int64
+	if err := config.InitDB().Model(&models.Kendaraan{}).Count(&count).Error; err != nil {
+		panic(err)
+	}
+
+	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
+		panic(err)
+	}
+
 	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 }
 

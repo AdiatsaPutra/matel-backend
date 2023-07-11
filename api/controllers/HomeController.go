@@ -14,7 +14,7 @@ func GetHome(c *gin.Context) {
 	kendaraanTotal, err := repository.GetKendaraanTotal(c)
 
 	if err != nil {
-		payloads.HandleSuccess(c, nil, "Leasing not found", http.StatusOK)
+		payloads.HandleSuccess(c, nil, "Something went wrong", http.StatusOK)
 		return
 	}
 
@@ -22,21 +22,21 @@ func GetHome(c *gin.Context) {
 	logrus.Info(leasingChart)
 
 	if err != nil {
-		payloads.HandleSuccess(c, nil, "Leasing not found", http.StatusOK)
+		payloads.HandleSuccess(c, nil, "Something went wrong", http.StatusOK)
 		return
 	}
 
 	leasingTotal, err := repository.GetLeasingTotal(c)
 
 	if err != nil {
-		payloads.HandleSuccess(c, nil, "Leasing not found", http.StatusOK)
+		payloads.HandleSuccess(c, nil, "Something went wrong", http.StatusOK)
 		return
 	}
 
 	userTotal, err := repository.GetUserTotalInfo(c)
 
 	if err != nil {
-		payloads.HandleSuccess(c, nil, "User not found", http.StatusOK)
+		payloads.HandleSuccess(c, nil, "Somethig went wrong", http.StatusOK)
 		return
 	}
 

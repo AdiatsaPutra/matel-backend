@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func DumpSQLHandler(c *gin.Context) {
@@ -312,6 +313,9 @@ func UpdateSQLHandler(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
+
+	logrus.Info(comparedCabangForm)
+	logrus.Info(cabangForm)
 
 	for _, cc := range comparedCabangForm {
 		var leasings []models.LeasingToExport
