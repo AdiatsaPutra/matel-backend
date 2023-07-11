@@ -314,6 +314,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
+	logrus.Info(cabangFormUnupdated)
 	logrus.Info(comparedCabangForm)
 	logrus.Info(cabangForm)
 
