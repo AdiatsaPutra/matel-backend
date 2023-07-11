@@ -18,7 +18,9 @@ func GetUserTotalInfo(c *gin.Context) (models.HomeUserInfo, error) {
 		SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS premium_members,
 		SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS expired_members
 	FROM
-    	m_users;
+		m_users
+	WHERE
+		is_admin = 0;
 	`
 	result := config.InitDB().Raw(query).Scan(&user)
 

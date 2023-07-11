@@ -58,5 +58,11 @@ func main() {
 	r.GET("/kabupaten/:province-id", controllers.GetKabupaten)
 	r.GET("/kecamatan/:kabupaten-id", controllers.GetKecamatan)
 
+	r.GET("/banks", controllers.GetBanks)
+	r.GET("/banks/:id", controllers.GetBank)
+	r.POST("/banks", controllers.CreateBank)
+	r.PUT("/banks/:id", controllers.UpdateBank)
+	r.DELETE("/banks/:id", controllers.DeleteBank)
+
 	r.Run()
 }
