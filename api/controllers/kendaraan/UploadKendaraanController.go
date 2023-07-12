@@ -75,6 +75,23 @@ func AddCSVPerCabang(c *gin.Context) {
 		panic(err)
 	}
 
+	cabangName := c.PostForm("cabang_name")
+
+	var cabang models.Cabang
+	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
+	if result.Error != nil {
+		payloads.HandleSuccess(c, "Leasing not found", "Success", 200)
+		return
+	}
+
+	cabang.Versi = cabang.Versi + 1
+
+	result = config.InitDB().Save(&cabang)
+	if result.Error != nil {
+		exceptions.AppException(c, result.Error.Error())
+		return
+	}
+
 	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 }
 

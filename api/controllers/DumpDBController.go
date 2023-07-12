@@ -14,7 +14,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func DumpSQLHandler(c *gin.Context) {
@@ -300,9 +299,6 @@ func UpdateSQLHandler(c *gin.Context) {
 			}
 		}
 	}
-
-	logrus.Info(comparedCabangForm)
-	logrus.Info(comparedCabangForm)
 
 	for _, cc := range comparedCabangForm {
 		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang = '%s';\n", cc.Name))
