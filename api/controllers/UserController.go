@@ -5,6 +5,7 @@ import (
 	"matel/payloads"
 	"matel/repository"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -83,13 +84,20 @@ func GetMember(c *gin.Context) {
 
 func SetUser(c *gin.Context) {
 	type SetUserReq struct {
-		UserID            uint `json:"user_id" validate:"required"`
-		SubscriptionMonth uint `json:"subscription_month" validate:"required"`
+		UserID            uint   `json:"user_id" validate:"required"`
+		SubscriptionMonth string `json:"subscription_month" validate:"required"`
 	}
 	var req SetUserReq
 	c.BindJSON(&req)
 
-	err := repository.SetUser(c, req.UserID, req.SubscriptionMonth)
+	sub, e := strconv.Atoi(req.SubscriptionMonth)
+
+	if e != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	err := repository.SetUser(c, req.UserID, uint(sub))
 
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
