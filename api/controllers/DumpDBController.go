@@ -298,14 +298,15 @@ func UpdateSQLHandler(c *gin.Context) {
 		for _, cfu := range cabangFormUnupdated {
 			logrus.Info("CABANG FORM UNUPDATED")
 			logrus.Info(cfu)
+			logrus.Info("COMPARING CABANG")
+			logrus.Info(cf.Name == cfu.Name)
+			logrus.Info(cf.Versi != cfu.Versi)
 			if cf.Name == cfu.Name && cf.Versi != cfu.Versi {
-				logrus.Info(cf.Name)
-				logrus.Info(cfu.Name)
-				logrus.Info(cf.Versi)
-				logrus.Info(cfu.Versi)
 				comparedCabangForm = append(comparedCabangForm, cf)
-				logrus.Info("COMPARED CABANG FORM")
-				logrus.Info(comparedCabangForm)
+				break
+			}
+			if cf.Name != cfu.Name {
+				comparedCabangForm = append(comparedCabangForm, cf)
 				break
 			}
 		}
@@ -329,6 +330,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	logrus.Info(cabangForm)
 
 	for _, cc := range comparedCabangForm {
+		logrus.Info("CC NAME")
 		logrus.Info(cc.Name)
 		var leasings []models.LeasingToExport
 		err = sourceDB.Table("m_kendaraan").
