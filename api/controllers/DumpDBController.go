@@ -293,19 +293,25 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	var comparedCabangForm []CabangForm
 	for _, cf := range cabangForm {
+		logrus.Info("CABANG FORM")
+		logrus.Info(cf)
 		for _, cfu := range cabangFormUnupdated {
+			logrus.Info("CABANG FORM UNUPDATED")
+			logrus.Info(cfu)
 			if cf.Name == cfu.Name && cf.Versi != cfu.Versi {
 				logrus.Info(cf.Name)
 				logrus.Info(cfu.Name)
 				logrus.Info(cf.Versi)
 				logrus.Info(cfu.Versi)
 				comparedCabangForm = append(comparedCabangForm, cf)
+				logrus.Info("COMPARED CABANG FORM")
+				logrus.Info(comparedCabangForm)
 				break
 			}
 		}
 	}
 
-	for _, cc := range cabangFormUnupdated {
+	for _, cc := range comparedCabangForm {
 		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang = '%s';\n", cc.Name))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
@@ -322,7 +328,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	logrus.Info(comparedCabangForm)
 	logrus.Info(cabangForm)
 
-	for _, cc := range cabangForm {
+	for _, cc := range comparedCabangForm {
 		var leasings []models.LeasingToExport
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
