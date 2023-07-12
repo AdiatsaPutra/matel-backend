@@ -33,11 +33,11 @@ func GetProfile(c *gin.Context) {
 
 		currentDate := time.Now()
 
-		var status = 0
+		// var status = 0
 
 		if currentDate.After(targetDate) {
 			// status = 2
-			newUser.Status = uint(status)
+			// newUser.Status = uint(status)
 		}
 
 		newUser.StartSubscription = newUser.CreatedAt.Format("2006-01-02 15:04:05")
@@ -48,11 +48,11 @@ func GetProfile(c *gin.Context) {
 
 		currentDate := time.Now()
 
-		var status = 0
+		// var status = 0
 
 		if currentDate.After(targetDate) {
 			// status = 2
-			newUser.Status = uint(status)
+			// newUser.Status = uint(status)
 		}
 
 	}
