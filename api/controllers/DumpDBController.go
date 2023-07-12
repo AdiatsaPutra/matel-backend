@@ -294,11 +294,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	var comparedCabangForm []CabangForm
 	for _, cf := range cabangForm {
 		for _, cfu := range cabangFormUnupdated {
-			if cf.Name == cfu.Name && cf.Versi != cfu.Versi {
-				comparedCabangForm = append(comparedCabangForm, cf)
-				break
-			}
-			if cf.Name != cfu.Name {
+			if (cf.Name == cfu.Name && cf.Versi != cfu.Versi) || cf.Name != cfu.Name {
 				comparedCabangForm = append(comparedCabangForm, cf)
 				break
 			}
@@ -328,7 +324,6 @@ func UpdateSQLHandler(c *gin.Context) {
 			Where("created_at >= ?", date).
 			Find(&leasings).Error
 
-		logrus.Info(leasings)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
 			return
