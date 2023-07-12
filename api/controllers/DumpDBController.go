@@ -293,14 +293,7 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	var comparedCabangForm []CabangForm
 	for _, cf := range cabangForm {
-		// logrus.Info("CABANG FORM")
-		// logrus.Info(cf)
 		for _, cfu := range cabangFormUnupdated {
-			// logrus.Info("CABANG FORM UNUPDATED")
-			// logrus.Info(cfu)
-			// logrus.Info("COMPARING CABANG")
-			// logrus.Info(cf.Name == cfu.Name)
-			// logrus.Info(cf.Versi != cfu.Versi)
 			if cf.Name == cfu.Name && cf.Versi != cfu.Versi {
 				comparedCabangForm = append(comparedCabangForm, cf)
 				break
@@ -311,6 +304,8 @@ func UpdateSQLHandler(c *gin.Context) {
 			}
 		}
 	}
+
+	logrus.Info(comparedCabangForm)
 
 	for _, cc := range comparedCabangForm {
 		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang = '%s';\n", cc.Name))
@@ -325,13 +320,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
-	// logrus.Info(cabangFormUnupdated)
-	logrus.Info(comparedCabangForm)
-	// logrus.Info(cabangForm)
-
 	for _, cc := range comparedCabangForm {
-		// logrus.Info("CC NAME")
-		// logrus.Info(cc.Name)
 		var leasings []models.LeasingToExport
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
