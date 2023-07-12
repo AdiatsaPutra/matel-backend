@@ -36,7 +36,7 @@ func GetProfile(c *gin.Context) {
 		var status = 0
 
 		if currentDate.After(targetDate) {
-			status = 2
+			// status = 2
 			newUser.Status = uint(status)
 		}
 
@@ -51,7 +51,7 @@ func GetProfile(c *gin.Context) {
 		var status = 0
 
 		if currentDate.After(targetDate) {
-			status = 2
+			// status = 2
 			newUser.Status = uint(status)
 		}
 
