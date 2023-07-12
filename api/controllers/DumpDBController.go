@@ -301,6 +301,8 @@ func UpdateSQLHandler(c *gin.Context) {
 		}
 	}
 
+	logrus.Info(cabangForm)
+	logrus.Info(cabangFormUnupdated)
 	logrus.Info(comparedCabangForm)
 
 	for _, cc := range comparedCabangForm {
