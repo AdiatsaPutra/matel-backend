@@ -294,13 +294,14 @@ func UpdateSQLHandler(c *gin.Context) {
 	var comparedCabangForm []CabangForm
 	for _, cf := range cabangForm {
 		for _, cfu := range cabangFormUnupdated {
-			if (cf.Name == cfu.Name && cf.Versi != cfu.Versi) || cf.Name != cfu.Name {
+			if cf.Name == cfu.Name && cf.Versi != cfu.Versi {
 				comparedCabangForm = append(comparedCabangForm, cf)
 				break
 			}
 		}
 	}
 
+	logrus.Info(comparedCabangForm)
 	logrus.Info(comparedCabangForm)
 
 	for _, cc := range comparedCabangForm {
