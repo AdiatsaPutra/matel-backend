@@ -326,12 +326,12 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	// logrus.Info(cabangFormUnupdated)
-	// logrus.Info(comparedCabangForm)
+	logrus.Info(comparedCabangForm)
 	// logrus.Info(cabangForm)
 
 	for _, cc := range comparedCabangForm {
-		logrus.Info("CC NAME")
-		logrus.Info(cc.Name)
+		// logrus.Info("CC NAME")
+		// logrus.Info(cc.Name)
 		var leasings []models.LeasingToExport
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
@@ -339,6 +339,7 @@ func UpdateSQLHandler(c *gin.Context) {
 			Where("created_at >= ?", date).
 			Find(&leasings).Error
 
+		logrus.Info(leasings)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
 			return
