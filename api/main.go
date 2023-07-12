@@ -53,6 +53,7 @@ func main() {
 
 	r.GET("/member", security.AuthMiddleware(), controllers.GetMember)
 	r.POST("/update-member", controllers.SetUser)
+	r.GET("/delete-member", controllers.DeleteMember)
 
 	r.GET("/province", controllers.GetProvince)
 	r.GET("/kabupaten/:province-id", controllers.GetKabupaten)

@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	config "matel/configs"
 	"matel/exceptions"
+	"matel/models"
 	"matel/payloads"
 	"matel/repository"
 	"net/http"
@@ -104,5 +106,22 @@ func SetUser(c *gin.Context) {
 		return
 	}
 
+	payloads.HandleSuccess(c, "Berhasil mengubah status", "Berhasil", http.StatusOK)
+}
+
+func DeleteMember(c *gin.Context) {
+	id := c.Param("id")
+
+	user := models.User{}
+	if err := config.InitDB().Where("id = ?", id).First(&user).Error; err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	err := config.InitDB().Delete(&user).Error
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
 	payloads.HandleSuccess(c, "Berhasil mengubah status", "Berhasil", http.StatusOK)
 }
