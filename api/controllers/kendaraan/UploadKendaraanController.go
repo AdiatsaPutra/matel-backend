@@ -255,7 +255,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			conn, err := db.Conn(context.Background())
 			query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang,%s, created_at, status, versi) VALUES (%s)",
 				strings.Join(header, ","),
-				strings.Join(generateQuestionsMark(len(header)+4), ","),
+				strings.Join(generateQuestionsMark(len(header)+5), ","),
 			)
 
 			logrus.Info(query)
