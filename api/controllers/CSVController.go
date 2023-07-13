@@ -195,16 +195,20 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 	leasingName := c.PostForm("leasing_name")
 	cabangName := c.PostForm("cabang_name")
 
-	if leasingName != "" {
-		values[0] = leasingName
-	}
-
-	if cabangName != "" {
-		values[1] = cabangName
-	}
-
+	values = append([]interface{}{cabangName}, values...)
+	values = append([]interface{}{leasingName}, values...)
 	values = append(values, now)
 	values = append(values, 1)
+
+	// get cabang versi from db
+	var cabang models.Cabang
+	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
+	if result.Error != nil {
+		return result.Error
+	}
+	logrus.Info("Cabang ", cabangName, ", versi: ", cabang.Versi)
+
+	values = append(values, cabang.Versi)
 
 	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
@@ -222,31 +226,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 		}
 	}
 
-	// get cabang versi from db
-	var cabang models.Cabang
-	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
-	if result.Error != nil {
-		return result.Error
-	}
-	logrus.Info("Cabang ", cabangName, ", versi: ", cabang.Versi)
-
-	values = append(values, cabang.Versi)
-
 	logrus.Info(values)
-
-	// leasingName := c.PostForm("leasing_name")
-	// cabangName := c.PostForm("cabang_name")
-
-	// if leasingName != "" {
-	// 	values[0] = leasingName
-	// }
-
-	// if cabangName != "" {
-	// 	values[1] = cabangName
-	// }
-
-	// values = append(values, now)
-	// values = append(values, 1)
 
 	for {
 		var outerError error
