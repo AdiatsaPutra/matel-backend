@@ -129,6 +129,17 @@ func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string) {
 	// payloads.HandleSuccess(c, cabang, "Success", 200)
 }
 
+func GetCabangVersi(CabangName string) int {
+
+	var cabang models.Cabang
+	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", CabangName).Find(&cabang)
+	if result.Error != nil {
+		return 0
+	}
+
+	return cabang.Versi
+}
+
 func DeleteCabang(c *gin.Context) {
 
 	cabangID := c.Param("id")

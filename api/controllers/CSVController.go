@@ -221,6 +221,11 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 	values = append(values, now)
 	values = append(values, 1)
 
+	cabangVersi := GetCabangVersi(values[1].(string))
+	cabangVersi = cabangVersi + 1
+
+	values = append(values, cabangVersi)
+
 	for {
 		var outerError error
 		func(outerError *error) {
@@ -231,7 +236,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			}()
 
 			conn, err := db.Conn(context.Background())
-			query := fmt.Sprintf("INSERT INTO m_kendaraan (%s, created_at, status) VALUES (%s)",
+			query := fmt.Sprintf("INSERT INTO m_kendaraan (%s, created_at, status, versi) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
 				strings.Join(generateQuestionsMark(len(dataHeaders)+2), ","),
 			)
