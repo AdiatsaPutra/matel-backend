@@ -191,6 +191,20 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) error {
 	now := time.Now()
 
+	leasingName := c.PostForm("leasing_name")
+	cabangName := c.PostForm("cabang_name")
+
+	if leasingName != "" {
+		values[0] = leasingName
+	}
+
+	if cabangName != "" {
+		values[1] = cabangName
+	}
+
+	values = append(values, now)
+	values = append(values, 1)
+
 	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
 	for i := 4; i < 7; i++ {
@@ -207,19 +221,19 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 		}
 	}
 
-	leasingName := c.PostForm("leasing_name")
-	cabangName := c.PostForm("cabang_name")
+	// leasingName := c.PostForm("leasing_name")
+	// cabangName := c.PostForm("cabang_name")
 
-	if leasingName != "" {
-		values[0] = leasingName
-	}
+	// if leasingName != "" {
+	// 	values[0] = leasingName
+	// }
 
-	if cabangName != "" {
-		values[1] = cabangName
-	}
+	// if cabangName != "" {
+	// 	values[1] = cabangName
+	// }
 
-	values = append(values, now)
-	values = append(values, 1)
+	// values = append(values, now)
+	// values = append(values, 1)
 
 	for {
 		var outerError error
