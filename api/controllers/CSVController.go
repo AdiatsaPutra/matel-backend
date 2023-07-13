@@ -21,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -221,6 +222,18 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 		}
 	}
 
+	// get cabang versi from db
+	var cabang models.Cabang
+	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
+	if result.Error != nil {
+		return result.Error
+	}
+	logrus.Info("Cabang ", cabangName, ", versi: ", cabang.Versi)
+
+	values = append(values, cabang.Versi)
+
+	logrus.Info(values)
+
 	// leasingName := c.PostForm("leasing_name")
 	// cabangName := c.PostForm("cabang_name")
 
@@ -245,9 +258,9 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			}()
 
 			conn, err := db.Conn(context.Background())
-			query := fmt.Sprintf("INSERT INTO m_kendaraan (%s, created_at, status) VALUES (%s)",
+			query := fmt.Sprintf("INSERT INTO m_kendaraan (%s, created_at, status, versi) VALUES (%s)",
 				strings.Join(dataHeaders, ","),
-				strings.Join(generateQuestionsMark(len(dataHeaders)+2), ","),
+				strings.Join(generateQuestionsMark(len(dataHeaders)+3), ","),
 			)
 
 			_, err = conn.ExecContext(context.Background(), query, values...)
