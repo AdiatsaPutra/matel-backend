@@ -21,7 +21,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -68,11 +67,11 @@ func AddCSVPerCabang(c *gin.Context) {
 
 	var count int64
 	if err := config.InitDB().Model(&models.Kendaraan{}).Count(&count).Error; err != nil {
-		panic(err)
+		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
 	}
 
 	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
-		panic(err)
+		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
 	}
 
 	cabangName := c.PostForm("cabang_name")
@@ -230,7 +229,6 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			values[i] = filteredStr
 		}
 	}
-	logrus.Info(values)
 
 	for {
 		var outerError error
@@ -247,7 +245,6 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 				strings.Join(generateQuestionsMark(len(header)+4), ","),
 			)
 
-			logrus.Info(query)
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			if err != nil {
 				exceptions.AppException(c, err.Error())

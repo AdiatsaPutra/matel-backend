@@ -36,6 +36,31 @@ func GetLeasingChart(c *gin.Context) ([]models.LeasingChart, error) {
 
 }
 
+func GetKendaraanPerCabangTotal(c *gin.Context, leasing string, cabang string) (uint, error) {
+	var count sql.NullInt64
+	var kendaraan models.Kendaraan
+
+	if cabang != "" {
+
+		result := config.InitDB().Model(&kendaraan).Count(&count.Int64).Where("leasing = ?", leasing).Where("cabang = ?", cabang)
+
+		if result.Error != nil {
+			return 0, result.Error
+		}
+
+		return uint(count.Int64), nil
+	}
+
+	result := config.InitDB().Model(&kendaraan).Count(&count.Int64).Where("leasing = ?", leasing)
+
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return uint(count.Int64), nil
+
+}
+
 func GetKendaraanTotal(c *gin.Context) (uint, error) {
 	var count sql.NullInt64
 	result := config.InitDB().Raw("SELECT kendaraan_total FROM m_home;").Scan(&count)

@@ -65,7 +65,7 @@ func GetKendaraan(c *gin.Context) {
 	offset := (pageNumber - 1) * limit
 
 	if limit == -1 {
-		result := query.Offset(offset).Find(&kendaraans)
+		result := query.Find(&kendaraans)
 		if result.Error != nil {
 			exceptions.AppException(c, "Something went wrong")
 			return
