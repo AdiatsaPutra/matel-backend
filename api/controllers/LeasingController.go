@@ -88,7 +88,7 @@ func DeleteKendaraan(c *gin.Context) {
 	cabang := c.Query("cabang")
 
 	leasingIDInt, _ := strconv.Atoi(leasingID)
-	SetVersiCabang(c, uint(leasingIDInt), cabang)
+	SetVersiCabang(c, uint(leasingIDInt), cabang, true)
 
 	var kendaraan models.Kendaraan
 

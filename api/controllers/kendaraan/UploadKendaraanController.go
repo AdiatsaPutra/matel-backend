@@ -55,6 +55,24 @@ func AddCSVPerCabang(c *gin.Context) {
 		return
 	}
 
+	// increment cabang versi
+	cabangName := c.PostForm("cabang_name")
+
+	var cabang models.Cabang
+	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
+	if result.Error != nil {
+		payloads.HandleSuccess(c, "Leasing not found", "Success", 200)
+		return
+	}
+
+	cabang.Versi = cabang.Versi + 1
+
+	result = config.InitDB().Save(&cabang)
+	if result.Error != nil {
+		exceptions.AppException(c, result.Error.Error())
+		return
+	}
+
 	jobs := make(chan []interface{}, 0)
 	wg := new(sync.WaitGroup)
 
@@ -72,23 +90,6 @@ func AddCSVPerCabang(c *gin.Context) {
 
 	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
 		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
-	}
-
-	cabangName := c.PostForm("cabang_name")
-
-	var cabang models.Cabang
-	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
-	if result.Error != nil {
-		payloads.HandleSuccess(c, "Leasing not found", "Success", 200)
-		return
-	}
-
-	cabang.Versi = cabang.Versi + 1
-
-	result = config.InitDB().Save(&cabang)
-	if result.Error != nil {
-		exceptions.AppException(c, result.Error.Error())
-		return
 	}
 
 	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
@@ -214,6 +215,16 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 	values = append(values, now)
 	values = append(values, 1)
 
+	// get cabang versi from db
+	var cabang models.Cabang
+	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
+	if result.Error != nil {
+		return result.Error
+	}
+	logrus.Info("Cabang ", cabangName, ", versi: ", cabang.Versi)
+
+	values = append(values, cabang.Versi)
+
 	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
 	for i := 4; i < 7; i++ {
@@ -240,9 +251,9 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			}()
 
 			conn, err := db.Conn(context.Background())
-			query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang,%s, created_at, status) VALUES (%s)",
+			query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang,%s, created_at, status, versi) VALUES (%s)",
 				strings.Join(header, ","),
-				strings.Join(generateQuestionsMark(len(header)+4), ","),
+				strings.Join(generateQuestionsMark(len(header)+5), ","),
 			)
 
 			_, err = conn.ExecContext(context.Background(), query, values...)

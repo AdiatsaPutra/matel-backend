@@ -110,7 +110,7 @@ func UpdateCabang(c *gin.Context) {
 	payloads.HandleSuccess(c, cabang, "Success", 200)
 }
 
-func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string) {
+func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string, Reset bool) {
 	var cabang models.Cabang
 	result := config.InitDB().Where("leasing_id = ? AND nama_cabang = ? AND deleted_at IS NULL", LeasingID, CabangName).Find(&cabang)
 	if result.Error != nil {
@@ -118,7 +118,11 @@ func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string) {
 		return
 	}
 
-	cabang.Versi = cabang.Versi + 1
+	if Reset {
+		cabang.Versi = 1
+	} else {
+		cabang.Versi = cabang.Versi + 1
+	}
 
 	result = config.InitDB().Save(&cabang)
 	if result.Error != nil {
@@ -127,6 +131,17 @@ func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string) {
 	}
 
 	// payloads.HandleSuccess(c, cabang, "Success", 200)
+}
+
+func GetCabangVersi(CabangName string) int {
+
+	var cabang models.Cabang
+	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", CabangName).Find(&cabang)
+	if result.Error != nil {
+		return 0
+	}
+
+	return cabang.Versi
 }
 
 func DeleteCabang(c *gin.Context) {
