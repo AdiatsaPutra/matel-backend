@@ -221,7 +221,6 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 	if result.Error != nil {
 		return result.Error
 	}
-	logrus.Info("Cabang ", cabangName, ", versi: ", cabang.Versi)
 
 	values = append(values, cabang.Versi)
 

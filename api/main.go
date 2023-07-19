@@ -31,6 +31,7 @@ func main() {
 	r.DELETE("/leasing-master/:id", controllers.DeleteLeasing)
 
 	r.GET("/cabang", controllers.GetCabang)
+	r.GET("/cabang-with-total", controllers.GetCabangWithTotal)
 	r.POST("/cabang", controllers.CreateCabang)
 	r.PUT("/cabang/:id", controllers.UpdateCabang)
 	r.DELETE("/cabang/:id", controllers.DeleteCabang)

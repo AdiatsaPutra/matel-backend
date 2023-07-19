@@ -83,6 +83,38 @@ func GetCabang(c *gin.Context) {
 	payloads.HandleSuccess(c, data, "Data found", 200)
 }
 
+func GetCabangWithTotal(c *gin.Context) {
+	leasingID := c.Query("leasing_id")
+
+	db := config.InitDB()
+
+	var results []models.CabangTotal
+
+	err := db.Raw(`SELECT
+		c.nama_cabang,
+		l.nama_leasing,
+		COUNT(k.nomorPolisi) AS kendaraan_total,
+		MAX(k.created_at) AS latest_created_at
+	FROM
+		m_cabang c
+	LEFT JOIN
+		m_leasing l ON c.leasing_id = l.id
+	LEFT JOIN
+		m_kendaraan k ON c.nama_cabang = k.cabang
+	WHERE
+		c.leasing_id = ?
+	GROUP BY
+		c.nama_cabang, l.nama_leasing;
+		`, leasingID).Scan(&results).Error
+
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	payloads.HandleSuccess(c, results, "Data found", 200)
+}
+
 func UpdateCabang(c *gin.Context) {
 	cabangID := c.Param("id")
 

@@ -25,6 +25,7 @@ func GetLeasingChart(c *gin.Context) ([]models.LeasingChart, error) {
 	var leasingChart []models.LeasingChart
 	query := `SELECT leasing AS leasing_name, COUNT(*) AS count
 	FROM m_kendaraan
+	WHERE deleted_at IS NULL
 	GROUP BY leasing;`
 	result := config.InitDB().Raw(query).Scan(&leasingChart)
 
