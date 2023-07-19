@@ -5,6 +5,7 @@ import (
 	"matel/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func GetProvince(c *gin.Context) ([]models.Province, error) {
@@ -21,6 +22,7 @@ func GetProvince(c *gin.Context) ([]models.Province, error) {
 
 func GetKabupaten(c *gin.Context, provinceID uint) ([]models.Kabupaten, error) {
 	var kabupaten []models.Kabupaten
+	logrus.Info(provinceID)
 	result := config.InitDB().Where(&models.Kabupaten{ProvinceID: provinceID}).Find(&kabupaten)
 
 	if result.Error != nil {

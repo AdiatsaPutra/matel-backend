@@ -154,8 +154,9 @@ func SetUser(c *gin.Context, userID uint, subscriptionMonths uint) error {
 	}
 
 	now := time.Now()
+	nowEnd := time.Now()
 
-	endSubscription := now.AddDate(0, int(subscriptionMonths), 0)
+	endSubscription := nowEnd.AddDate(0, int(subscriptionMonths), 0)
 
 	startSubscriptionStr := now.Format("2006-01-02")
 	endSubscriptionStr := endSubscription.Format("2006-01-02")
@@ -164,6 +165,7 @@ func SetUser(c *gin.Context, userID uint, subscriptionMonths uint) error {
 		StartSubscription: startSubscriptionStr,
 		EndSubscription:   endSubscriptionStr,
 		Status:            1,
+		SubscriptionMonth: subscriptionMonths,
 	}).Error; err != nil {
 		return err
 	}
