@@ -91,6 +91,7 @@ func GetCabangWithTotal(c *gin.Context) {
 	var results []models.CabangTotal
 
 	err := db.Raw(`SELECT
+		c.id,
 		c.nama_cabang,
 		l.nama_leasing,
 		COUNT(k.nomorPolisi) AS kendaraan_total,
@@ -104,7 +105,7 @@ func GetCabangWithTotal(c *gin.Context) {
 	WHERE
 		c.leasing_id = ?
 	GROUP BY
-		c.nama_cabang, l.nama_leasing;
+		c.id, c.nama_cabang, l.nama_leasing;
 		`, leasingID).Scan(&results).Error
 
 	if err != nil {
