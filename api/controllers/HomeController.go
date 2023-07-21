@@ -23,8 +23,6 @@ func GetHome(c *gin.Context) {
 
 	var kendaraanTotalPerCabang uint = 0
 
-	logrus.Info(leasing)
-	logrus.Info(cabang)
 	if leasing != "" {
 
 		k, err := repository.GetKendaraanPerCabangTotal(c, leasing, cabang)
