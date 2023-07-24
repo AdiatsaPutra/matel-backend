@@ -8,23 +8,44 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func GetBanks(c *gin.Context) {
-	var banks []models.InfoPembayaran
+	var banks []models.BankInfoPembayaran
 
 	// Get query parameters
 	searchQuery := c.Query("search")
 
 	// Prepare database query
 	db := config.InitDB()
-	query := db
+
+	// Construct the SQL query with the required fields and the LEFT JOIN
+	query := db.Table("m_info_pembayaran").
+		Select("m_info_pembayaran.id, m_info_pembayaran.no_rekening, m_info_pembayaran.bank_id, m_bank.image, m_bank.bank, m_info_pembayaran.created_at, m_info_pembayaran.updated_at").
+		Joins("LEFT JOIN m_bank ON m_info_pembayaran.bank_id = m_bank.id")
+
 	if searchQuery != "" {
 		// Add search condition to the query
-		query = query.Where("name LIKE ?", "%"+searchQuery+"%")
+		query = query.Where("m_bank.bank LIKE ?", "%"+searchQuery+"%")
 	}
 
 	// Retrieve banks from the database
+	err := query.Find(&banks).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	payloads.HandleSuccess(c, banks, "Banks found", 200)
+}
+
+func GetBankData(c *gin.Context) {
+	var banks []models.Bank
+
+	db := config.InitDB()
+	query := db
+
 	err := query.Find(&banks).Error
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")

@@ -61,6 +61,7 @@ func main() {
 	r.GET("/kecamatan/:kabupaten-id", controllers.GetKecamatan)
 
 	r.GET("/banks", controllers.GetBanks)
+	r.GET("/bank-data", controllers.GetBankData)
 	r.GET("/banks/:id", controllers.GetBank)
 	r.POST("/banks", controllers.CreateBank)
 	r.PUT("/banks/:id", controllers.UpdateBank)

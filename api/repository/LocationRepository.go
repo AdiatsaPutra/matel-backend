@@ -22,25 +22,44 @@ func GetProvince(c *gin.Context) ([]models.Province, error) {
 
 func GetKabupaten(c *gin.Context, provinceID uint) ([]models.Kabupaten, error) {
 	var kabupaten []models.Kabupaten
-	logrus.Info(provinceID)
-	result := config.InitDB().Where(&models.Kabupaten{ProvinceID: provinceID}).Find(&kabupaten)
+	if provinceID == 0 {
+		result := config.InitDB().Find(&kabupaten)
+		logrus.Info(kabupaten)
 
-	if result.Error != nil {
-		return kabupaten, result.Error
+		if result.Error != nil {
+			return kabupaten, result.Error
+		}
+
+		return kabupaten, nil
+	} else {
+		result := config.InitDB().Where(&models.Kabupaten{ProvinceID: provinceID}).Find(&kabupaten)
+
+		if result.Error != nil {
+			return kabupaten, result.Error
+		}
+
+		return kabupaten, nil
+
 	}
-
-	return kabupaten, nil
 
 }
 
 func GetKecamatan(c *gin.Context, KabupatenID uint) ([]models.Kecamatan, error) {
 	var kecamatan []models.Kecamatan
-	result := config.InitDB().Where(&models.Kecamatan{KabupatenID: KabupatenID}).Find(&kecamatan)
+	if KabupatenID == 0 {
+		result := config.InitDB().Find(&kecamatan)
+		if result.Error != nil {
+			return kecamatan, result.Error
+		}
 
-	if result.Error != nil {
-		return kecamatan, result.Error
+		return kecamatan, nil
+	} else {
+		result := config.InitDB().Where(&models.Kecamatan{KabupatenID: KabupatenID}).Find(&kecamatan)
+		if result.Error != nil {
+			return kecamatan, result.Error
+		}
+
+		return kecamatan, nil
 	}
-
-	return kecamatan, nil
 
 }
