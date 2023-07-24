@@ -21,7 +21,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -206,7 +205,6 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 	if result.Error != nil {
 		return result.Error
 	}
-	logrus.Info("Cabang ", cabangName, ", versi: ", cabang.Versi)
 
 	values = append(values, cabang.Versi)
 
@@ -225,8 +223,6 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 			values[i] = filteredStr
 		}
 	}
-
-	logrus.Info(values)
 
 	for {
 		var outerError error

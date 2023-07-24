@@ -1,11 +1,11 @@
 package config
 
 import (
+	"log"
 	"net/url"
 	"os"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -33,14 +33,12 @@ func InitDB() *gorm.DB {
 	sqlDB, err := db.DB()
 
 	if err != nil {
-		log.Fatal("Cannot connected database ", err)
 		return nil
 	}
 
 	err = sqlDB.Ping()
 
 	if err != nil {
-		log.Fatal("Request Timeout ", err)
 		return nil
 	}
 
@@ -48,8 +46,6 @@ func InitDB() *gorm.DB {
 	sqlDB.SetConnMaxIdleTime(time.Minute * 3)
 	sqlDB.SetMaxOpenConns(10)
 	sqlDB.SetConnMaxLifetime(time.Minute * 3)
-
-	log.Info("Connected Database")
 
 	return db
 }

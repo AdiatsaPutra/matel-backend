@@ -12,13 +12,10 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func GetKendaraan(c *gin.Context) {
 	search := c.Query("search")
-
-	logrus.Info(search)
 
 	if search != "" {
 		query := config.InitDB().Model(&models.Kendaraan{}).

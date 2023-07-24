@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func GetHome(c *gin.Context) {
@@ -33,7 +32,6 @@ func GetHome(c *gin.Context) {
 		}
 
 		kendaraanTotalPerCabang = k
-		logrus.Info(kendaraanTotalPerCabang)
 	}
 
 	leasingChart, err := repository.GetLeasingChart(c)
