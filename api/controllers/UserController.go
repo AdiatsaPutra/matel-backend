@@ -3,12 +3,12 @@ package controllers
 import (
 	config "matel/configs"
 	"matel/exceptions"
+	"matel/helper"
 	"matel/models"
 	"matel/payloads"
 	"matel/repository"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,34 +28,14 @@ func GetProfile(c *gin.Context) {
 		return
 	}
 
-	if newUser.Status == 0 {
-		targetDate := newUser.CreatedAt.AddDate(0, 0, 29)
+	var user models.User
 
-		currentDate := time.Now()
+	user.Status = newUser.Status
+	user.StartSubscription = newUser.StartSubscription
+	user.EndSubscription = newUser.EndSubscription
+	user.CreatedAt = newUser.CreatedAt
 
-		var status = 0
-
-		if currentDate.After(targetDate) {
-			status = 2
-			newUser.Status = uint(status)
-		}
-
-		newUser.StartSubscription = newUser.CreatedAt.Format("2006-01-02 15:04:05")
-		newUser.EndSubscription = targetDate.Format("2006-01-02 15:04:05")
-
-	} else if newUser.Status == 1 {
-		targetDate := newUser.CreatedAt.AddDate(0, 0, int((newUser.SubscriptionMonth*30)-1))
-
-		currentDate := time.Now()
-
-		var status = 0
-
-		if currentDate.After(targetDate) {
-			status = 2
-			newUser.Status = uint(status)
-		}
-
-	}
+	newUser.Status = uint(helper.GetUserStatus(user))
 
 	payloads.HandleSuccess(c, newUser, "Success get data", http.StatusOK)
 }

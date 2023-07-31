@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"matel/exceptions"
+	"matel/helper"
 	"matel/models"
 	"matel/payloads"
 	"matel/repository"
@@ -154,8 +155,11 @@ func Login(c *gin.Context) {
 						return
 					}
 
+					findUserFromDB.Status = uint(helper.GetUserStatus(findUserFromDB))
 					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 				} else {
+
+					findUserFromDB.Status = uint(helper.GetUserStatus(findUserFromDB))
 					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 				}
 			} else {
