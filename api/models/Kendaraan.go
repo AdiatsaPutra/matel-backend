@@ -11,7 +11,7 @@ type Kendaraan struct {
 	NoKontrak   string `json:"no_kontrak" gorm:"column:noKontrak"`
 	NamaDebitur string `json:"nama_debitur" gorm:"column:namaDebitur"`
 	NomorPolisi string `json:"nomor_polisi" gorm:"column:nomorPolisi"`
-	SisaHutang  uint   `json:"sisa_hutang" gorm:"column:sisaHutang"`
+	SisaHutang  string `json:"sisa_hutang" gorm:"column:sisaHutang"`
 	Tipe        string `json:"tipe" gorm:"column:tipe"`
 	Tahun       string `json:"tahun" gorm:"column:tahun"`
 	NoRangka    string `json:"no_rangka" gorm:"column:noRangka"`
