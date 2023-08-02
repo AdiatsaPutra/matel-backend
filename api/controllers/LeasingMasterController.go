@@ -56,10 +56,19 @@ func GetLeasingMaster(c *gin.Context) {
 
 	query.Count(&count)
 
-	result := query.Offset(offset).Limit(limit).Find(&leasings)
-	if result.Error != nil {
-		exceptions.AppException(c, "Something went wrong")
-		return
+	if limit == -1 {
+		result := query.Find(&leasings)
+		if result.Error != nil {
+			exceptions.AppException(c, "Something went wrong")
+			return
+		}
+	} else {
+
+		result := query.Offset(offset).Limit(limit).Find(&leasings)
+		if result.Error != nil {
+			exceptions.AppException(c, "Something went wrong")
+			return
+		}
 	}
 
 	data := make(map[string]interface{})
