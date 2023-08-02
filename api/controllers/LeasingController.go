@@ -80,6 +80,25 @@ func GetKendaraan(c *gin.Context) {
 }
 
 func DeleteKendaraan(c *gin.Context) {
+	leasing := c.Query("leasing")
+	leasingID := c.Query("leasing_id")
+	cabang := c.Query("cabang")
+
+	leasingIDInt, _ := strconv.Atoi(leasingID)
+	SetVersiCabang(c, uint(leasingIDInt), cabang, true)
+	// SetVersiCabang(c, uint(leasingIDInt), cabang, true)
+
+	var kendaraan models.Kendaraan
+
+	deleteResult := config.InitDB().Where("leasing = ? AND cabang = ?", leasing, cabang).Delete(&kendaraan)
+	if deleteResult.Error != nil {
+		exceptions.AppException(c, "Failed to delete Kendaraan")
+		return
+	}
+	payloads.HandleSuccess(c, "Success", "Success", http.StatusOK)
+}
+
+func DeleteKendaraanByID(c *gin.Context) {
 	kendaraanID := c.Param("id")
 
 	kendaraanIDInt, _ := strconv.Atoi(kendaraanID)
@@ -89,17 +108,17 @@ func DeleteKendaraan(c *gin.Context) {
 
 	deleteResult := config.InitDB().Where("id = ?", kendaraanIDInt).Delete(&kendaraan)
 	if deleteResult.Error != nil {
-		exceptions.AppException(c, "Failed to delete Kendaraan")
+		exceptions.AppException(c, deleteResult.Error.Error())
 		return
 	}
 
 	var count int64
 	if err := config.InitDB().Model(&models.Kendaraan{}).Count(&count).Error; err != nil {
-		panic(err)
+		exceptions.AppException(c, err.Error())
 	}
 
 	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
-		panic(err)
+		exceptions.AppException(c, err.Error())
 	}
 
 	payloads.HandleSuccess(c, "Success", "Success", http.StatusOK)
