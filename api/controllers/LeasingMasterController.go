@@ -6,7 +6,6 @@ import (
 	"matel/exceptions"
 	"matel/models"
 	"matel/payloads"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,11 +36,11 @@ func CreateLeasing(c *gin.Context) {
 
 func GetLeasingMaster(c *gin.Context) {
 
-	page, _ := strconv.Atoi(c.Query("page"))
-	limit, _ := strconv.Atoi(c.Query("limit"))
+	// page, _ := strconv.Atoi(c.Query("page"))
+	// limit, _ := strconv.Atoi(c.Query("limit"))
 	search := c.Query("search")
 
-	offset := (page - 1) * limit
+	// offset := (page - 1) * limit
 
 	var leasings []models.Leasing
 	var count int64
@@ -56,24 +55,26 @@ func GetLeasingMaster(c *gin.Context) {
 
 	query.Count(&count)
 
-	if limit == -1 {
-		result := query.Find(&leasings)
-		if result.Error != nil {
-			exceptions.AppException(c, "Something went wrong")
-			return
-		}
-	} else {
-
-		result := query.Offset(offset).Limit(limit).Find(&leasings)
-		if result.Error != nil {
-			exceptions.AppException(c, "Something went wrong")
-			return
-		}
+	// if limit == -1 {
+	result := query.Find(&leasings)
+	if result.Error != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
 	}
+	// } else {
+
+	// 	result := query.Offset(offset).Limit(limit).Find(&leasings)
+	// 	if result.Error != nil {
+	// 		exceptions.AppException(c, "Something went wrong")
+	// 		return
+	// 	}
+	// }
 
 	data := make(map[string]interface{})
 	data["leasing"] = leasings
 	data["total"] = count
+
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, data, "Data found", 200)
 

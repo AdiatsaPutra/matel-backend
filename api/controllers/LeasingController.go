@@ -181,7 +181,7 @@ func GetLeasing(c *gin.Context) {
 
 	var kendaraan []models.Kendaraan
 
-	query := config.InitDB().Limit(100)
+	query := config.InitDB()
 
 	if searchQuery != "" {
 		query = query.Find(&kendaraan).Where("leasing LIKE ? OR cabang LIKE ? OR nomorPolisi LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%", "%"+searchQuery+"%")

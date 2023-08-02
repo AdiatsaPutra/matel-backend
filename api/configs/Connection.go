@@ -47,11 +47,16 @@ func InitDB() *gorm.DB {
 	sqlDB.SetMaxOpenConns(10)
 	sqlDB.SetConnMaxLifetime(time.Minute * 3)
 
-	// sqlDB.Close()
-
 	return db
 }
 
 func CloseDB(db *gorm.DB) {
+	sqlDB, err := db.DB()
 
+	if err != nil {
+		log.Fatal("Cannot get database connection: ", err)
+		return
+	}
+
+	sqlDB.Close()
 }
