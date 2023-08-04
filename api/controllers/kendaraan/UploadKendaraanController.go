@@ -76,7 +76,7 @@ func AddCSVPerCabang(c *gin.Context) {
 	jobs := make(chan []interface{}, 0)
 	wg := new(sync.WaitGroup)
 
-	go dispatchWorkers(c, db, jobs, wg)
+	go dispatchWorkers(c, db, jobs, wg, cabang)
 	readCsvFilePerLineThenSendToWorker(csvReader, jobs, wg)
 
 	wg.Wait()
@@ -160,13 +160,13 @@ func detectDelimiter(content []byte) rune {
 	return ','
 }
 
-func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup) {
+func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup, cabang models.Cabang) {
 	for workerIndex := 0; workerIndex <= totalWorker; workerIndex++ {
 		go func(workerIndex int, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup) {
 			counter := 0
 
 			for job := range jobs {
-				err := doTheJob(c, workerIndex, counter, db, job)
+				err := doTheJob(c, workerIndex, counter, db, job, cabang)
 				if err != nil {
 					exceptions.AppException(c, err.Error())
 				}
@@ -204,7 +204,7 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 	close(jobs)
 }
 
-func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) error {
+func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}, cabang models.Cabang) error {
 	now := time.Now()
 
 	leasingName := c.PostForm("leasing_name")
@@ -214,13 +214,6 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 	values = append([]interface{}{leasingName}, values...)
 	values = append(values, now)
 	values = append(values, 1)
-
-	// get cabang versi from db
-	var cabang models.Cabang
-	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
-	if result.Error != nil {
-		return result.Error
-	}
 
 	values = append(values, cabang.Versi)
 
