@@ -149,19 +149,19 @@ func GetAllKabupaten(c *gin.Context, provinceID uint) ([]models.Kabupaten, error
 // GetAllKecamatan retrieves all Kecamatans or filtered by KabupatenID.
 func GetAllKecamatan(c *gin.Context, kabupatenID uint) ([]models.Kecamatan, error) {
 	var kecamatan []models.Kecamatan
+	db := config.InitDB()
+
 	if kabupatenID == 0 {
-		result := config.InitDB().Find(&kecamatan)
+		result := db.Order("name asc").Find(&kecamatan)
 		if result.Error != nil {
 			return kecamatan, result.Error
 		}
-
-		return kecamatan, nil
 	} else {
-		result := config.InitDB().Where("kabupaten_id = ?", kabupatenID).Find(&kecamatan)
+		result := db.Where("kabupaten_id = ?", kabupatenID).Order("name asc").Find(&kecamatan)
 		if result.Error != nil {
 			return kecamatan, result.Error
 		}
-
-		return kecamatan, nil
 	}
+
+	return kecamatan, nil
 }
