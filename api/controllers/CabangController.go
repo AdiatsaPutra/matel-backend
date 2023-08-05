@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func CreateCabang(c *gin.Context) {
@@ -185,6 +186,7 @@ func DeleteCabang(c *gin.Context) {
 	cabangID := c.Param("id")
 
 	var cabang models.Cabang
+	var kendaraan models.Kendaraan
 	result := config.InitDB().First(&cabang, cabangID)
 	if result.Error != nil {
 		exceptions.AppException(c, "Something went wrong")
@@ -196,6 +198,14 @@ func DeleteCabang(c *gin.Context) {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
+
+	deleteResult := config.InitDB().Where("cabang = ?", cabang.NamaCabang).Delete(&kendaraan)
+	if deleteResult.Error != nil {
+		exceptions.AppException(c, "Failed to delete Kendaraan")
+		return
+	}
+
+	logrus.Info("2")
 
 	payloads.HandleSuccess(c, "Cabang deleted", "Success", 200)
 }
