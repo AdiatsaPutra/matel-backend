@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func CreateCabang(c *gin.Context) {
@@ -31,6 +30,7 @@ func CreateCabang(c *gin.Context) {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, cabang, "Cabang created", 200)
 
@@ -115,6 +115,7 @@ func GetCabangWithTotal(c *gin.Context) {
 		exceptions.AppException(c, err.Error())
 		return
 	}
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, results, "Data found", 200)
 }
@@ -143,6 +144,7 @@ func UpdateCabang(c *gin.Context) {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, cabang, "Success", 200)
 }
@@ -205,7 +207,16 @@ func DeleteCabang(c *gin.Context) {
 		return
 	}
 
-	logrus.Info("2")
+	var count int64
+	if err := config.InitDB().Model(&models.Kendaraan{}).Count(&count).Error; err != nil {
+		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
+	}
+
+	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
+		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
+	}
+
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, "Cabang deleted", "Success", 200)
 }

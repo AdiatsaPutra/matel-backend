@@ -76,6 +76,8 @@ func GetKendaraan(c *gin.Context) {
 
 	}
 
+	config.CloseDB(config.InitDB())
+
 	payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
 }
 
