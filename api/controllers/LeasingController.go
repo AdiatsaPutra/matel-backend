@@ -32,6 +32,17 @@ func GetKendaraan(c *gin.Context) {
 			return
 		}
 
+		var count int64
+		r := query.Count(&count)
+		if r.Error != nil {
+			exceptions.AppException(c, "Something went wrong")
+			return
+		}
+
+		data := make(map[string]interface{})
+		data["total"] = count
+		data["kendaraan"] = kendaraans
+
 		payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
 		return
 	}
@@ -61,6 +72,13 @@ func GetKendaraan(c *gin.Context) {
 	var kendaraans []models.Kendaraan
 	offset := (pageNumber - 1) * limit
 
+	var count int64
+	result := query.Count(&count)
+	if result.Error != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
 	if limit == -1 {
 		result := query.Find(&kendaraans)
 		if result.Error != nil {
@@ -76,9 +94,13 @@ func GetKendaraan(c *gin.Context) {
 
 	}
 
+	data := make(map[string]interface{})
+	data["total"] = count
+	data["kendaraan"] = kendaraans
+
 	config.CloseDB(config.InitDB())
 
-	payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
+	payloads.HandleSuccess(c, data, "Kendaraan found", http.StatusOK)
 }
 
 func DeleteKendaraan(c *gin.Context) {
