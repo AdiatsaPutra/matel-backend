@@ -49,11 +49,17 @@ func AddCSVPerCabang(c *gin.Context) {
 		return
 	}
 
-	csvReader, _, err := openCsvFile(c)
+	csvReader, csvFile, err := openCsvFile(c)
 	if err != nil {
 		exceptions.AppException(c, err.Error())
 		return
 	}
+
+	defer func() {
+		if err := csvFile.Close(); err != nil {
+			exceptions.AppException(c, err.Error())
+		}
+	}()
 
 	// increment cabang versi
 	cabangName := c.PostForm("cabang_name")
@@ -85,12 +91,14 @@ func AddCSVPerCabang(c *gin.Context) {
 
 	var count int64
 	if err := config.InitDB().Model(&models.Kendaraan{}).Count(&count).Error; err != nil {
-		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
+		exceptions.AppException(c, "Something went wrong")
 	}
 
 	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
-		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
+		exceptions.AppException(c, "Something went wrong")
 	}
+
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 }
