@@ -26,7 +26,7 @@ import (
 var (
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
-	totalWorker    = 100
+	totalWorker    = 500
 	header         = []string{
 		"noKontrak",
 		"namaDebitur",
