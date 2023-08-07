@@ -99,7 +99,7 @@ func openDbConnection(c *gin.Context) (*sql.DB, error) {
 	dbConnString := ""
 
 	if os.Getenv("GIN_MODE") == "release" {
-		dbConnString = "Beta:root_BetaTaurus@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+		dbConnString = "Beta:BetaTaurus@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
 	} else {
 		dbConnString = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
 	}
