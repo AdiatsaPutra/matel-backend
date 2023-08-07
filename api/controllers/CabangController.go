@@ -30,6 +30,7 @@ func CreateCabang(c *gin.Context) {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, cabang, "Cabang created", 200)
 
@@ -114,6 +115,7 @@ func GetCabangWithTotal(c *gin.Context) {
 		exceptions.AppException(c, err.Error())
 		return
 	}
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, results, "Data found", 200)
 }
@@ -142,6 +144,7 @@ func UpdateCabang(c *gin.Context) {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, cabang, "Success", 200)
 }
@@ -185,6 +188,7 @@ func DeleteCabang(c *gin.Context) {
 	cabangID := c.Param("id")
 
 	var cabang models.Cabang
+	var kendaraan models.Kendaraan
 	result := config.InitDB().First(&cabang, cabangID)
 	if result.Error != nil {
 		exceptions.AppException(c, "Something went wrong")
@@ -196,6 +200,23 @@ func DeleteCabang(c *gin.Context) {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
+
+	deleteResult := config.InitDB().Where("cabang = ?", cabang.NamaCabang).Delete(&kendaraan)
+	if deleteResult.Error != nil {
+		exceptions.AppException(c, "Failed to delete Kendaraan")
+		return
+	}
+
+	var count int64
+	if err := config.InitDB().Model(&models.Kendaraan{}).Count(&count).Error; err != nil {
+		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
+	}
+
+	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
+		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
+	}
+
+	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, "Cabang deleted", "Success", 200)
 }
