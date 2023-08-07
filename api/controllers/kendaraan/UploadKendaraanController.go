@@ -26,7 +26,7 @@ import (
 var (
 	dbMaxIdleConns = 4
 	dbMaxConns     = 100
-	totalWorker    = 500
+	totalWorker    = 4
 	header         = []string{
 		"noKontrak",
 		"namaDebitur",
@@ -79,7 +79,7 @@ func AddCSVPerCabang(c *gin.Context) {
 		return
 	}
 
-	jobs := make(chan []interface{}, 0)
+	jobs := make(chan [][]interface{}, 0)
 	wg := new(sync.WaitGroup)
 
 	go dispatchWorkers(c, db, jobs, wg, cabang)
@@ -168,25 +168,25 @@ func detectDelimiter(content []byte) rune {
 	return ','
 }
 
-func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup, cabang models.Cabang) {
+func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan [][]interface{}, wg *sync.WaitGroup, cabang models.Cabang) {
 	for workerIndex := 0; workerIndex <= totalWorker; workerIndex++ {
-		go func(workerIndex int, db *sql.DB, jobs <-chan []interface{}, wg *sync.WaitGroup) {
-			counter := 0
-
+		go func(workerIndex int, db *sql.DB, jobs <-chan [][]interface{}, wg *sync.WaitGroup) {
 			for job := range jobs {
-				err := doTheJob(c, workerIndex, counter, db, job, cabang)
+				err := doTheJobBatch(c, workerIndex, db, job, cabang)
 				if err != nil {
 					exceptions.AppException(c, err.Error())
 				}
 				wg.Done()
-				counter++
 			}
 		}(workerIndex, db, jobs, wg)
 	}
 }
 
-func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []interface{}, wg *sync.WaitGroup) {
+func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- [][]interface{}, wg *sync.WaitGroup) {
 	isHeader := true
+	batchSize := 100 // Define the batch size here (you can adjust it as needed)
+	batch := make([][]interface{}, 0, batchSize)
+
 	for {
 		row, err := csvReader.Read()
 		if err != nil {
@@ -206,81 +206,96 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 			rowOrdered = append(rowOrdered, each)
 		}
 
-		wg.Add(1)
-		jobs <- rowOrdered
+		batch = append(batch, rowOrdered)
+
+		if len(batch) >= batchSize {
+			wg.Add(1)
+			jobs <- batch
+			batch = make([][]interface{}, 0, batchSize)
+		}
 	}
+
+	// Send any remaining data in the last batch
+	if len(batch) > 0 {
+		wg.Add(1)
+		jobs <- batch
+	}
+
 	close(jobs)
 }
 
-func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}, cabang models.Cabang) error {
+func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interface{}, cabang models.Cabang) error {
 	now := time.Now()
 
 	leasingName := c.PostForm("leasing_name")
 	cabangName := c.PostForm("cabang_name")
 
-	values = append([]interface{}{cabangName}, values...)
-	values = append([]interface{}{leasingName}, values...)
-	values = append(values, now)
-	values = append(values, 1)
+	var valuesBatch []interface{}
+	for _, row := range rows {
+		values := make([]interface{}, 0)
+		values = append(values, cabangName)
+		values = append(values, row...)
 
-	values = append(values, cabang.Versi)
+		values = append([]interface{}{leasingName}, values...)
+		values = append(values, now)
+		values = append(values, 1)
+		values = append(values, cabang.Versi)
 
-	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
+		var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
-	for i := 4; i < 7; i++ {
-		if str, ok := values[i].(string); ok {
-			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
-			values[i] = filteredStr
-		}
-	}
-
-	for i := 8; i < 10; i++ {
-		if str, ok := values[i].(string); ok {
-			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
-			values[i] = filteredStr
-		}
-	}
-
-	for {
-		var outerError error
-		func(outerError *error) {
-			defer func() {
-				if err := recover(); err != nil {
-					*outerError = fmt.Errorf("%v Error", err)
-				}
-			}()
-
-			conn, err := db.Conn(context.Background())
-			query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang,%s, created_at, status, versi) VALUES (%s)",
-				strings.Join(header, ","),
-				strings.Join(generateQuestionsMark(len(header)+5), ","),
-			)
-
-			_, err = conn.ExecContext(context.Background(), query, values...)
-			if err != nil {
-				exceptions.AppException(c, err.Error())
-				*outerError = err
-				return
+		for i := 4; i < 7; i++ {
+			if str, ok := values[i].(string); ok {
+				filteredStr := alphanumericRegex.ReplaceAllString(str, "")
+				values[i] = filteredStr
 			}
+		}
 
-			err = conn.Close()
-			if err != nil {
-				exceptions.AppException(c, err.Error())
-				*outerError = err
-				return
+		for i := 8; i < 10; i++ {
+			if str, ok := values[i].(string); ok {
+				filteredStr := alphanumericRegex.ReplaceAllString(str, "")
+				values[i] = filteredStr
 			}
-		}(&outerError)
-		if outerError == nil {
-			break
+		}
+
+		valuesBatch = append(valuesBatch, values)
+	}
+
+	conn, err := db.Conn(context.Background())
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return err
+	}
+
+	defer func() {
+		if err := conn.Close(); err != nil {
+			exceptions.AppException(c, err.Error())
+		}
+	}()
+
+	placeholderRows := generateQuestionsMark(len(rows), len(header)+5)
+
+	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang,%s, created_at, status, versi) VALUES %s",
+		strings.Join(header, ","),
+		placeholderRows,
+	)
+
+	args := make([]interface{}, 0, len(valuesBatch)*len(header)+5)
+	for _, values := range valuesBatch {
+		if v, ok := values.([]interface{}); ok {
+			args = append(args, v...)
 		}
 	}
+
+	_, err = conn.ExecContext(context.Background(), query, args...)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return err
+	}
+
 	return nil
 }
 
-func generateQuestionsMark(n int) []string {
-	s := make([]string, 0)
-	for i := 0; i < n; i++ {
-		s = append(s, "?")
-	}
-	return s
+func generateQuestionsMark(rowsCount, columnsCount int) string {
+	placeholder := "(?" + strings.Repeat(", ?", columnsCount-1) + ")"
+	return strings.Repeat(", "+placeholder, rowsCount)[2:]
 }
