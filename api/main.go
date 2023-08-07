@@ -24,6 +24,7 @@ func main() {
 	r.GET("/profil", security.AuthMiddleware(), controllers.GetProfile)
 
 	r.GET("/home", controllers.GetHome)
+	r.GET("/kendaraan-per-cabang", controllers.GetKendaraanPerCabang)
 
 	r.GET("/leasing-master", controllers.GetLeasingMaster)
 	r.POST("/leasing-master", controllers.CreateLeasing)
