@@ -18,7 +18,7 @@ func InitDB() *gorm.DB {
 	dsn := ""
 
 	if os.Getenv("GIN_MODE") == "release" {
-		dsn = "root:root@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
+		dsn = "Beta:BetaTaurus@tcp(db)/matel?charset=utf8mb4&parseTime=True&loc=Local"
 	} else {
 		dsn = "root:1Ultramilk!@tcp(127.0.0.1:3306)/motor?charset=utf8mb4&parseTime=True&loc=Local"
 	}

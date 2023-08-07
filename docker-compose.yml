@@ -8,9 +8,9 @@ services:
     networks:
       - internal_network
     environment:
-      - "MYSQL_ROOT_PASSWORD=root"
-      - "MYSQL_USER=root"
-      - "MYSQL_PASSWORD=root"
+      - "MYSQL_ROOT_PASSWORD=root_BetaTaurus"
+      - "MYSQL_USER=Beta"
+      - "MYSQL_PASSWORD=BetaTaurus"
       - "MYSQL_DATABASE=matel"
     volumes:
       - db:/var/lib/mysql
@@ -30,7 +30,7 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root_BetaTaurus
       UPLOAD_LIMIT: 200M
       PMA_ABSOLUTE_URI: https://taurusaplikasi.com/phpmyadmin/
     networks:
