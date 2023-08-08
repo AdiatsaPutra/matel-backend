@@ -128,14 +128,14 @@ func Login(c *gin.Context) {
 			hash := security.VerifyPassword(hashPwd, pwd)
 
 			if hash == nil {
-				if findUserFromDB.DeviceID == "" {
-					err := repository.ResetDeviceID(c, findUserFromDB.ID, body.DeviceID)
+				// if findUserFromDB.DeviceID == "" {
+				// 	err := repository.ResetDeviceID(c, findUserFromDB.ID, body.DeviceID)
 
-					if err != nil {
-						exceptions.AppException(c, err.Error())
-						return
-					}
-				}
+				// 	if err != nil {
+				// 		exceptions.AppException(c, err.Error())
+				// 		return
+				// 	}
+				// }
 
 				if findUserFromDB.Token == "" {
 
