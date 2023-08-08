@@ -97,18 +97,26 @@ func GetCabangWithTotal(c *gin.Context) {
 			c.nama_cabang,
 			c.no_hp,
 			l.nama_leasing,
-			COUNT(k.nomorPolisi) AS kendaraan_total,
-			MAX(k.created_at) AS latest_created_at
+			COALESCE(k.kendaraan_total, 0) AS kendaraan_total,
+			COALESCE(k.latest_created_at, NULL) AS latest_created_at
 		FROM
 			m_cabang c
 		LEFT JOIN
 			m_leasing l ON c.leasing_id = l.id
-		LEFT JOIN
-			m_kendaraan k ON c.nama_cabang = k.cabang AND k.deleted_at IS NULL
+		LEFT JOIN (
+			SELECT
+				cabang,
+				COUNT(nomorPolisi) AS kendaraan_total,
+				MAX(created_at) AS latest_created_at
+			FROM
+				m_kendaraan
+			WHERE
+				deleted_at IS NULL
+			GROUP BY
+				cabang
+		) k ON c.nama_cabang = k.cabang
 		WHERE
-			c.leasing_id = ? AND c.deleted_at IS NULL
-		GROUP BY
-			c.id, c.nama_cabang, c.no_hp, l.nama_leasing;
+			c.leasing_id = ? AND c.deleted_at IS NULL;
 		`, leasingID).Scan(&results).Error
 
 	if err != nil {

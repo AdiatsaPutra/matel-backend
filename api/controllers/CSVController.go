@@ -74,9 +74,11 @@ func AddCSV(c *gin.Context) {
 
 	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
 		panic(err)
+	} else {
+
+		payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 	}
 
-	payloads.HandleSuccess(c, int(math.Ceil(duration.Seconds())), "Success", 200)
 }
 
 func openDbConnection(c *gin.Context) (*sql.DB, error) {
