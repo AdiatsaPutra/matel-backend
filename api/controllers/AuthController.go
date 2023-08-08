@@ -121,21 +121,66 @@ func Login(c *gin.Context) {
 
 	if findUserFromDB.UserName != "" {
 
-		if findUserFromDB.DeviceID == body.DeviceID || (findUserFromDB.DeviceID != body.DeviceID && findUserFromDB.Token == "") {
+		if findUserFromDB.DeviceID == "" {
 			hashPwd := findUserFromDB.Password
 			pwd := body.Password
 
 			hash := security.VerifyPassword(hashPwd, pwd)
 
 			if hash == nil {
-				// if findUserFromDB.DeviceID == "" {
-				// 	err := repository.ResetDeviceID(c, findUserFromDB.ID, body.DeviceID)
+				if findUserFromDB.DeviceID == "" {
+					err := repository.ResetDeviceID(c, findUserFromDB.ID, body.DeviceID)
 
-				// 	if err != nil {
-				// 		exceptions.AppException(c, err.Error())
-				// 		return
-				// 	}
-				// }
+					if err != nil {
+						exceptions.AppException(c, err.Error())
+						return
+					}
+				}
+
+				if findUserFromDB.Token == "" {
+
+					token, err := security.GenerateToken(findUserFromDB.ID)
+
+					if err != nil {
+						exceptions.AppException(c, err.Error())
+						return
+					}
+
+					findUserFromDB.Token = token
+
+					tokenCreated, err := repository.SetToken(c, findUserFromDB)
+
+					if !tokenCreated {
+						exceptions.AppException(c, err.Error())
+						return
+					}
+
+					findUserFromDB.Status = uint(helper.GetUserStatus(findUserFromDB))
+					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
+				} else {
+
+					findUserFromDB.Status = uint(helper.GetUserStatus(findUserFromDB))
+					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
+				}
+			} else {
+				exceptions.AppException(c, hash.Error())
+				return
+			}
+		} else if findUserFromDB.DeviceID == body.DeviceID || (findUserFromDB.DeviceID != body.DeviceID && findUserFromDB.Token == "") {
+			hashPwd := findUserFromDB.Password
+			pwd := body.Password
+
+			hash := security.VerifyPassword(hashPwd, pwd)
+
+			if hash == nil {
+				if findUserFromDB.DeviceID == "" {
+					err := repository.ResetDeviceID(c, findUserFromDB.ID, body.DeviceID)
+
+					if err != nil {
+						exceptions.AppException(c, err.Error())
+						return
+					}
+				}
 
 				if findUserFromDB.Token == "" {
 
