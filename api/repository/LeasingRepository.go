@@ -76,10 +76,10 @@ func GetKendaraanTotal(c *gin.Context) (uint, error) {
 
 func GetLeasingByID(c *gin.Context, LeasingID uint) (models.Kendaraan, error) {
 	var leasing = models.Kendaraan{}
-	result := config.InitDB().First(&leasing, LeasingID)
+	result := config.InitDB().Unscoped().Where("id = ?", LeasingID).First(&leasing)
 
 	if result.Error != nil {
-		return models.Kendaraan{}, result.Error
+		return leasing, result.Error
 	}
 
 	return leasing, nil

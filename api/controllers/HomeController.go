@@ -34,13 +34,6 @@ func GetHome(c *gin.Context) {
 		kendaraanTotalPerCabang = k
 	}
 
-	leasingChart, err := repository.GetLeasingChart(c)
-
-	if err != nil {
-		payloads.HandleSuccess(c, nil, "Something went wrong", http.StatusOK)
-		return
-	}
-
 	leasingTotal, err := repository.GetLeasingTotal(c)
 
 	if err != nil {
@@ -62,7 +55,18 @@ func GetHome(c *gin.Context) {
 	data["trial_members"] = userTotal.TrialMembers
 	data["premium_members"] = userTotal.PremiumMembers
 	data["expired_members"] = userTotal.ExpiredMembers
-	data["leasing_chart"] = leasingChart
 
 	payloads.HandleSuccess(c, data, "Data found", http.StatusOK)
+}
+
+func GetKendaraanPerCabang(c *gin.Context) {
+
+	leasingChart, err := repository.GetLeasingChart(c)
+
+	if err != nil {
+		payloads.HandleSuccess(c, nil, "Something went wrong", http.StatusOK)
+		return
+	}
+
+	payloads.HandleSuccess(c, leasingChart, "Data found", http.StatusOK)
 }
