@@ -167,11 +167,11 @@ func Login(c *gin.Context) {
 				return
 			}
 		} else {
-			exceptions.AppException(c, "Data anda telah login")
+			exceptions.AppException(c, "Anda sudah login di device lain, mohon untuk logout terlebih dahulu")
 			return
 		}
 	} else {
-		exceptions.AppException(c, "User not registered")
+		exceptions.AppException(c, "Email tidak terdaftar")
 		return
 	}
 }
@@ -220,7 +220,7 @@ func LoginWeb(c *gin.Context) {
 			return
 		}
 	} else {
-		exceptions.AppException(c, "User not registered")
+		exceptions.AppException(c, "Email tidak terdaftar")
 		return
 	}
 }
