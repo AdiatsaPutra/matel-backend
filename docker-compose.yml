@@ -12,6 +12,8 @@ services:
       - "MYSQL_USER=Beta"
       - "MYSQL_PASSWORD=BetaTaurus"
       - "MYSQL_DATABASE=matel"
+      - "MYSQL_INITDB_SKIP_TZINFO=1"
+      - "MYSQL_INNODB_BUFFER_POOL_SIZE=4G"
     volumes:
       - db:/var/lib/mysql
       # - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
