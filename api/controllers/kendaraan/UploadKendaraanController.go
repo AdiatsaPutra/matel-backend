@@ -22,7 +22,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -186,7 +185,7 @@ func dispatchWorkers(c *gin.Context, db *sql.DB, jobs <-chan [][]interface{}, wg
 
 func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- [][]interface{}, wg *sync.WaitGroup) {
 	isHeader := true
-	batchSize := 100 // Define the batch size here (you can adjust it as needed)
+	batchSize := 100
 	batch := make([][]interface{}, 0, batchSize)
 
 	for {
@@ -217,7 +216,6 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- [][]i
 		}
 	}
 
-	// Send any remaining data in the last batch
 	if len(batch) > 0 {
 		wg.Add(1)
 		jobs <- batch
@@ -242,7 +240,7 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 	var valuesBatch []interface{}
 	for _, row := range rows {
 		values := make([]interface{}, 0)
-		values = append(values, cabangID) // Add cabang_id
+		values = append(values, cabangID)
 		values = append(values, cabangName)
 		values = append(values, row...)
 
@@ -282,16 +280,12 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 		}
 	}()
 
-	logrus.Info(valuesBatch...)
-
 	placeholderRows := generateQuestionsMark(len(rows), len(header)+6)
 
-	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang_idd, cabang, %s, created_at, status, versi) VALUES %s",
+	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang_id, cabang, %s, created_at, status, versi) VALUES %s",
 		strings.Join(header, ","),
 		placeholderRows,
 	)
-
-	logrus.Info(query)
 
 	args := make([]interface{}, 0, len(valuesBatch)*len(header)+6)
 	for _, values := range valuesBatch {
@@ -302,7 +296,6 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 
 	_, err = conn.ExecContext(context.Background(), query, args...)
 	if err != nil {
-		logrus.Info(err)
 		exceptions.AppException(c, err.Error())
 		return err
 	}
