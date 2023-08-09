@@ -40,7 +40,7 @@ func DumpSQLHandler(c *gin.Context) {
 	// Get Cabang With Version
 	var cabang []models.Cabang
 	err = sourceDB.Table("m_cabang").
-		Select("nama_cabang, versi").
+		Select("id, versi").
 		Find(&cabang).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
@@ -49,14 +49,15 @@ func DumpSQLHandler(c *gin.Context) {
 
 	// Insert cabangForm into m_cabang
 
-	_, err = file.WriteString("INSERT INTO m_cabang (nama_cabang, versi) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_cabang (id, versi) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
 	for i, cb := range cabang {
+		idInt := strconv.Itoa(int(cb.ID))
 		versi := strconv.Itoa(cb.Versi)
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.NamaCabang, versi))
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", idInt, versi))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
@@ -180,7 +181,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	dateParam := c.Query("date")
 
 	type CabangForm struct {
-		Name  string `json:"nama_cabang"`
+		ID    string `json:"id"`
 		Versi int    `json:"versi"`
 	}
 
@@ -227,19 +228,20 @@ func UpdateSQLHandler(c *gin.Context) {
 	existingCabangMap := make(map[string]int)
 
 	for _, cf := range cabangForm {
-		existingCabangMap[cf.Name] = cf.Versi
+		existingCabangMap[cf.ID] = cf.Versi
 	}
 
 	for _, cb := range cabang {
+		idStr := strconv.Itoa(int(cb.ID))
 		if _, ok := existingCabangMap[cb.NamaCabang]; !ok {
-			cabangForm = append(cabangForm, CabangForm{Name: cb.NamaCabang, Versi: cb.Versi})
+			cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
 		} else {
 			existingCabangMap[cb.NamaCabang] = cb.Versi
 		}
 	}
 
 	for i := range cabangForm {
-		versi := existingCabangMap[cabangForm[i].Name]
+		versi := existingCabangMap[cabangForm[i].ID]
 		if versi == 0 {
 			cabangForm[i].Versi = 1
 		} else {
@@ -267,7 +269,7 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for i, cb := range cabangForm {
 		versi := strconv.Itoa(cb.Versi)
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.Name, versi))
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.ID, versi))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
@@ -294,7 +296,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	var comparedCabangForm []CabangForm
 	for _, cf := range cabangForm {
 		for _, cfu := range cabangFormUnupdated {
-			if cf.Name == cfu.Name && cf.Versi != cfu.Versi {
+			if cf.ID == cfu.ID && cf.Versi != cfu.Versi {
 				comparedCabangForm = append(comparedCabangForm, cf)
 				break
 			}
@@ -302,7 +304,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	for _, cc := range comparedCabangForm {
-		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang = '%s';\n", cc.Name))
+		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang = '%s';\n", cc.ID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 			return
@@ -318,12 +320,13 @@ func UpdateSQLHandler(c *gin.Context) {
 	logrus.Info(cabangForm)
 	logrus.Info(cabangFormUnupdated)
 
-	for _, cc := range comparedCabangForm {
+	for _, cc := range cabangForm {
+		logrus.Info(cc.ID)
 		var leasings []models.LeasingToExport
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
-			Where("cabang = ?", cc.Name).
-			Where("created_at >= ?", date).
+			Where("cabang_id = ?", cc.ID).
+			Where("versi < ?", cc.Versi).
 			Find(&leasings).Error
 
 		if err != nil {
