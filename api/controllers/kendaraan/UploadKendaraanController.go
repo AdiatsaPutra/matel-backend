@@ -22,6 +22,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -287,6 +288,8 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 		strings.Join(header, ","),
 		placeholderRows,
 	)
+
+	logrus.Info(query)
 
 	args := make([]interface{}, 0, len(valuesBatch)*len(header)+6)
 	for _, values := range valuesBatch {
