@@ -286,7 +286,7 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 
 	placeholderRows := generateQuestionsMark(len(rows), len(header)+6)
 
-	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang_id(1), cabang, %s, created_at, status, versi) VALUES %s",
+	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang_idd, cabang, %s, created_at, status, versi) VALUES %s",
 		strings.Join(header, ","),
 		placeholderRows,
 	)
