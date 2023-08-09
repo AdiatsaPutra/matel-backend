@@ -263,11 +263,16 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	var comparedCabangForm []CabangForm
 	for _, cf := range cabangForm {
+		found := false
 		for _, cfu := range cabangFormUnupdated {
-			if cf.ID != cfu.ID {
-				comparedCabangForm = append(comparedCabangForm, cf)
+			if cf.ID == cfu.ID {
+				found = true
 				break
 			}
+		}
+
+		if !found {
+			comparedCabangForm = append(comparedCabangForm, cf)
 		}
 	}
 
