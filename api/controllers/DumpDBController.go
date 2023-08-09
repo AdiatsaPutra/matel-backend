@@ -224,6 +224,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
+	logrus.Info("THIS")
 	for _, cf := range cabang {
 		logrus.Info(cf.ID)
 		logrus.Info(cf.NamaCabang)
