@@ -295,7 +295,9 @@ func UpdateSQLHandler(c *gin.Context) {
 	var comparedCabangForm []CabangForm
 	for _, cf := range cabangForm {
 		for _, cfu := range cabangFormUnupdated {
+			logrus.Info("cf")
 			logrus.Info(cf.ID)
+			logrus.Info("cfu")
 			logrus.Info(cfu.ID)
 			if cf.ID == cfu.ID && cf.Versi != cfu.Versi {
 				comparedCabangForm = append(comparedCabangForm, cf)
