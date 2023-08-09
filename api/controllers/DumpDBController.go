@@ -227,17 +227,18 @@ func UpdateSQLHandler(c *gin.Context) {
 	existingCabangMap := make(map[string]int)
 
 	for _, cf := range cabangForm {
-		existingCabangMap[cf.ID] = cf.Versi
+		versi := strconv.Itoa(int(cf.Versi))
+		existingCabangMap[versi] = cf.Versi
 	}
 
-	// for _, cb := range cabang {
-	// 	idStr := strconv.Itoa(int(cb.ID))
-	// 	if _, ok := existingCabangMap[cb.NamaCabang]; !ok {
-	// 		cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
-	// 	} else {
-	// 		existingCabangMap[cb.NamaCabang] = cb.Versi
-	// 	}
-	// }
+	for _, cb := range cabang {
+		idStr := strconv.Itoa(int(cb.ID))
+		if _, ok := existingCabangMap[cb.NamaCabang]; !ok {
+			cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
+		} else {
+			existingCabangMap[cb.NamaCabang] = cb.Versi
+		}
+	}
 
 	for i := range cabangForm {
 		versi := existingCabangMap[cabangForm[i].ID]
