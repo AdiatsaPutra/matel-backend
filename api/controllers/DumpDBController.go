@@ -261,6 +261,16 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	// Insert cabangForm into m_cabang
 
+	var comparedCabangForm []CabangForm
+	for _, cf := range cabangForm {
+		for _, cfu := range cabangFormUnupdated {
+			if cf.ID != cfu.ID {
+				comparedCabangForm = append(comparedCabangForm, cf)
+				break
+			}
+		}
+	}
+
 	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
@@ -292,20 +302,6 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	var comparedCabangForm []CabangForm
-	for _, cf := range cabangForm {
-		for _, cfu := range cabangFormUnupdated {
-			logrus.Info("cf")
-			logrus.Info(cf.ID)
-			logrus.Info("cfu")
-			logrus.Info(cfu.ID)
-			if cf.ID == cfu.ID && cf.Versi != cfu.Versi {
-				comparedCabangForm = append(comparedCabangForm, cf)
-				break
-			}
-		}
-	}
-
 	for _, cc := range comparedCabangForm {
 		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang = '%s';\n", cc.ID))
 		if err != nil {
@@ -323,7 +319,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	logrus.Info(cabangForm)
 	logrus.Info(cabangFormUnupdated)
 
-	for _, cc := range cabangForm {
+	for _, cc := range comparedCabangForm {
 		logrus.Info(cc.ID)
 		var leasings []models.LeasingToExport
 		err = sourceDB.Table("m_kendaraan").
