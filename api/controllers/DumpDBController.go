@@ -224,7 +224,10 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	logrus.Info(cabang)
+	for _, cf := range cabang {
+		logrus.Info(cf.ID)
+		logrus.Info(cf.NamaCabang)
+	}
 
 	existingCabangMap := make(map[string]int)
 
