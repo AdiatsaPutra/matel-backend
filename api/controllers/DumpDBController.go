@@ -180,7 +180,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	// dateParam := c.Query("date")
 
 	type CabangForm struct {
-		ID    string `json:"id"`
+		ID    string `json:"id_source"`
 		Versi int    `json:"versi"`
 	}
 
