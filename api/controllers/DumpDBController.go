@@ -224,13 +224,6 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	logrus.Info("THIS")
-	logrus.Info(cabang)
-	for _, c := range cabang {
-		logrus.Info(c.ID)
-		logrus.Info(c.NamaCabang)
-	}
-
 	existingCabangMap := make(map[string]int)
 
 	for _, cf := range cabangForm {
@@ -302,6 +295,8 @@ func UpdateSQLHandler(c *gin.Context) {
 	var comparedCabangForm []CabangForm
 	for _, cf := range cabangForm {
 		for _, cfu := range cabangFormUnupdated {
+			logrus.Info(cf.ID)
+			logrus.Info(cfu.ID)
 			if cf.ID == cfu.ID && cf.Versi != cfu.Versi {
 				comparedCabangForm = append(comparedCabangForm, cf)
 				break
