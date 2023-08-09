@@ -241,7 +241,8 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	for i := range cabangForm {
-		versi := existingCabangMap[cabangForm[i].ID]
+		cInt := strconv.Itoa(cabangForm[i].Versi)
+		versi := existingCabangMap[cInt]
 		if versi == 0 {
 			cabangForm[i].Versi = 1
 		} else {
