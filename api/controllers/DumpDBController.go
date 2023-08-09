@@ -48,7 +48,7 @@ func DumpSQLHandler(c *gin.Context) {
 
 	// Insert cabangForm into m_cabang
 
-	_, err = file.WriteString("INSERT INTO m_cabang (id, versi) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
