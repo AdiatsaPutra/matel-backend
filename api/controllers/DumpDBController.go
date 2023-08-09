@@ -230,14 +230,14 @@ func UpdateSQLHandler(c *gin.Context) {
 		existingCabangMap[cf.ID] = cf.Versi
 	}
 
-	for _, cb := range cabang {
-		idStr := strconv.Itoa(int(cb.ID))
-		if _, ok := existingCabangMap[cb.NamaCabang]; !ok {
-			cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
-		} else {
-			existingCabangMap[cb.NamaCabang] = cb.Versi
-		}
-	}
+	// for _, cb := range cabang {
+	// 	idStr := strconv.Itoa(int(cb.ID))
+	// 	if _, ok := existingCabangMap[cb.NamaCabang]; !ok {
+	// 		cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
+	// 	} else {
+	// 		existingCabangMap[cb.NamaCabang] = cb.Versi
+	// 	}
+	// }
 
 	for i := range cabangForm {
 		versi := existingCabangMap[cabangForm[i].ID]
@@ -325,7 +325,6 @@ func UpdateSQLHandler(c *gin.Context) {
 	logrus.Info(cabangFormUnupdated)
 
 	for _, cc := range comparedCabangForm {
-		logrus.Info(cc.ID)
 		var leasings []models.LeasingToExport
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
