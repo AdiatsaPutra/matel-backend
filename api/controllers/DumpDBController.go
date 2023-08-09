@@ -9,7 +9,6 @@ import (
 	"matel/payloads"
 	"os"
 	"strconv"
-	"time"
 
 	"net/http"
 
@@ -178,7 +177,7 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	filepath := "export_new_only.sql"
 
-	dateParam := c.Query("date")
+	// dateParam := c.Query("date")
 
 	type CabangForm struct {
 		ID    string `json:"id"`
@@ -195,11 +194,11 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	cabangFormUnupdated = append(cabangFormUnupdated, cabangForm...)
 
-	date, err := time.Parse("2006-01-02-15-04-05", dateParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
-		return
-	}
+	// date, err := time.Parse("2006-01-02-15-04-05", dateParam)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+	// 	return
+	// }
 
 	sourceDB := config.InitDB()
 
