@@ -282,6 +282,8 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 		}
 	}()
 
+	logrus.Info(valuesBatch...)
+
 	placeholderRows := generateQuestionsMark(len(rows), len(header)+6)
 
 	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang_id, cabang, %s, created_at, status, versi) VALUES %s",
@@ -300,6 +302,7 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 
 	_, err = conn.ExecContext(context.Background(), query, args...)
 	if err != nil {
+		logrus.Info(err)
 		exceptions.AppException(c, err.Error())
 		return err
 	}
