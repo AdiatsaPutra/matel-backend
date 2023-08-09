@@ -15,6 +15,7 @@ import (
 	"mime/multipart"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -228,11 +229,19 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 	now := time.Now()
 
 	leasingName := c.PostForm("leasing_name")
+	cabangIDStr := c.PostForm("cabang_id")
+	cabangID, err := strconv.Atoi(cabangIDStr)
+	if err != nil {
+		exceptions.AppException(c, "Invalid cabang_id")
+		return err
+	}
+
 	cabangName := c.PostForm("cabang_name")
 
 	var valuesBatch []interface{}
 	for _, row := range rows {
 		values := make([]interface{}, 0)
+		values = append(values, cabangID) // Add cabang_id
 		values = append(values, cabangName)
 		values = append(values, row...)
 
@@ -243,14 +252,14 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 
 		var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
-		for i := 4; i < 7; i++ {
+		for i := 5; i < 8; i++ {
 			if str, ok := values[i].(string); ok {
 				filteredStr := alphanumericRegex.ReplaceAllString(str, "")
 				values[i] = filteredStr
 			}
 		}
 
-		for i := 8; i < 10; i++ {
+		for i := 9; i < 11; i++ {
 			if str, ok := values[i].(string); ok {
 				filteredStr := alphanumericRegex.ReplaceAllString(str, "")
 				values[i] = filteredStr
@@ -272,14 +281,14 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 		}
 	}()
 
-	placeholderRows := generateQuestionsMark(len(rows), len(header)+5)
+	placeholderRows := generateQuestionsMark(len(rows), len(header)+6)
 
-	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang,%s, created_at, status, versi) VALUES %s",
+	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang_id, cabang, %s, created_at, status, versi) VALUES %s",
 		strings.Join(header, ","),
 		placeholderRows,
 	)
 
-	args := make([]interface{}, 0, len(valuesBatch)*len(header)+5)
+	args := make([]interface{}, 0, len(valuesBatch)*len(header)+6)
 	for _, values := range valuesBatch {
 		if v, ok := values.([]interface{}); ok {
 			args = append(args, v...)
