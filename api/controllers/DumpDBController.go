@@ -331,24 +331,13 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	// Create a map to track processed IDs
-	processedIDs := make(map[string]bool)
-
 	for _, cc := range cabangForm {
+		// Compare cabangFormUnupdated with cabangForm based on Versi
 		idInt, err := strconv.Atoi(cc.ID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 
 		}
-		// Check if the ID has already been processed
-		if processedIDs[cc.ID] {
-			continue // Skip processing if the ID is already processed
-		}
-
-		// Mark the ID as processed
-		processedIDs[cc.ID] = true
-
-		// Compare cabangFormUnupdated with cabangForm based on Versi
 		if cabangFormUnupdated[idInt].Versi < cc.Versi {
 			_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
 			if err != nil {
