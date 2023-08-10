@@ -331,14 +331,22 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	for _, cc := range cabangForm {
-		// Compare cabangFormUnupdated with cabangForm based on Versi
-		idInt, err := strconv.Atoi(cc.ID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+	// Create a map to track processed IDs and their corresponding Versi
+	processedIDs := make(map[string]int)
 
+	for _, cc := range cabangFormUnupdated {
+		// Store the highest Versi for each ID
+		if cc.Versi > processedIDs[cc.ID] {
+			processedIDs[cc.ID] = cc.Versi
 		}
-		if cabangFormUnupdated[idInt].Versi < cc.Versi {
+	}
+
+	for _, cc := range cabangForm {
+		// Get the highest processed Versi for the current ID
+		highestProcessedVersi := processedIDs[cc.ID]
+
+		// Compare cabangForm with the highest processed Versi
+		if highestProcessedVersi < cc.Versi {
 			_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
