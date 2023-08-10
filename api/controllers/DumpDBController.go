@@ -331,20 +331,30 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	uniqueDeleteIDs := make(map[string]bool) // Map to track unique IDs for delete queries
+	// Create a map to track processed IDs
+	processedIDs := make(map[string]bool)
 
-	for _, cc := range comparedCabangForm {
-		// Check if the ID is already processed for delete queries
-		if uniqueDeleteIDs[cc.ID] {
-			continue // Skip this iteration if already processed
-		}
-
-		uniqueDeleteIDs[cc.ID] = true // Mark the ID as processed
-
-		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id_source = '%s';\n", cc.ID))
+	for _, cc := range cabangForm {
+		idInt, err := strconv.Atoi(cc.ID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-			return
+
+		}
+		// Check if the ID has already been processed
+		if processedIDs[cc.ID] {
+			continue // Skip processing if the ID is already processed
+		}
+
+		// Mark the ID as processed
+		processedIDs[cc.ID] = true
+
+		// Compare cabangFormUnupdated with cabangForm based on Versi
+		if cabangFormUnupdated[idInt].Versi < cc.Versi {
+			_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+				return
+			}
 		}
 	}
 
