@@ -233,7 +233,8 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cb := range cabang {
 		idStr := strconv.Itoa(int(cb.ID))
-		if _, ok := existingCabangMap[cb.NamaCabang]; !ok {
+		versiStr := strconv.Itoa(int(cb.Versi))
+		if _, ok := existingCabangMap[versiStr]; !ok {
 			cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
 		} else {
 			vStr := strconv.Itoa(cb.Versi)
