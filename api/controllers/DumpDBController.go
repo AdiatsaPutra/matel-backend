@@ -329,6 +329,7 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cc := range comparedCabangForm {
 		var leasings []models.LeasingToExport
+		logrus.Info(cc)
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang, nomorPolisi, noMesin, noRangka").
 			Where("cabang_id = ?", cc.ID).
