@@ -350,7 +350,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		logrus.Info(cc)
 
 		// Compare cabangForm with the highest processed Versi
-		if highestProcessedVersi < cc.Versi {
+		if highestProcessedVersi > cc.Versi {
 			_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
