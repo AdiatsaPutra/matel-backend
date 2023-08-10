@@ -331,7 +331,16 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
+	uniqueDeleteIDs := make(map[string]bool) // Map to track unique IDs for delete queries
+
 	for _, cc := range cabangForm {
+		// Check if the ID is already processed for delete queries
+		if uniqueDeleteIDs[cc.ID] {
+			continue // Skip this iteration if already processed
+		}
+
+		uniqueDeleteIDs[cc.ID] = true // Mark the ID as processed
+
 		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
