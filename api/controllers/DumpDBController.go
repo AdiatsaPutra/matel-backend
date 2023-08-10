@@ -81,7 +81,7 @@ func DumpSQLHandler(c *gin.Context) {
 	}
 
 	// Menulis header SQL ke file
-	_, err = file.WriteString("INSERT INTO m_kendaraan (id, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
@@ -340,7 +340,7 @@ func UpdateSQLHandler(c *gin.Context) {
 			return
 		}
 
-		_, err = file.WriteString("INSERT INTO m_kendaraan (id, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
+		_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 		}
