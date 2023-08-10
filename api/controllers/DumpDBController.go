@@ -293,23 +293,34 @@ func UpdateSQLHandler(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
+	uniqueIDs := make(map[string]bool) // Map to track unique IDs
 
-	for i, cb := range comparedCabangForm {
+	for i, cb := range cabangForm {
+		// Check if the ID is already processed
+		if uniqueIDs[cb.ID] {
+			continue // Skip this iteration if already processed
+		}
+
+		uniqueIDs[cb.ID] = true // Mark the ID as processed
+
 		versi := strconv.Itoa(cb.Versi)
 		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.ID, versi))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+			return
 		}
 
-		if i < len(comparedCabangForm)-1 {
+		if i < len(cabangForm)-1 {
 			_, err = file.WriteString(",\n")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				return
 			}
 		} else {
 			_, err = file.WriteString(";")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				return
 			}
 		}
 	}
@@ -320,7 +331,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	for _, cc := range comparedCabangForm {
+	for _, cc := range cabangForm {
 		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
