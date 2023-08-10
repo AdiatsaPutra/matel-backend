@@ -289,10 +289,10 @@ func UpdateSQLHandler(c *gin.Context) {
 		}
 	}
 
-	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi) VALUES\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-	}
+	// _, err = file.WriteString("INSERT INTO m_cabang (id_source, versi) VALUES\n")
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+	// }
 
 	// for i, cb := range comparedCabangForm {
 	// 	versi := strconv.Itoa(cb.Versi)
