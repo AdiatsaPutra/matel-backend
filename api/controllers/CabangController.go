@@ -144,14 +144,25 @@ func UpdateCabang(c *gin.Context) {
 		return
 	}
 
+	// Store the original NamaCabang value for comparison
+	originalNamaCabang := cabang.NamaCabang
+
+	// Update the cabang record
 	cabang.NamaCabang = payload.NamaCabang
 	cabang.NoHP = payload.NoHP
-
 	result = config.InitDB().Save(&cabang)
 	if result.Error != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
+
+	// Update the m_kendaraan table
+	kendaraanResult := config.InitDB().Model(&models.Kendaraan{}).Where("cabang = ?", originalNamaCabang).Update("cabang", cabang.NamaCabang)
+	if kendaraanResult.Error != nil {
+		exceptions.AppException(c, "Something went wrong while updating m_kendaraan")
+		return
+	}
+
 	config.CloseDB(config.InitDB())
 
 	payloads.HandleSuccess(c, cabang, "Success", 200)
