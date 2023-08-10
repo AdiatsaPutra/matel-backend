@@ -347,7 +347,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		logrus.Info("THIS")
 		logrus.Info(highestProcessedVersi)
 		logrus.Info("THIS")
-		logrus.Info(cc)
+		logrus.Info(cc.Versi)
 
 		// Compare cabangForm with the highest processed Versi
 		if highestProcessedVersi < cc.Versi {
