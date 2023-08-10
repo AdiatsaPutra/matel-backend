@@ -25,7 +25,7 @@ func GetLeasingChart(c *gin.Context) ([]models.LeasingChart, error) {
 	var leasingChart []models.LeasingChart
 	query := `SELECT m_kendaraan.cabang AS leasing_name, COUNT(*) AS count
 	FROM m_kendaraan
-	WHERE id < 99999999
+	WHERE id < 99999999 AND deleted_at IS NULL
 	GROUP BY cabang
 	ORDER BY cabang;`
 	result := config.InitDB().Raw(query).Scan(&leasingChart)
