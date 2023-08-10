@@ -284,14 +284,14 @@ func UpdateSQLHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
-	for i, cb := range cabangFormUnupdated {
+	for i, cb := range comparedCabangForm {
 		versi := strconv.Itoa(cb.Versi)
 		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.ID, versi))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
 
-		if i < len(cabangFormUnupdated)-1 {
+		if i < len(comparedCabangForm)-1 {
 			_, err = file.WriteString(",\n")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
