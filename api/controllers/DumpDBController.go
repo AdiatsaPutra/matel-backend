@@ -289,44 +289,44 @@ func UpdateSQLHandler(c *gin.Context) {
 		}
 	}
 
-	// _, err = file.WriteString("INSERT INTO m_cabang (id_source, versi) VALUES\n")
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-	// }
+	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi) VALUES\n")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+	}
 
-	// for i, cb := range comparedCabangForm {
-	// 	versi := strconv.Itoa(cb.Versi)
-	// 	_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.ID, versi))
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 	}
+	for i, cb := range comparedCabangForm {
+		versi := strconv.Itoa(cb.Versi)
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.ID, versi))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+		}
 
-	// 	if i < len(comparedCabangForm)-1 {
-	// 		_, err = file.WriteString(",\n")
-	// 		if err != nil {
-	// 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 		}
-	// 	} else {
-	// 		_, err = file.WriteString(";")
-	// 		if err != nil {
-	// 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 		}
-	// 	}
-	// }
+		if i < len(comparedCabangForm)-1 {
+			_, err = file.WriteString(",\n")
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+			}
+		} else {
+			_, err = file.WriteString(";")
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+			}
+		}
+	}
 
-	// _, err = file.WriteString("\n")
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-	// 	return
-	// }
+	_, err = file.WriteString("\n")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+		return
+	}
 
-	// for _, cc := range comparedCabangForm {
-	// 	_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-	// 		return
-	// 	}
-	// }
+	for _, cc := range comparedCabangForm {
+		_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+			return
+		}
+	}
 
 	_, err = file.WriteString("\n")
 	if err != nil {
