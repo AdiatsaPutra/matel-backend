@@ -67,7 +67,7 @@ func GetKendaraanTotal(c *gin.Context) (uint, error) {
 	var count sql.NullInt64
 	result := config.InitDB().Raw(`SELECT COUNT(*)
 	FROM m_kendaraan
-	WHERE id < 99999999 WHERE deleted_at IS NULL;`).Scan(&count)
+	WHERE id < 99999999 AND WHERE deleted_at IS NULL;`).Scan(&count)
 
 	if result.Error != nil {
 		return 0, result.Error
