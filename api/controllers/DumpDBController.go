@@ -87,7 +87,7 @@ func DumpSQLHandler(c *gin.Context) {
 	}
 
 	var leasings []models.LeasingToExport
-	err = sourceDB.Table("m_kendaraan").Select("id, cabang_id, nomorPolisi, noMesin, noRangka").Find(&leasings).Error
+	err = sourceDB.Table("m_kendaraan").Select("id, cabang_id, nomorPolisi, noMesin, noRangka").Where("deleted_at IS NULL").Find(&leasings).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table: %v": err.Error()})
 	}
