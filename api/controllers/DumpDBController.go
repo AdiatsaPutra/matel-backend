@@ -218,6 +218,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	var cabang []models.Cabang
 	err = sourceDB.Table("m_cabang").
 		Select("id, nama_cabang, versi").
+		Where("deleted_at IS NULL").
 		Find(&cabang).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
@@ -344,14 +345,10 @@ func UpdateSQLHandler(c *gin.Context) {
 	for _, cc := range cabangForm {
 		// Get the highest processed Versi for the current ID
 		highestProcessedVersi := processedIDs[cc.ID]
-		logrus.Info("THIS")
-		logrus.Info(highestProcessedVersi)
-		logrus.Info("THIS")
-		logrus.Info(cc.Versi)
 
 		// Compare cabangForm with the highest processed Versi
 		if highestProcessedVersi < cc.Versi {
-			_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE id = '%s';\n", cc.ID))
+			_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = '%s';\n", cc.ID))
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 				return
@@ -370,11 +367,10 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cc := range comparedCabangForm {
 		var leasings []models.LeasingToExport
-		logrus.Info(cc)
 		err = sourceDB.Table("m_kendaraan").
-			Select("id, cabang, nomorPolisi, noMesin, noRangka").
+			Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
 			Where("cabang_id = ?", cc.ID).
-			// Where("versi < ?", cc.Versi).
+			Where("versi < ?", cc.Versi).
 			Find(&leasings).Error
 
 		if err != nil {
