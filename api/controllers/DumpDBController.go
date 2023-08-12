@@ -370,7 +370,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
 			Where("cabang_id = ?", cc.ID).
-			Where("versi < ?", cc.Versi).
+			Where("versi > ?", cc.Versi).
 			Find(&leasings).Error
 
 		if err != nil {
