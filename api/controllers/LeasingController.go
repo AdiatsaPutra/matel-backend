@@ -42,8 +42,9 @@ func GetKendaraan(c *gin.Context) {
 		data := make(map[string]interface{})
 		data["total"] = count
 		data["kendaraan"] = kendaraans
+		config.CloseDB(config.InitDB())
 
-		payloads.HandleSuccess(c, kendaraans, "Kendaraan found", http.StatusOK)
+		payloads.HandleSuccess(c, kendaraans, "Kendaraan faound", http.StatusOK)
 		return
 	}
 

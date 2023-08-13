@@ -367,10 +367,11 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cc := range comparedCabangForm {
 		var leasings []models.LeasingToExport
+
 		err = sourceDB.Table("m_kendaraan").
 			Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
 			Where("cabang_id = ?", cc.ID).
-			Where("versi > ?", cc.Versi).
+			// Where("versi > ?", cc.Versi).
 			Find(&leasings).Error
 
 		if err != nil {
