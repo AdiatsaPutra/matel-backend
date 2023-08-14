@@ -21,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -30,6 +31,7 @@ var (
 	dataHeaders    = []string{
 		"leasing",
 		"cabang",
+		"cabangData",
 		"noKontrak",
 		"namaDebitur",
 		"nomorPolisi",
@@ -193,33 +195,21 @@ func readCsvFilePerLineThenSendToWorker(csvReader *csv.Reader, jobs chan<- []int
 func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []interface{}) error {
 	now := time.Now()
 
-	leasingName := c.PostForm("leasing_name")
-	cabangName := c.PostForm("cabang_name")
-
-	values = append([]interface{}{cabangName}, values...)
-	values = append([]interface{}{leasingName}, values...)
 	values = append(values, now)
 	values = append(values, 1)
 
-	// get cabang versi from db
-	var cabang models.Cabang
-	result := config.InitDB().Where("nama_cabang = ? AND deleted_at IS NULL", cabangName).Find(&cabang)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	values = append(values, cabang.Versi)
+	values = append(values, 1)
 
 	var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
-	for i := 4; i < 7; i++ {
+	for i := 5; i < 8; i++ {
 		if str, ok := values[i].(string); ok {
 			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
 			values[i] = filteredStr
 		}
 	}
 
-	for i := 8; i < 10; i++ {
+	for i := 9; i < 11; i++ {
 		if str, ok := values[i].(string); ok {
 			filteredStr := alphanumericRegex.ReplaceAllString(str, "")
 			values[i] = filteredStr
@@ -243,6 +233,7 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			if err != nil {
+				logrus.Info(err)
 				exceptions.AppException(c, err.Error())
 				*outerError = err
 				return
