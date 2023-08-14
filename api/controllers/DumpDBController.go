@@ -227,6 +227,10 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	logrus.Info(cabang)
 
+	for _, cf := range cabang {
+		logrus.Info(cf.Versi)
+	}
+
 	existingCabangMap := make(map[string]int)
 
 	for _, cf := range cabangForm {
