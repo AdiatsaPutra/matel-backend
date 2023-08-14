@@ -5,11 +5,12 @@ import (
 )
 
 type Cabang struct {
-	ID         uint   `json:"id" gorm:"column:id"`
-	LeasingID  uint   `json:"leasing_id" gorm:"column:leasing_id"`
-	NamaCabang string `json:"nama_cabang" gorm:"column:nama_cabang"`
-	NoHP       string `json:"no_hp" gorm:"column:no_hp"`
-	Versi      int    `json:"versi" gorm:"column:versi"`
+	ID          uint   `json:"id" gorm:"column:id"`
+	LeasingID   uint   `json:"leasing_id" gorm:"column:leasing_id"`
+	NamaCabang  string `json:"nama_cabang" gorm:"column:nama_cabang"`
+	NoHP        string `json:"no_hp" gorm:"column:no_hp"`
+	Versi       int    `json:"versi" gorm:"column:versi"`
+	VersiMaster int    `json:"versi_master" gorm:"column:versi_master"`
 	gorm.Model
 }
 
