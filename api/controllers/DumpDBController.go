@@ -225,12 +225,6 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	logrus.Info(cabang)
-
-	for _, cf := range cabang {
-		logrus.Info(cf.Versi)
-	}
-
 	existingCabangMap := make(map[string]int)
 
 	for _, cf := range cabangForm {
@@ -238,23 +232,14 @@ func UpdateSQLHandler(c *gin.Context) {
 		existingCabangMap[versi] = cf.Versi
 	}
 
-	// for _, cb := range cabang {
-	// 	idStr := strconv.Itoa(int(cb.ID))
-	// 	versiStr := strconv.Itoa(int(cb.Versi))
-	// 	if _, ok := existingCabangMap[versiStr]; !ok {
-	// 		cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
-	// 		} else {
-	// 			vStr := strconv.Itoa(cb.Versi)
-	// 			existingCabangMap[vStr] = cb.Versi
-	// 		}
-	// 	}
-
 	for _, cb := range cabang {
 		idStr := strconv.Itoa(int(cb.ID))
-		if _, ok := existingCabangMap[cb.NamaCabang]; !ok {
+		versiStr := strconv.Itoa(int(cb.Versi))
+		if _, ok := existingCabangMap[versiStr]; !ok {
 			cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
 		} else {
-			existingCabangMap[cb.NamaCabang] = cb.Versi
+			vStr := strconv.Itoa(cb.Versi)
+			existingCabangMap[vStr] = cb.Versi
 		}
 	}
 
