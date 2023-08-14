@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func GetKendaraan(c *gin.Context) {
@@ -67,6 +68,9 @@ func GetKendaraan(c *gin.Context) {
 	if cabang := c.Query("cabang"); cabang != "" {
 		query = query.Where("cabang LIKE ?", "%"+cabang+"%")
 	}
+
+	logrus.Info("THIS")
+	logrus.Info(c.Query("cabang"))
 
 	query = query.Order("created_at DESC")
 

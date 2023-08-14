@@ -8,6 +8,7 @@ type Kendaraan struct {
 	ID          uint   `json:"id" gorm:"column:id"`
 	Leasing     string `json:"leasing" gorm:"column:leasing"`
 	Cabang      string `json:"cabang" gorm:"column:cabang"`
+	CabangData  string `json:"cabangData" gorm:"column:cabangData"`
 	NoKontrak   string `json:"no_kontrak" gorm:"column:noKontrak"`
 	NamaDebitur string `json:"nama_debitur" gorm:"column:namaDebitur"`
 	NomorPolisi string `json:"nomor_polisi" gorm:"column:nomorPolisi"`
