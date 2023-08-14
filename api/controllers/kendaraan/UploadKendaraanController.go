@@ -74,7 +74,7 @@ func AddCSVPerCabang(c *gin.Context) {
 		return
 	}
 
-	cabang.Versi = cabang.Versi + 1
+	// cabang.Versi = cabang.Versi + 1
 
 	result = config.InitDB().Save(&cabang)
 	if result.Error != nil {
