@@ -177,6 +177,8 @@ func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string, Reset boo
 		return
 	}
 
+	cabang.VersiMaster = cabang.VersiMaster + 1
+
 	if Reset {
 		cabang.Versi = 1
 	} else {
