@@ -19,10 +19,11 @@ func CreateCabang(c *gin.Context) {
 	}
 
 	cabang := models.Cabang{
-		LeasingID:  payload.LeasingID,
-		NamaCabang: payload.NamaCabang,
-		NoHP:       payload.NoHP,
-		Versi:      1,
+		LeasingID:   payload.LeasingID,
+		NamaCabang:  payload.NamaCabang,
+		NoHP:        payload.NoHP,
+		Versi:       1,
+		VersiMaster: 1,
 	}
 
 	result := config.InitDB().Create(&cabang)

@@ -39,7 +39,7 @@ func DumpSQLHandler(c *gin.Context) {
 	// Get Cabang With Version
 	var cabang []models.Cabang
 	err = sourceDB.Table("m_cabang").
-		Select("id, versi").
+		Select("id, versi, versi_master").
 		Find(&cabang).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
@@ -48,7 +48,7 @@ func DumpSQLHandler(c *gin.Context) {
 
 	// Insert cabangForm into m_cabang
 
-	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi, versi_master) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
@@ -56,7 +56,8 @@ func DumpSQLHandler(c *gin.Context) {
 	for i, cb := range cabang {
 		idInt := strconv.Itoa(int(cb.ID))
 		versi := strconv.Itoa(cb.Versi)
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", idInt, versi))
+		versiMaster := strconv.Itoa(cb.VersiMaster)
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s')", idInt, versi, versiMaster))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
@@ -217,7 +218,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	// Get Cabang With Version
 	var cabang []models.Cabang
 	err = sourceDB.Table("m_cabang").
-		Select("id, nama_cabang, versi").
+		Select("id, nama_cabang, versi, versi_master").
 		Where("deleted_at IS NULL").
 		Find(&cabang).Error
 	if err != nil {
