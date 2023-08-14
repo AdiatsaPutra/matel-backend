@@ -371,7 +371,8 @@ func UpdateSQLHandler(c *gin.Context) {
 				return
 			}
 
-			logrus.Info(leasings)
+			logrus.Info("VERSI")
+			logrus.Info(cf.Versi)
 
 			_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
 			if err != nil {
