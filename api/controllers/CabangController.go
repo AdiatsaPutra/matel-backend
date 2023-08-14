@@ -183,7 +183,7 @@ func SetVersiCabang(c *gin.Context, LeasingID uint, CabangName string, Reset boo
 	if Reset {
 		cabang.Versi = 1
 	} else {
-		cabang.Versi = cabang.Versi + 1
+		// cabang.Versi = cabang.Versi + 1
 	}
 
 	result = config.InitDB().Save(&cabang)
