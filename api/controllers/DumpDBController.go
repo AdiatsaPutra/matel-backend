@@ -292,7 +292,8 @@ func UpdateSQLHandler(c *gin.Context) {
 
 		id := strconv.Itoa(int(cb.ID))
 		versi := strconv.Itoa(cb.Versi)
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", id, versi))
+		versiMaster := strconv.Itoa(cb.VersiMaster)
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s')", id, versi, versiMaster))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 			return
