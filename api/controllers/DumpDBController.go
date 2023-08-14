@@ -282,7 +282,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		}
 	}
 
-	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi) VALUES\n")
+	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi, versi_master) VALUES\n")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
