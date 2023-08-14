@@ -287,36 +287,27 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 	// uniqueIDs := make(map[string]bool) // Map to track unique IDs
 
-	for i, cr := range cabangForm {
-		for _, cb := range cabang {
-			logrus.Info(cr)
-			// Check if the ID is already processed
-			// if uniqueIDs[cb.ID] {
-			// 	continue // Skip this iteration if already processed
-			// }
+	for i, cb := range cabang {
 
-			// uniqueIDs[cb.ID] = true // Mark the ID as processed
+		id := strconv.Itoa(int(cb.ID))
+		versi := strconv.Itoa(cb.Versi)
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", id, versi))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+			return
+		}
 
-			id := strconv.Itoa(int(cb.ID))
-			versi := strconv.Itoa(cb.Versi)
-			_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", id, versi))
+		if i < len(cabangForm)-1 {
+			_, err = file.WriteString(",\n")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 				return
 			}
-
-			if i < len(cabangForm)-1 {
-				_, err = file.WriteString(",\n")
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-					return
-				}
-			} else {
-				_, err = file.WriteString(";")
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-					return
-				}
+		} else {
+			_, err = file.WriteString(";")
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				return
 			}
 		}
 	}
