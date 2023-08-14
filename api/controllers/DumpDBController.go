@@ -339,16 +339,6 @@ func UpdateSQLHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
-	logrus.Info(comparedCabangForm)
-	logrus.Info(cabangForm)
-	logrus.Info(cabangFormUnupdated)
-	for _, r := range cabang {
-
-		logrus.Info("CABANG")
-		logrus.Info(r.NamaCabang)
-		logrus.Info(r.Versi)
-	}
-
 	for _, cf := range cabangFormUnupdated {
 		for _, cc := range cabang {
 			if cc.VersiMaster > cf.VersiMaster {
