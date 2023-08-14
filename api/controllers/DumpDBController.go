@@ -181,8 +181,9 @@ func UpdateSQLHandler(c *gin.Context) {
 	// dateParam := c.Query("date")
 
 	type CabangForm struct {
-		ID    string `json:"id_source"`
-		Versi int    `json:"versi"`
+		ID          string `json:"id_source"`
+		Versi       int    `json:"versi"`
+		VersiMaster int    `json:"versi_master"`
 	}
 
 	var cabangForm []CabangForm
@@ -320,26 +321,15 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	// Create a map to track processed IDs and their corresponding Versi
-	processedIDs := make(map[string]int)
-
-	for _, cc := range cabangFormUnupdated {
-		// Store the highest Versi for each ID
-		if cc.Versi > processedIDs[cc.ID] {
-			processedIDs[cc.ID] = cc.Versi
-		}
-	}
-
-	for _, cc := range cabangForm {
-		// Get the highest processed Versi for the current ID
-		highestProcessedVersi := processedIDs[cc.ID]
-
-		// Compare cabangForm with the highest processed Versi
-		if highestProcessedVersi < cc.Versi {
-			_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = '%s';\n", cc.ID))
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-				return
+	for _, cf := range cabangFormUnupdated {
+		for _, cc := range cabang {
+			if cf.VersiMaster < cc.VersiMaster {
+				id := strconv.Itoa(int(cc.ID))
+				_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = '%s';\n", id))
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
+					return
+				}
 			}
 		}
 	}
