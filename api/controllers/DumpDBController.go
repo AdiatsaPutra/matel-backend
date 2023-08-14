@@ -357,54 +357,51 @@ func UpdateSQLHandler(c *gin.Context) {
 		logrus.Info(r.Versi)
 	}
 
-	for _, cc := range cabangForm {
+	for _, cf := range cabangFormUnupdated {
+		var leasings []models.LeasingToExport
+		err = sourceDB.Table("m_kendaraan").
+			Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
+			Where("cabang_id = ?", cf.ID).
+			Where("versi > ?", cf.Versi).
+			Find(&leasings).Error
 
-		for _, cf := range cabangFormUnupdated {
-			var leasings []models.LeasingToExport
-			err = sourceDB.Table("m_kendaraan").
-				Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
-				Where("cabang_id = ?", cc.ID).
-				Where("versi > ?", cf.Versi).
-				Find(&leasings).Error
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
+			return
+		}
 
+		logrus.Info("VERSI")
+		logrus.Info(cf.Versi)
+
+		_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+		}
+
+		for i, l := range leasings {
+			_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
-				return
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 			}
 
-			logrus.Info("VERSI")
-			logrus.Info(cf.Versi)
-
-			_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-			}
-
-			for i, l := range leasings {
-				_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+			if i < len(leasings)-1 {
+				_, err = file.WriteString(",\n")
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 				}
-
-				if i < len(leasings)-1 {
-					_, err = file.WriteString(",\n")
-					if err != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-					}
-				} else {
-					_, err = file.WriteString(";")
-					if err != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-					}
+			} else {
+				_, err = file.WriteString(";")
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 				}
 			}
-
-			_, err = file.WriteString("\n")
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-			}
-
 		}
+
+		_, err = file.WriteString("\n")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+		}
+
 	}
 
 	fileSource, err := os.Open(filepath)
