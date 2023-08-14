@@ -297,8 +297,9 @@ func UpdateSQLHandler(c *gin.Context) {
 
 			// uniqueIDs[cb.ID] = true // Mark the ID as processed
 
+			id := strconv.Itoa(int(cb.ID))
 			versi := strconv.Itoa(cb.Versi)
-			_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", cb.ID, versi))
+			_, err = file.WriteString(fmt.Sprintf("('%s', '%s')", id, versi))
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 				return
