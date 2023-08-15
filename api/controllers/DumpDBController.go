@@ -13,7 +13,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func DumpSQLHandler(c *gin.Context) {
@@ -339,14 +338,64 @@ func UpdateSQLHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
 	}
 
-	for _, cf := range cabangFormUnupdated {
-		logrus.Info("CF")
-		logrus.Info(cf)
-		for _, cc := range cabang {
-
-			logrus.Info("CC")
-			logrus.Info(cc)
+	for _, cc := range cabang {
+		found := false
+		for _, cf := range cabangFormUnupdated {
 			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
+				found = true
+				// ... (Your existing code for inserting data)
+				break
+			} else if cc.VersiMaster > cf.VersiMaster {
+				found = true
+				// ... (Your existing code for inserting data)
+				break
+			}
+		}
+		if !found {
+			// Insert data for remaining cc elements
+			var leasings []models.LeasingToExport
+			err = sourceDB.Table("m_kendaraan").
+				Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
+				Where("cabang_id = ?", cc.ID).
+				Where("deleted_at IS NULL").
+				Find(&leasings).Error
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
+				return
+			}
+
+			_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+			}
+
+			for i, l := range leasings {
+				_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				}
+
+				if i < len(leasings)-1 {
+					_, err = file.WriteString(",\n")
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+					}
+				} else {
+					_, err = file.WriteString(";")
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+					}
+				}
+			}
+		}
+	}
+
+	for _, cc := range cabang {
+		found := false
+		for _, cf := range cabangFormUnupdated {
+			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
+				found = true
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -383,7 +432,9 @@ func UpdateSQLHandler(c *gin.Context) {
 						}
 					}
 				}
+				break
 			} else if cc.VersiMaster > cf.VersiMaster {
+				found = true
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -419,9 +470,128 @@ func UpdateSQLHandler(c *gin.Context) {
 						}
 					}
 				}
+				break
+			}
+		}
+		if !found {
+			// Insert data for remaining cc elements
+			var leasings []models.LeasingToExport
+			err = sourceDB.Table("m_kendaraan").
+				Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
+				Where("cabang_id = ?", cc.ID).
+				Where("deleted_at IS NULL").
+				Find(&leasings).Error
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
+				return
+			}
+
+			_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+			}
+
+			for i, l := range leasings {
+				_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				}
+
+				if i < len(leasings)-1 {
+					_, err = file.WriteString(",\n")
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+					}
+				} else {
+					_, err = file.WriteString(";")
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+					}
+				}
 			}
 		}
 	}
+
+	// for _, cf := range cabangFormUnupdated {
+	// 	for _, cc := range cabang {
+
+	// 		if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
+	// 			var leasings []models.LeasingToExport
+	// 			err = sourceDB.Table("m_kendaraan").
+	// 				Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
+	// 				Where("cabang_id = ?", cf.ID).
+	// 				Where("versi > ?", cf.Versi).
+	// 				Where("deleted_at IS NULL").
+	// 				Find(&leasings).Error
+
+	// 			if err != nil {
+	// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
+	// 				return
+	// 			}
+
+	// 			_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
+	// 			if err != nil {
+	// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+	// 			}
+
+	// 			for i, l := range leasings {
+	// 				_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+	// 				if err != nil {
+	// 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+	// 				}
+
+	// 				if i < len(leasings)-1 {
+	// 					_, err = file.WriteString(",\n")
+	// 					if err != nil {
+	// 						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+	// 					}
+	// 				} else {
+	// 					_, err = file.WriteString(";")
+	// 					if err != nil {
+	// 						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+	// 					}
+	// 				}
+	// 			}
+	// 		} else if cc.VersiMaster > cf.VersiMaster {
+	// 			var leasings []models.LeasingToExport
+	// 			err = sourceDB.Table("m_kendaraan").
+	// 				Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
+	// 				Where("cabang_id = ?", cf.ID).
+	// 				Where("deleted_at IS NULL").
+	// 				Find(&leasings).Error
+
+	// 			if err != nil {
+	// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
+	// 				return
+	// 			}
+
+	// 			_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
+	// 			if err != nil {
+	// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+	// 			}
+
+	// 			for i, l := range leasings {
+	// 				_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
+	// 				if err != nil {
+	// 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+	// 				}
+
+	// 				if i < len(leasings)-1 {
+	// 					_, err = file.WriteString(",\n")
+	// 					if err != nil {
+	// 						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+	// 					}
+	// 				} else {
+	// 					_, err = file.WriteString(";")
+	// 					if err != nil {
+	// 						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	_, err = file.WriteString("\n")
 	if err != nil {
