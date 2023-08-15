@@ -331,7 +331,6 @@ func UpdateSQLHandler(c *gin.Context) {
 					return
 				}
 
-				return
 			}
 		}
 	}
