@@ -323,7 +323,8 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cf := range cabangForm {
 		for _, cc := range cabang {
-			if cf.VersiMaster < cc.VersiMaster {
+			if cc.VersiMaster > cf.VersiMaster {
+
 				id := strconv.Itoa(int(cc.ID))
 				_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = '%s';\n", id))
 				if err != nil {
