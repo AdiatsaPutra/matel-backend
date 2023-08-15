@@ -340,10 +340,10 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	for _, cf := range cabangFormUnupdated {
+		logrus.Info("CF")
+		logrus.Info(cf)
 		for _, cc := range cabang {
 
-			logrus.Info("CF")
-			logrus.Info(cf)
 			logrus.Info("CC")
 			logrus.Info(cc)
 			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
