@@ -353,7 +353,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		found := false
 
 		for _, cc := range cabang {
-			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster && found == false {
+			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster && !found {
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -394,7 +394,7 @@ func UpdateSQLHandler(c *gin.Context) {
 					}
 				}
 				found = true
-			} else if cc.VersiMaster > cf.VersiMaster && found == false {
+			} else if cc.VersiMaster > cf.VersiMaster && !found {
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
