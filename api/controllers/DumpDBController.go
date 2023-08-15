@@ -227,33 +227,33 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	existingCabangMap := make(map[string]int)
+	// existingCabangMap := make(map[string]int)
 
-	for _, cf := range cabangForm {
-		versi := strconv.Itoa(int(cf.Versi))
-		existingCabangMap[versi] = cf.Versi
-	}
+	// for _, cf := range cabangForm {
+	// 	versi := strconv.Itoa(int(cf.Versi))
+	// 	existingCabangMap[versi] = cf.Versi
+	// }
 
-	for _, cb := range cabang {
-		idStr := strconv.Itoa(int(cb.ID))
-		versiStr := strconv.Itoa(int(cb.Versi))
-		if _, ok := existingCabangMap[versiStr]; !ok {
-			cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
-		} else {
-			vStr := strconv.Itoa(cb.Versi)
-			existingCabangMap[vStr] = cb.Versi
-		}
-	}
+	// for _, cb := range cabang {
+	// 	idStr := strconv.Itoa(int(cb.ID))
+	// 	versiStr := strconv.Itoa(int(cb.Versi))
+	// 	if _, ok := existingCabangMap[versiStr]; !ok {
+	// 		cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
+	// 	} else {
+	// 		vStr := strconv.Itoa(cb.Versi)
+	// 		existingCabangMap[vStr] = cb.Versi
+	// 	}
+	// }
 
-	for i := range cabangForm {
-		cInt := strconv.Itoa(cabangForm[i].Versi)
-		versi := existingCabangMap[cInt]
-		if versi == 0 {
-			cabangForm[i].Versi = 1
-		} else {
-			cabangForm[i].Versi = versi
-		}
-	}
+	// for i := range cabangForm {
+	// 	cInt := strconv.Itoa(cabangForm[i].Versi)
+	// 	versi := existingCabangMap[cInt]
+	// 	if versi == 0 {
+	// 		cabangForm[i].Versi = 1
+	// 	} else {
+	// 		cabangForm[i].Versi = versi
+	// 	}
+	// }
 
 	_, err = file.WriteString("DELETE FROM m_cabang;")
 	if err != nil {
