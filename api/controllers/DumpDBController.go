@@ -324,12 +324,12 @@ func UpdateSQLHandler(c *gin.Context) {
 	for _, cf := range cabangForm {
 		for _, cc := range cabang {
 			id := strconv.Itoa(int(cc.ID))
-			logrus.Info("Cabang")
-			logrus.Info(cc)
-			logrus.Info("Cabang Form")
-			logrus.Info(cf)
-			if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
 
+			if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
+				logrus.Info("Cabang")
+				logrus.Info(cc)
+				logrus.Info("Cabang Form")
+				logrus.Info(cf)
 				_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = '%s';\n", id))
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
