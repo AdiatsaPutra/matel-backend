@@ -401,9 +401,7 @@ func UpdateSQLHandler(c *gin.Context) {
 				}
 
 				break
-			}
-
-			if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
+			} else if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
