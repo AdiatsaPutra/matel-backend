@@ -307,7 +307,7 @@ func UpdateSQLHandler(c *gin.Context) {
 				return
 			}
 		} else {
-			_, err = file.WriteString(";")
+			_, err = file.WriteString(";\n")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 				return
