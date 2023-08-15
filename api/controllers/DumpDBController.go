@@ -349,11 +349,11 @@ func UpdateSQLHandler(c *gin.Context) {
 	// cabangForm = Cabang From User
 	// cabang = Cabang From Server
 
-	for _, cf := range cabangFormUnupdated {
-		found := false
+	for _, cf := range cabangForm {
 
 		for _, cc := range cabang {
-			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster && !found {
+
+			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -393,8 +393,11 @@ func UpdateSQLHandler(c *gin.Context) {
 						}
 					}
 				}
-				found = true
-			} else if cc.VersiMaster > cf.VersiMaster && !found {
+
+				continue
+			}
+
+			if cc.VersiMaster > cf.VersiMaster {
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -433,7 +436,8 @@ func UpdateSQLHandler(c *gin.Context) {
 						}
 					}
 				}
-				found = true
+
+				continue
 			}
 		}
 
