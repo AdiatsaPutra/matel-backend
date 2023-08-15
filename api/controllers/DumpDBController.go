@@ -330,7 +330,7 @@ func UpdateSQLHandler(c *gin.Context) {
 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 					return
 				}
-
+				break
 			}
 		}
 	}
