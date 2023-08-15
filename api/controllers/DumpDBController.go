@@ -341,13 +341,10 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cf := range cabangFormUnupdated {
 		for _, cc := range cabang {
-			logrus.Info("START")
-			logrus.Info("CC")
-			logrus.Info(cc.Versi)
+
 			logrus.Info("CF")
-			logrus.Info(cf.Versi)
+			logrus.Info(cf)
 			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
-				logrus.Info("1 TRUE")
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -385,7 +382,6 @@ func UpdateSQLHandler(c *gin.Context) {
 					}
 				}
 			} else if cc.VersiMaster > cf.VersiMaster {
-				logrus.Info("1 FALSE")
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
