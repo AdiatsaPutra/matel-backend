@@ -394,7 +394,7 @@ func UpdateSQLHandler(c *gin.Context) {
 					}
 				}
 
-				continue
+				break
 			}
 
 			if cc.VersiMaster > cf.VersiMaster {
@@ -437,7 +437,7 @@ func UpdateSQLHandler(c *gin.Context) {
 					}
 				}
 
-				continue
+				break
 			}
 		}
 
