@@ -326,9 +326,9 @@ func UpdateSQLHandler(c *gin.Context) {
 			id := strconv.Itoa(int(cc.ID))
 
 			if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
-				logrus.Info("Cabang")
+				logrus.Info("Cabang Deleted")
 				logrus.Info(cc)
-				logrus.Info("Cabang Form")
+				logrus.Info("Cabang Form Deleted")
 				logrus.Info(cf)
 				_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = '%s';\n", id))
 				if err != nil {
