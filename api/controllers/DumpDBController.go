@@ -321,7 +321,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	for _, cf := range cabangFormUnupdated {
+	for _, cf := range cabangForm {
 		for _, cc := range cabang {
 			if cf.VersiMaster < cc.VersiMaster {
 				id := strconv.Itoa(int(cc.ID))
@@ -330,6 +330,8 @@ func UpdateSQLHandler(c *gin.Context) {
 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
 					return
 				}
+
+				return
 			}
 		}
 	}
