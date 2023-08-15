@@ -342,7 +342,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	for _, cf := range cabangFormUnupdated {
 		for _, cc := range cabang {
 			if cc.Versi > cf.Versi && cc.Versi == cc.Versi {
-
+				logrus.Info("1 TRUE")
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -355,9 +355,6 @@ func UpdateSQLHandler(c *gin.Context) {
 					c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
 					return
 				}
-
-				logrus.Info("VERSI")
-				logrus.Info(cf.Versi)
 
 				_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
 				if err != nil {
@@ -383,6 +380,7 @@ func UpdateSQLHandler(c *gin.Context) {
 					}
 				}
 			} else if cc.VersiMaster > cf.VersiMaster {
+				logrus.Info("1 FALSE")
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -394,9 +392,6 @@ func UpdateSQLHandler(c *gin.Context) {
 					c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
 					return
 				}
-
-				logrus.Info("VERSI")
-				logrus.Info(cf.Versi)
 
 				_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
 				if err != nil {
