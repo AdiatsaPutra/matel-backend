@@ -249,7 +249,8 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 		values = append([]interface{}{leasingName}, values...)
 		values = append(values, now)
 		values = append(values, 1)
-		values = append(values, cabang.Versi+1)
+		var versi = cabang.Versi + 1
+		values = append(values, versi)
 
 		var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
