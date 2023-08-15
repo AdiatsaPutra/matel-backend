@@ -74,7 +74,7 @@ func AddCSVPerCabang(c *gin.Context) {
 		return
 	}
 
-	cabang.Versi = cabang.Versi + 2
+	cabang.Versi = cabang.Versi + 1
 
 	result = config.InitDB().Save(&cabang)
 	if result.Error != nil {
@@ -249,7 +249,7 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 		values = append([]interface{}{leasingName}, values...)
 		values = append(values, now)
 		values = append(values, 1)
-		values = append(values, cabang.Versi)
+		values = append(values, cabang.Versi+1)
 
 		var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
