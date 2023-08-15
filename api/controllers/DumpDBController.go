@@ -354,8 +354,8 @@ func UpdateSQLHandler(c *gin.Context) {
 	for _, cf := range cabangForm {
 
 		for _, cc := range cabang {
-
-			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
+			id := strconv.Itoa(int(cc.ID))
+			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster && id == cf.ID {
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
@@ -399,7 +399,7 @@ func UpdateSQLHandler(c *gin.Context) {
 				break
 			}
 
-			if cc.VersiMaster > cf.VersiMaster {
+			if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
 					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").

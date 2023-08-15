@@ -22,7 +22,7 @@ func CreateCabang(c *gin.Context) {
 		LeasingID:   payload.LeasingID,
 		NamaCabang:  payload.NamaCabang,
 		NoHP:        payload.NoHP,
-		Versi:       1,
+		Versi:       2,
 		VersiMaster: 1,
 	}
 
