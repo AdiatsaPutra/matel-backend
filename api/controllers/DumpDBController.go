@@ -323,9 +323,9 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cf := range cabangForm {
 		for _, cc := range cabang {
-			if cc.VersiMaster > cf.VersiMaster {
+			id := strconv.Itoa(int(cc.ID))
+			if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
 
-				id := strconv.Itoa(int(cc.ID))
 				_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = '%s';\n", id))
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
