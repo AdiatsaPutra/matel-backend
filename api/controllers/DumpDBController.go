@@ -344,6 +344,8 @@ func UpdateSQLHandler(c *gin.Context) {
 
 			logrus.Info("CF")
 			logrus.Info(cf)
+			logrus.Info("CC")
+			logrus.Info(cc)
 			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
