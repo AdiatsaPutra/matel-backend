@@ -342,7 +342,11 @@ func UpdateSQLHandler(c *gin.Context) {
 	for _, cf := range cabangFormUnupdated {
 		for _, cc := range cabang {
 			logrus.Info("START")
-			if cc.Versi > cf.Versi && cc.Versi == cc.Versi {
+			logrus.Info(cc.Versi)
+			logrus.Info(cf.Versi)
+			logrus.Info(cc.VersiMaster)
+			logrus.Info(cf.VersiMaster)
+			if cc.Versi > cf.Versi && cc.Versi == cf.Versi {
 				logrus.Info("1 TRUE")
 				var leasings []models.LeasingToExport
 				err = sourceDB.Table("m_kendaraan").
