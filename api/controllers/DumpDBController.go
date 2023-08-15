@@ -300,7 +300,7 @@ func UpdateSQLHandler(c *gin.Context) {
 			return
 		}
 
-		if i < len(cabangForm)-1 {
+		if i < len(cabang)-1 {
 			_, err = file.WriteString(",\n")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
