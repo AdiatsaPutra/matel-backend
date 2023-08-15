@@ -348,7 +348,7 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	for _, cc := range cabang {
 		found := false
-		for _, cf := range cabangFormUnupdated {
+		for _, cf := range cabangForm {
 			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster {
 				found = true
 				var leasings []models.LeasingToExport
