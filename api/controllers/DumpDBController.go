@@ -274,7 +274,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		for _, cfu := range cabangFormUnupdated {
 			if cf.ID == cfu.ID {
 				found = true
-				break
+				// break
 			}
 		}
 
@@ -351,6 +351,8 @@ func UpdateSQLHandler(c *gin.Context) {
 	logrus.Info(cabangForm)
 	logrus.Info("cabang Form Unupdated")
 	logrus.Info(cabangFormUnupdated)
+	logrus.Info("cabang Form comparedCabangForm")
+	logrus.Info(comparedCabangForm)
 
 	// cabangForm = Cabang From User
 	// cabang = Cabang From Server
