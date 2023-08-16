@@ -362,6 +362,72 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	createSQLFile(compareResults, mKendaraanData, dbData)
 
+	// handle download file
+
+	filepath := "output.sql"
+
+	fileSource, err := os.Open(filepath)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	defer fileSource.Close()
+
+	// Get the file information.
+	fileInfo, err := fileSource.Stat()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Create a zip archive.
+	zipFilePath := "archive.zip"
+	zipFile, err := os.Create(zipFilePath)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
+		return
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Create a new file in the zip archive.
+	header, err := zip.FileInfoHeader(fileInfo)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	header.Name = fileInfo.Name()
+
+	writer, err := zipWriter.CreateHeader(&zip.FileHeader{
+		Name:   filepath,
+		Method: zip.Deflate, // Menggunakan metode kompresi Deflate
+	})
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Copy the file content to the zip archive.
+	_, err = io.Copy(writer, fileSource)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Close the zip archive.
+	err = zipWriter.Close()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+zipFilePath)
+	c.Writer.Header().Set("Content-Type", "application/zip")
+
+	c.File(zipFilePath)
+
 	// c.JSON(http.StatusOK, gin.H{
 	// 	"compare_results":   compareResults,
 	// 	"m_kendaraan_data": mKendaraanData,
