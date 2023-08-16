@@ -15,6 +15,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 var db *sql.DB
@@ -330,6 +331,7 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 func UpdateSQLHandler(c *gin.Context) {
 	var items []Item
 	if err := c.ShouldBindJSON(&items); err != nil {
+		logrus.Info(items)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
