@@ -331,6 +331,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	mKendaraanData := []MKendaraan{}
 
 	for _, result := range compareResults {
+		logrus.Info("Status -----------------------------------")
 		logrus.Info(result["status"].(string))
 		switch status := result["status"].(string); {
 		case status == "Cabang tidak ada dalam request API":
