@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func GetUserTotalInfo(c *gin.Context) (models.HomeUserInfo, error) {
@@ -153,21 +154,34 @@ func SetUser(c *gin.Context, userID uint, subscriptionMonths uint) error {
 		return err
 	}
 
-	now := time.Now()
-	nowEnd := time.Now()
+	if subscriptionMonths == 0 {
+		if err := db.Model(&user).Updates(models.User{
+			StartSubscription: "",
+			EndSubscription:   "",
+			Status:            2,
+			SubscriptionMonth: 0,
+		}).Error; err != nil {
+			return err
+		}
+	} else {
+		logrus.Info(1)
+		now := time.Now()
+		nowEnd := time.Now()
 
-	endSubscription := nowEnd.AddDate(0, 0, int(subscriptionMonths))
+		endSubscription := nowEnd.AddDate(0, 0, int(subscriptionMonths))
 
-	startSubscriptionStr := now.Format("2006-01-02")
-	endSubscriptionStr := endSubscription.Format("2006-01-02")
+		startSubscriptionStr := now.Format("2006-01-02")
+		endSubscriptionStr := endSubscription.Format("2006-01-02")
 
-	if err := db.Model(&user).Updates(models.User{
-		StartSubscription: startSubscriptionStr,
-		EndSubscription:   endSubscriptionStr,
-		Status:            1,
-		SubscriptionMonth: subscriptionMonths,
-	}).Error; err != nil {
-		return err
+		if err := db.Model(&user).Updates(models.User{
+			StartSubscription: startSubscriptionStr,
+			EndSubscription:   endSubscriptionStr,
+			Status:            1,
+			SubscriptionMonth: subscriptionMonths,
+		}).Error; err != nil {
+			return err
+		}
+
 	}
 
 	return nil

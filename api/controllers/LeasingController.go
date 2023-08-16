@@ -141,15 +141,6 @@ func DeleteKendaraanByID(c *gin.Context) {
 		return
 	}
 
-	var count int64
-	if err := config.InitDB().Model(&models.Kendaraan{}).Count(&count).Error; err != nil {
-		exceptions.AppException(c, err.Error())
-	}
-
-	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
-		exceptions.AppException(c, err.Error())
-	}
-
 	payloads.HandleSuccess(c, "Success", "Success", http.StatusOK)
 }
 
