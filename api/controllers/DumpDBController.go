@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func DumpSQLHandler(c *gin.Context) {
@@ -251,6 +252,8 @@ func getMKendaraanByCabang(cabangID int) ([]MKendaraan, error) {
 	if err := config.InitDB().Where("cabang_id = ?", cabangID).Find(&results).Error; err != nil {
 		return nil, err
 	}
+	logrus.Info("DATA KENDARAAN BY CABANG")
+	logrus.Info(results)
 	return results, nil
 }
 
@@ -259,6 +262,8 @@ func getMKendaraanByCabangVersi(cabangID int, versi int) ([]MKendaraan, error) {
 	if err := config.InitDB().Where("cabang_id = ? AND versi > ?", cabangID, versi).Find(&results).Error; err != nil {
 		return nil, err
 	}
+	logrus.Info("DATA KENDARAAN BY CABANG VERSI")
+	logrus.Info(results)
 	return results, nil
 }
 
