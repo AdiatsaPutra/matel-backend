@@ -94,7 +94,7 @@ func GetCabangWithTotal(c *gin.Context) {
 	var results []models.CabangTotal
 
 	err := db.Raw(`SELECT
-			k.cabang_id as id,
+			c.id,
 			c.nama_cabang,
 			c.no_hp,
 			l.nama_leasing,
@@ -228,15 +228,6 @@ func DeleteCabang(c *gin.Context) {
 	if deleteResult.Error != nil {
 		exceptions.AppException(c, "Failed to delete Kendaraan")
 		return
-	}
-
-	var count int64
-	if err := config.InitDB().Model(&models.Kendaraan{}).Count(&count).Error; err != nil {
-		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
-	}
-
-	if err := config.InitDB().Model(&models.Home{}).Where("id = ?", 1).Update("kendaraan_total", count).Error; err != nil {
-		payloads.HandleSuccess(c, "Something went wrong", "Success", 200)
 	}
 
 	config.CloseDB(config.InitDB())

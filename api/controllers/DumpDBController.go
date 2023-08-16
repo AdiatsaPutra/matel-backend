@@ -249,7 +249,7 @@ func compareData(apiData []Item, dbData []MCabang) []map[string]interface{} {
 
 func getMKendaraanByCabang(cabangID int) ([]MKendaraan, error) {
 	var results []MKendaraan
-	if err := config.InitDB().Where("cabang_id = ?", cabangID).Find(&results).Error; err != nil {
+	if err := config.InitDB().Where("cabang_id = ? AND deleted_at IS NULL", cabangID).Find(&results).Error; err != nil {
 		return nil, err
 	}
 	logrus.Info("DATA KENDARAAN BY CABANG")
@@ -259,7 +259,7 @@ func getMKendaraanByCabang(cabangID int) ([]MKendaraan, error) {
 
 func getMKendaraanByCabangVersi(cabangID int, versi int) ([]MKendaraan, error) {
 	var results []MKendaraan
-	if err := config.InitDB().Where("cabang_id = ? AND versi > ?", cabangID, versi).Find(&results).Error; err != nil {
+	if err := config.InitDB().Where("cabang_id = ? AND versi > ? AND deleted_at IS NULL", cabangID, versi).Find(&results).Error; err != nil {
 		return nil, err
 	}
 	logrus.Info("DATA KENDARAAN BY CABANG VERSI")
@@ -284,6 +284,8 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 
 	for _, result := range compareResults {
 		if status, ok := result["status"].(string); ok && status == "Perbedaan versi master" {
+			logrus.Info("Status")
+			logrus.Info(status)
 			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
 			break
 		}
@@ -331,6 +333,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	mKendaraanData := []MKendaraan{}
 
 	for _, result := range compareResults {
+		logrus.Info("Status -----------------------------------")
 		logrus.Info(result["status"].(string))
 		switch status := result["status"].(string); {
 		case status == "Cabang tidak ada dalam request API":
