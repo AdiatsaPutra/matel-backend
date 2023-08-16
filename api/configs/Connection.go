@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+var db *gorm.DB
+
 func InitDB() *gorm.DB {
 	val := url.Values{}
 	val.Add("parseTime", "True")

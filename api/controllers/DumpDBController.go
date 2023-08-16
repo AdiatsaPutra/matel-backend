@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"archive/zip"
-	"database/sql"
 	"fmt"
 	"io"
 	"log"
@@ -15,10 +14,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
-
-var db *sql.DB
 
 func DumpSQLHandler(c *gin.Context) {
 
@@ -243,44 +239,18 @@ func compareData(apiData []Item, dbData []Cabang) []map[string]interface{} {
 }
 
 func getMKendaraanByCabang(cabangID int) ([]MKendaraan, error) {
-	query := fmt.Sprintf("SELECT id, cabang_id, nomorPolisi, noRangka, noMesin FROM m_kendaraan WHERE cabang_id = %d", cabangID)
-	rows, err := db.Query(query)
-	if err != nil {
+	var results []MKendaraan
+	if err := config.InitDB().Where("cabang_id = ?", cabangID).Find(&results).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	var results []MKendaraan
-	for rows.Next() {
-		var kendaraan MKendaraan
-		err := rows.Scan(&kendaraan.ID, &kendaraan.CabangID, &kendaraan.NomorPolisi, &kendaraan.NoRangka, &kendaraan.NoMesin)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, kendaraan)
-	}
-
 	return results, nil
 }
 
 func getMKendaraanByCabangVersi(cabangID int, versi int) ([]MKendaraan, error) {
-	query := fmt.Sprintf("SELECT id, cabang_id, nomorPolisi, noRangka, noMesin FROM m_kendaraan WHERE cabang_id = %d AND versi > %d", cabangID, versi)
-	rows, err := db.Query(query)
-	if err != nil {
+	var results []MKendaraan
+	if err := config.InitDB().Where("cabang_id = ? AND versi > ?", cabangID, versi).Find(&results).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	var results []MKendaraan
-	for rows.Next() {
-		var kendaraan MKendaraan
-		err := rows.Scan(&kendaraan.ID, &kendaraan.CabangID, &kendaraan.NomorPolisi, &kendaraan.NoRangka, &kendaraan.NoMesin)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, kendaraan)
-	}
-
 	return results, nil
 }
 
@@ -331,27 +301,14 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 func UpdateSQLHandler(c *gin.Context) {
 	var items []Item
 	if err := c.ShouldBindJSON(&items); err != nil {
-		logrus.Info(items)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	rows, err := db.Query("SELECT id, versi, versi_master FROM m_cabang")
-	if err != nil {
+	var dbData []Cabang
+	if err := config.InitDB().Find(&dbData).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}
-	defer rows.Close()
-
-	var dbData []Cabang
-	for rows.Next() {
-		var cabang Cabang
-		err := rows.Scan(&cabang.ID, &cabang.Versi, &cabang.VersiMaster)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		dbData = append(dbData, cabang)
 	}
 
 	compareResults := compareData(items, dbData)
@@ -392,9 +349,9 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	createSQLFile(compareResults, mKendaraanData, dbData)
 
-	c.JSON(http.StatusOK, gin.H{
-		"compare_results":  compareResults,
-		"m_kendaraan_data": mKendaraanData,
-	})
+	// c.JSON(http.StatusOK, gin.H{
+	// 	"compare_results":   compareResults,
+	// 	"m_kendaraan_data": mKendaraanData,
+	// })
 
 }
