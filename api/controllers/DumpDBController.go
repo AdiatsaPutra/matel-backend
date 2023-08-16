@@ -192,6 +192,10 @@ type MKendaraan struct {
 	NoMesin     string `json:"noMesin"`
 }
 
+func (e *MKendaraan) TableName() string {
+	return "m_kendaraan"
+}
+
 type Item struct {
 	IDSource    int `json:"id_source"`
 	Versi       int `json:"versi"`
