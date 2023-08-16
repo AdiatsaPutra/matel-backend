@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"archive/zip"
+	"database/sql"
 	"fmt"
 	"io"
+	"log"
 	config "matel/configs"
 	"matel/models"
 	"matel/payloads"
@@ -13,8 +15,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
+
+var db *sql.DB
 
 func DumpSQLHandler(c *gin.Context) {
 
@@ -174,463 +177,222 @@ func DumpSQLHandler(c *gin.Context) {
 	payloads.HandleSuccess(c, "Berhasil update database", "Berhasil", 200)
 }
 
-func UpdateSQLHandler(c *gin.Context) {
+type Cabang struct {
+	ID          int `json:"id"`
+	Versi       int `json:"versi"`
+	VersiMaster int `json:"versi_master"`
+}
 
-	filepath := "export_new_only.sql"
+type MKendaraan struct {
+	ID          int    `json:"id"`
+	CabangID    int    `json:"cabang_id"`
+	NomorPolisi string `json:"nomorPolisi"`
+	NoRangka    string `json:"noRangka"`
+	NoMesin     string `json:"noMesin"`
+}
 
-	// dateParam := c.Query("date")
+type Item struct {
+	IDSource    int `json:"id_source"`
+	Versi       int `json:"versi"`
+	VersiMaster int `json:"versi_master"`
+}
 
-	type CabangForm struct {
-		ID          string `json:"id_source"`
-		Versi       int    `json:"versi"`
-		VersiMaster int    `json:"versi_master"`
-	}
+func compareData(apiData []Item, dbData []Cabang) []map[string]interface{} {
+	results := []map[string]interface{}{}
 
-	var cabangForm []CabangForm
-	var cabangFormUnupdated []CabangForm
-
-	if err := c.BindJSON(&cabangForm); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	cabangFormUnupdated = append(cabangFormUnupdated, cabangForm...)
-
-	// date, err := time.Parse("2006-01-02-15-04-05", dateParam)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
-	// 	return
-	// }
-
-	sourceDB := config.InitDB()
-
-	db, err := sourceDB.DB()
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-	}
-	defer db.Close()
-
-	file, err := os.Create(filepath)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to create file: %v": err.Error()})
-	}
-	defer file.Close()
-
-	// Get Cabang With Version
-	var cabang []models.Cabang
-	err = sourceDB.Table("m_cabang").
-		Select("id, nama_cabang, versi, versi_master").
-		Where("deleted_at IS NULL").
-		Find(&cabang).Error
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
-		return
-	}
-
-	// existingCabangMap := make(map[string]int)
-
-	// for _, cf := range cabangForm {
-	// 	versi := strconv.Itoa(int(cf.Versi))
-	// 	existingCabangMap[versi] = cf.Versi
-	// }
-
-	// for _, cb := range cabang {
-	// 	idStr := strconv.Itoa(int(cb.ID))
-	// 	versiStr := strconv.Itoa(int(cb.Versi))
-	// 	if _, ok := existingCabangMap[versiStr]; !ok {
-	// 		cabangForm = append(cabangForm, CabangForm{ID: idStr, Versi: cb.Versi})
-	// 	} else {
-	// 		vStr := strconv.Itoa(cb.Versi)
-	// 		existingCabangMap[vStr] = cb.Versi
-	// 	}
-	// }
-
-	// for i := range cabangForm {
-	// 	cInt := strconv.Itoa(cabangForm[i].Versi)
-	// 	versi := existingCabangMap[cInt]
-	// 	if versi == 0 {
-	// 		cabangForm[i].Versi = 1
-	// 	} else {
-	// 		cabangForm[i].Versi = versi
-	// 	}
-	// }
-
-	_, err = file.WriteString("DELETE FROM m_cabang;")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-	}
-
-	_, err = file.WriteString("\n\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-		return
-	}
-
-	// Insert cabangForm into m_cabang
-
-	var comparedCabangForm []CabangForm
-	for _, cf := range cabangForm {
+	for _, dbItem := range dbData {
+		dbID, dbVersi, dbVersiMaster := dbItem.ID, dbItem.Versi, dbItem.VersiMaster
 		found := false
-		for _, cfu := range cabangFormUnupdated {
-			if cf.ID == cfu.ID {
+
+		for _, apiItem := range apiData {
+			if apiItem.IDSource == dbID {
+				if apiItem.Versi != dbVersi || apiItem.VersiMaster != dbVersiMaster {
+					var status string
+					if dbVersiMaster > apiItem.VersiMaster {
+						status = "Perbedaan versi master"
+					} else if dbVersi > apiItem.Versi {
+						status = "Perbedaan versi"
+					}
+
+					compareResult := map[string]interface{}{
+						"id_source":    dbID,
+						"versi":        dbVersi,
+						"versi_master": dbVersiMaster,
+						"status":       status,
+					}
+					results = append(results, compareResult)
+				}
 				found = true
-				// break
+				break
 			}
 		}
 
 		if !found {
-			comparedCabangForm = append(comparedCabangForm, cf)
+			result := map[string]interface{}{
+				"id_source":    dbID,
+				"versi":        dbVersi,
+				"versi_master": dbVersiMaster,
+				"status":       "Cabang tidak ada dalam request API",
+			}
+			results = append(results, result)
 		}
 	}
 
-	_, err = file.WriteString("INSERT INTO m_cabang (id_source, versi, versi_master) VALUES\n")
+	return results
+}
+
+func getMKendaraanByCabang(cabangID int) ([]MKendaraan, error) {
+	query := fmt.Sprintf("SELECT id, cabang_id, nomorPolisi, noRangka, noMesin FROM m_kendaraan WHERE cabang_id = %d", cabangID)
+	rows, err := db.Query(query)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
+		return nil, err
 	}
-	// uniqueIDs := make(map[string]bool) // Map to track unique IDs
+	defer rows.Close()
 
-	for i, cb := range cabang {
-
-		id := strconv.Itoa(int(cb.ID))
-		versi := strconv.Itoa(cb.Versi)
-		versiMaster := strconv.Itoa(cb.VersiMaster)
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s')", id, versi, versiMaster))
+	var results []MKendaraan
+	for rows.Next() {
+		var kendaraan MKendaraan
+		err := rows.Scan(&kendaraan.ID, &kendaraan.CabangID, &kendaraan.NomorPolisi, &kendaraan.NoRangka, &kendaraan.NoMesin)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+			return nil, err
+		}
+		results = append(results, kendaraan)
+	}
+
+	return results, nil
+}
+
+func getMKendaraanByCabangVersi(cabangID int, versi int) ([]MKendaraan, error) {
+	query := fmt.Sprintf("SELECT id, cabang_id, nomorPolisi, noRangka, noMesin FROM m_kendaraan WHERE cabang_id = %d AND versi > %d", cabangID, versi)
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []MKendaraan
+	for rows.Next() {
+		var kendaraan MKendaraan
+		err := rows.Scan(&kendaraan.ID, &kendaraan.CabangID, &kendaraan.NomorPolisi, &kendaraan.NoRangka, &kendaraan.NoMesin)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, kendaraan)
+	}
+
+	return results, nil
+}
+
+func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKendaraan, dbData []Cabang) {
+	sqlStatements := []string{}
+
+	sqlStatements = append(sqlStatements, "DELETE FROM m_cabang;\n")
+	sqlStatements = append(sqlStatements, "INSERT INTO m_cabang (id_source, versi, versi_master) VALUES")
+	for idx, dbItem := range dbData {
+		statement := fmt.Sprintf("(%d, %d, %d)", dbItem.ID, dbItem.Versi, dbItem.VersiMaster)
+		if idx == len(dbData)-1 {
+			statement += ";\n"
+		} else {
+			statement += ","
+		}
+		sqlStatements = append(sqlStatements, statement)
+	}
+
+	for _, result := range compareResults {
+		if status, ok := result["status"].(string); ok && status == "Perbedaan versi master" {
+			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
+			break
+		}
+	}
+
+	sqlStatements = append(sqlStatements, "INSERT INTO m_kendaraan (id_source, cabang_id, nomor_polisi, no_rangka, no_mesin) VALUES")
+	for idx, kendaraan := range mKendaraanData {
+		statement := fmt.Sprintf("(%d, %d, '%s', '%s', '%s')", kendaraan.ID, kendaraan.CabangID, kendaraan.NomorPolisi, kendaraan.NoRangka, kendaraan.NoMesin)
+		if idx == len(mKendaraanData)-1 {
+			statement += ";\n"
+		} else {
+			statement += ","
+		}
+		sqlStatements = append(sqlStatements, statement)
+	}
+
+	sqlFile, err := os.Create("output.sql")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer sqlFile.Close()
+
+	for _, statement := range sqlStatements {
+		sqlFile.WriteString(statement + "\n")
+	}
+}
+
+func UpdateSQLHandler(c *gin.Context) {
+	var items []Item
+	if err := c.ShouldBindJSON(&items); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	rows, err := db.Query("SELECT id, versi, versi_master FROM m_cabang")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var dbData []Cabang
+	for rows.Next() {
+		var cabang Cabang
+		err := rows.Scan(&cabang.ID, &cabang.Versi, &cabang.VersiMaster)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		dbData = append(dbData, cabang)
+	}
 
-		if i < len(cabang)-1 {
-			_, err = file.WriteString(",\n")
+	compareResults := compareData(items, dbData)
+	mKendaraanData := []MKendaraan{}
+
+	for _, result := range compareResults {
+		switch status := result["status"].(string); {
+		case status == "Cabang tidak ada dalam request API":
+			kendaraanData, err := getMKendaraanByCabang(result["id_source"].(int))
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-		} else {
-			_, err = file.WriteString(";\n")
+			mKendaraanData = append(mKendaraanData, kendaraanData...)
+		case status == "Perbedaan versi master":
+			kendaraanData, err := getMKendaraanByCabang(result["id_source"].(int))
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-		}
-	}
-
-	_, err = file.WriteString("\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-		return
-	}
-
-	for _, cf := range cabangForm {
-		for _, cc := range cabang {
-			id := strconv.Itoa(int(cc.ID))
-
-			if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
-				logrus.Info("Cabang Deleted")
-				logrus.Info(cc)
-				logrus.Info("Cabang Form Deleted")
-				logrus.Info(cf)
-				_, err = file.WriteString(fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = '%s';\n", id))
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to write delete query to file": err.Error()})
-					return
+			mKendaraanData = append(mKendaraanData, kendaraanData...)
+		case status == "Perbedaan versi":
+			versi := result["versi"].(int)
+			for _, item := range items {
+				if item.IDSource == result["id_source"].(int) {
+					versi = item.Versi
+					break
 				}
-				break
 			}
-		}
-	}
-
-	_, err = file.WriteString("\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-	}
-
-	logrus.Info("Cabang")
-	logrus.Info(cabang)
-	logrus.Info("Cabang Form")
-	logrus.Info(cabangForm)
-	logrus.Info("cabang Form Unupdated")
-	logrus.Info(cabangFormUnupdated)
-	logrus.Info("cabang Form comparedCabangForm")
-	logrus.Info(comparedCabangForm)
-
-	// cabangForm = Cabang From User
-	// cabang = Cabang From Server
-
-	for _, cf := range cabangForm {
-
-		for _, cc := range cabang {
-			id := strconv.Itoa(int(cc.ID))
-			if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster && id == cf.ID {
-				var leasings []models.LeasingToExport
-				err = sourceDB.Table("m_kendaraan").
-					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
-					Where("cabang_id = ?", cf.ID).
-					Where("versi > ?", cf.Versi).
-					Where("deleted_at IS NULL").
-					Find(&leasings).Error
-
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
-					return
-				}
-
-				logrus.Info("VERSI")
-				logrus.Info(cf.Versi)
-
-				_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-				}
-
-				for i, l := range leasings {
-					_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
-					if err != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-					}
-
-					if i < len(leasings)-1 {
-						_, err = file.WriteString(",\n")
-						if err != nil {
-							c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-						}
-					} else {
-						_, err = file.WriteString(";\n")
-						if err != nil {
-							c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-						}
-					}
-				}
-
-				break
-			} else if cc.VersiMaster > cf.VersiMaster && id == cf.ID {
-				var leasings []models.LeasingToExport
-				err = sourceDB.Table("m_kendaraan").
-					Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
-					Where("cabang_id = ?", cf.ID).
-					Where("deleted_at IS NULL").
-					Find(&leasings).Error
-
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
-					return
-				}
-
-				logrus.Info("VERSI")
-				logrus.Info(cf.Versi)
-
-				_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-				}
-
-				for i, l := range leasings {
-					_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
-					if err != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-					}
-
-					if i < len(leasings)-1 {
-						_, err = file.WriteString(",\n")
-						if err != nil {
-							c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-						}
-					} else {
-						_, err = file.WriteString(";\n")
-						if err != nil {
-							c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-						}
-					}
-				}
-
-				break
+			kendaraanData, err := getMKendaraanByCabangVersi(result["id_source"].(int), versi)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
 			}
+			mKendaraanData = append(mKendaraanData, kendaraanData...)
 		}
-
-		// if !found {
-		// 	var leasings []models.LeasingToExport
-		// 	err = sourceDB.Table("m_kendaraan").
-		// 		Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
-		// 		Where("cabang_id = ?", cf.ID).
-		// 		Where("deleted_at IS NULL").
-		// 		Find(&leasings).Error
-
-		// 	if err != nil {
-		// 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
-		// 		return
-		// 	}
-
-		// 	_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
-		// 	if err != nil {
-		// 		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-		// 	}
-
-		// 	for i, l := range leasings {
-		// 		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
-		// 		if err != nil {
-		// 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-		// 		}
-
-		// 		if i < len(leasings)-1 {
-		// 			_, err = file.WriteString(",\n")
-		// 			if err != nil {
-		// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-		// 			}
-		// 		} else {
-		// 			_, err = file.WriteString(";")
-		// 			if err != nil {
-		// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-		// 			}
-		// 		}
-		// 	}
-		// }
 	}
 
-	// for _, cf := range cabangForm {
-	// 	for _, cc := range cabang {
-	// 		if cc.Versi > cf.Versi && cc.VersiMaster == cf.VersiMaster{
+	createSQLFile(compareResults, mKendaraanData, dbData)
 
-	// 			var leasings []models.LeasingToExport
-	// 			err = sourceDB.Table("m_kendaraan").
-	// 				Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
-	// 				Where("cabang_id = ?", cf.ID).
-	// 				Where("versi > ?", cf.Versi).
-	// 				Where("deleted_at IS NULL").
-	// 				Find(&leasings).Error
-
-	// 			if err != nil {
-	// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
-	// 				return
-	// 			}
-
-	// 			logrus.Info("VERSI")
-	// 			logrus.Info(cf.Versi)
-
-	// 			_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
-	// 			if err != nil {
-	// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-	// 			}
-
-	// 			for i, l := range leasings {
-	// 				_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
-	// 				if err != nil {
-	// 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 				}
-
-	// 				if i < len(leasings)-1 {
-	// 					_, err = file.WriteString(",\n")
-	// 					if err != nil {
-	// 						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 					}
-	// 				} else {
-	// 					_, err = file.WriteString(";")
-	// 					if err != nil {
-	// 						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 					}
-	// 				}
-	// 			}
-	// 		} else if cc.VersiMaster > cf.VersiMaster {
-	// 			var leasings []models.LeasingToExport
-	// 			err = sourceDB.Table("m_kendaraan").
-	// 				Select("id, cabang_id, nomorPolisi, noMesin, noRangka").
-	// 				Where("cabang_id = ?", cf.ID).
-	// 				Where("deleted_at IS NULL").
-	// 				Find(&leasings).Error
-
-	// 			if err != nil {
-	// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
-	// 				return
-	// 			}
-
-	// 			logrus.Info("VERSI")
-	// 			logrus.Info(cf.Versi)
-
-	// 			_, err = file.WriteString("INSERT INTO m_kendaraan (id_source, cabang_id, nomorPolisi, noMesin, noRangka) VALUES\n")
-	// 			if err != nil {
-	// 				c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-	// 			}
-
-	// 			for i, l := range leasings {
-	// 				_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka))
-	// 				if err != nil {
-	// 					c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 				}
-
-	// 				if i < len(leasings)-1 {
-	// 					_, err = file.WriteString(",\n")
-	// 					if err != nil {
-	// 						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 					}
-	// 				} else {
-	// 					_, err = file.WriteString(";")
-	// 					if err != nil {
-	// 						c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	_, err = file.WriteString("\n")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failed to write header to file: %v": err.Error()})
-	}
-
-	fileSource, err := os.Open(filepath)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	defer fileSource.Close()
-
-	fileInfo, err := fileSource.Stat()
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	zipFilePath := "archive_new_only.zip"
-	zipFile, err := os.Create(zipFilePath)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
-		return
-	}
-	defer zipFile.Close()
-
-	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
-
-	header, err := zip.FileInfoHeader(fileInfo)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	header.Name = fileInfo.Name()
-
-	writer, err := zipWriter.CreateHeader(&zip.FileHeader{
-		Name:   filepath,
-		Method: zip.Deflate,
+	c.JSON(http.StatusOK, gin.H{
+		"compare_results":  compareResults,
+		"m_kendaraan_data": mKendaraanData,
 	})
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
 
-	_, err = io.Copy(writer, fileSource)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	err = zipWriter.Close()
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+zipFilePath)
-	c.Writer.Header().Set("Content-Type", "application/zip")
-
-	c.File(zipFilePath)
 }
