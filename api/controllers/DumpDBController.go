@@ -189,8 +189,8 @@ type MKendaraan struct {
 	ID          int    `json:"id"`
 	CabangID    int    `json:"cabang_id"`
 	NomorPolisi string `json:"nomor_polisi" gorm:"column:nomorPolisi"`
-	NoRangka    string `json:"noRangka"`
-	NoMesin     string `json:"noMesin"`
+	NoRangka    string `json:"no_rangka" gorm:"column:noRangka"`
+	NoMesin     string `json:"no_mesin" gorm:"column:noMesin"`
 }
 
 func (e *MKendaraan) TableName() string {
