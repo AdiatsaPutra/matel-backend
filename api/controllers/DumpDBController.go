@@ -289,15 +289,17 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 		}
 	}
 
-	sqlStatements = append(sqlStatements, "INSERT INTO m_kendaraan (id_source, cabang_id, nomor_polisi, no_rangka, no_mesin) VALUES")
-	for idx, kendaraan := range mKendaraanData {
-		statement := fmt.Sprintf("(%d, %d, '%s', '%s', '%s')", kendaraan.ID, kendaraan.CabangID, kendaraan.NomorPolisi, kendaraan.NoRangka, kendaraan.NoMesin)
-		if idx == len(mKendaraanData)-1 {
-			statement += ";\n"
-		} else {
-			statement += ","
+	if len(mKendaraanData) > 0 {
+		sqlStatements = append(sqlStatements, "INSERT INTO m_kendaraan (id_source, cabang_id, nomor_polisi, no_rangka, no_mesin) VALUES")
+		for idx, kendaraan := range mKendaraanData {
+			statement := fmt.Sprintf("(%d, %d, '%s', '%s', '%s')", kendaraan.ID, kendaraan.CabangID, kendaraan.NomorPolisi, kendaraan.NoRangka, kendaraan.NoMesin)
+			if idx == len(mKendaraanData)-1 {
+				statement += ";\n"
+			} else {
+				statement += ","
+			}
+			sqlStatements = append(sqlStatements, statement)
 		}
-		sqlStatements = append(sqlStatements, statement)
 	}
 
 	sqlFile, err := os.Create("output.sql")
