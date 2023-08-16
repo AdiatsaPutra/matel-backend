@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var db *gorm.DB
+var gobalDB *gorm.DB
 
 func InitDB() *gorm.DB {
 	val := url.Values{}
@@ -34,6 +34,8 @@ func InitDB() *gorm.DB {
 		log.Fatal("Cannot connected database ", err)
 		return nil
 	}
+
+	gobalDB = db
 
 	sqlDB, err := db.DB()
 

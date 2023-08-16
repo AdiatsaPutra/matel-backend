@@ -174,7 +174,7 @@ func DumpSQLHandler(c *gin.Context) {
 	payloads.HandleSuccess(c, "Berhasil update database", "Berhasil", 200)
 }
 
-type Cabang struct {
+type MCabang struct {
 	ID          int `json:"id"`
 	Versi       int `json:"versi"`
 	VersiMaster int `json:"versi_master"`
@@ -194,7 +194,7 @@ type Item struct {
 	VersiMaster int `json:"versi_master"`
 }
 
-func compareData(apiData []Item, dbData []Cabang) []map[string]interface{} {
+func compareData(apiData []Item, dbData []MCabang) []map[string]interface{} {
 	results := []map[string]interface{}{}
 
 	for _, dbItem := range dbData {
@@ -254,7 +254,7 @@ func getMKendaraanByCabangVersi(cabangID int, versi int) ([]MKendaraan, error) {
 	return results, nil
 }
 
-func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKendaraan, dbData []Cabang) {
+func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKendaraan, dbData []MCabang) {
 	sqlStatements := []string{}
 
 	sqlStatements = append(sqlStatements, "DELETE FROM m_cabang;\n")
@@ -305,7 +305,7 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
-	var dbData []Cabang
+	var dbData []MCabang
 	if err := config.InitDB().Find(&dbData).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
