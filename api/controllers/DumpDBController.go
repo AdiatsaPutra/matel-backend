@@ -180,6 +180,10 @@ type MCabang struct {
 	VersiMaster int `json:"versi_master"`
 }
 
+func (e *MCabang) TableName() string {
+	return "m_cabang"
+}
+
 type MKendaraan struct {
 	ID          int    `json:"id"`
 	CabangID    int    `json:"cabang_id"`
