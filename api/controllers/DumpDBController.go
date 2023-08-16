@@ -328,9 +328,11 @@ func UpdateSQLHandler(c *gin.Context) {
 	mKendaraanData := []MKendaraan{}
 
 	for _, result := range compareResults {
+		logrus.Info(result["status"].(string))
 		switch status := result["status"].(string); {
 		case status == "Cabang tidak ada dalam request API":
 			kendaraanData, err := getMKendaraanByCabang(result["id_source"].(int))
+			logrus.Info(kendaraanData)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -338,6 +340,7 @@ func UpdateSQLHandler(c *gin.Context) {
 			mKendaraanData = append(mKendaraanData, kendaraanData...)
 		case status == "Perbedaan versi master":
 			kendaraanData, err := getMKendaraanByCabang(result["id_source"].(int))
+			logrus.Info(kendaraanData)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
