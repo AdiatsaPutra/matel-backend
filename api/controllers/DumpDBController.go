@@ -284,6 +284,7 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 
 	for _, result := range compareResults {
 		if status, ok := result["status"].(string); ok && status == "Perbedaan versi master" {
+			logrus.Info("Status")
 			logrus.Info(status)
 			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
 			break
