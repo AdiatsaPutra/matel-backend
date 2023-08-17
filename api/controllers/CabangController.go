@@ -223,6 +223,8 @@ func DeleteCabang(c *gin.Context) {
 			exceptions.AppException(c, "Something went wrong")
 			return
 		}
+
+		cabang.VersiMaster = cabang.VersiMaster + 1
 	}
 
 	var kendaraan models.Kendaraan
