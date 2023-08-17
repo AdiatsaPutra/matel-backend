@@ -97,7 +97,7 @@ func DumpSQLHandler(c *gin.Context) {
 	// Menulis data ke file
 	for i, l := range leasings {
 		// log.Printf("Writing data %d of %d\n", i+1, len(leasings))
-		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.NomorPolisi, l.NoMesin, l.NoRangka, l.Versi))
+		_, err = file.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s')", l.ID, l.CabangID, l.Versi, l.NomorPolisi, l.NoMesin, l.NoRangka))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failed to write to file: %v": err.Error()})
 		}
