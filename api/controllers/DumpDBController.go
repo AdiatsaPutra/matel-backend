@@ -404,7 +404,6 @@ func UpdateSQLHandler(c *gin.Context) {
 		}
 	}
 
-	createSQLFile(compareResults, mKendaraanData, dbData)
 	filepath :=
 		createSQLFile(compareResults, mKendaraanData, dbData)
 
