@@ -243,22 +243,18 @@ func compareData(apiData []Item, dbData []MCabang) []map[string]interface{} {
 			results = append(results, result)
 		}
 
-		found = false
 		for _, apiItem := range apiData {
 			if apiItem.IDSource == dbID {
-				found = true
-				break
+				continue
 			}
-		}
-
-		if !found {
 			result := map[string]interface{}{
-				"id_source":    dbID,
-				"versi":        dbVersi,
-				"versi_master": dbVersiMaster,
+				"id_source":    apiItem.IDSource,
+				"versi":        apiItem.Versi,
+				"versi_master": apiItem.VersiMaster,
 				"status":       "Cabang tidak ada dalam database",
 			}
 			results = append(results, result)
+			break
 		}
 	}
 
