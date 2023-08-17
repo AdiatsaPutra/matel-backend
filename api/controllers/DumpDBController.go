@@ -8,6 +8,7 @@ import (
 	config "matel/configs"
 	"matel/models"
 	"matel/payloads"
+	"math/rand"
 	"os"
 	"strconv"
 
@@ -16,6 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 func DumpSQLHandler(c *gin.Context) {
 
@@ -417,8 +420,9 @@ func UpdateSQLHandler(c *gin.Context) {
 		return
 	}
 
+	zipFileName := randomString(10) + ".zip"
 	// Create a zip archive.
-	zipFilePath := "dump_update.zip"
+	zipFilePath := zipFileName
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
@@ -470,4 +474,12 @@ func UpdateSQLHandler(c *gin.Context) {
 	// 	"m_kendaraan_data": mKendaraanData,
 	// })
 
+}
+
+func randomString(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }
