@@ -41,6 +41,7 @@ func DumpSQLHandler(c *gin.Context) {
 	var cabang []models.Cabang
 	err = sourceDB.Table("m_cabang").
 		Select("id, versi, versi_master").
+		Where("deleted_at IS NULL").
 		Find(&cabang).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch data from table": err.Error()})
