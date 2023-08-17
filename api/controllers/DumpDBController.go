@@ -469,6 +469,11 @@ func UpdateSQLHandler(c *gin.Context) {
 
 	c.File(zipFilePath)
 
+	e := os.Remove(zipFilePath)
+	if e != nil {
+		log.Fatal(e)
+	}
+
 	// c.JSON(http.StatusOK, gin.H{
 	// 	"compare_results":   compareResults,
 	// 	"m_kendaraan_data": mKendaraanData,
