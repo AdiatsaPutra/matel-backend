@@ -230,6 +230,7 @@ func DeleteCabang(c *gin.Context) {
 		}
 
 	}
+
 	cabang.VersiMaster = cabang.VersiMaster + 1
 	result = config.InitDB().Save(&cabang)
 	if result.Error != nil {
