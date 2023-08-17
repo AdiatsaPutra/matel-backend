@@ -242,6 +242,24 @@ func compareData(apiData []Item, dbData []MCabang) []map[string]interface{} {
 			}
 			results = append(results, result)
 		}
+
+		found = false
+		for _, apiItem := range apiData {
+			if apiItem.IDSource == dbID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result := map[string]interface{}{
+				"id_source":    dbID,
+				"versi":        dbVersi,
+				"versi_master": dbVersiMaster,
+				"status":       "Cabang tidak ada dalam database",
+			}
+			results = append(results, result)
+		}
 	}
 
 	return results
@@ -284,7 +302,16 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 
 	for _, result := range compareResults {
 		if status, ok := result["status"].(string); ok && status == "Perbedaan versi master" {
-			logrus.Info("Status")
+			logrus.Info("Status ++++++++++++++++++++++++++++++++")
+			logrus.Info(status)
+			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
+			break
+		}
+	}
+
+	for _, result := range compareResults {
+		if status, ok := result["status"].(string); ok && status == "Cabang tidak ada dalam database" {
+			logrus.Info("Status ++++++++++++++++++++++++++++++++")
 			logrus.Info(status)
 			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
 			break
