@@ -224,9 +224,9 @@ func DeleteCabang(c *gin.Context) {
 			return
 		}
 
-		cabang.VersiMaster = cabang.VersiMaster + 1
 	}
 
+	cabang.VersiMaster = cabang.VersiMaster + 1
 	var kendaraan models.Kendaraan
 	deleteKendaraanResult := config.InitDB().Where("cabang = ?", cabang.NamaCabang).Delete(&kendaraan)
 	if deleteKendaraanResult.Error != nil {
