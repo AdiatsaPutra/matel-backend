@@ -207,25 +207,27 @@ func GetCabangVersi(CabangName string) int {
 }
 
 func DeleteCabang(c *gin.Context) {
-
 	cabangID := c.Param("id")
+	queryParam := c.DefaultQuery("query", "")
 
 	var cabang models.Cabang
-	var kendaraan models.Kendaraan
 	result := config.InitDB().First(&cabang, cabangID)
 	if result.Error != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
 
-	result = config.InitDB().Delete(&cabang)
-	if result.Error != nil {
-		exceptions.AppException(c, "Something went wrong")
-		return
+	if queryParam == "delete-cabang" {
+		result = config.InitDB().Delete(&cabang)
+		if result.Error != nil {
+			exceptions.AppException(c, "Something went wrong")
+			return
+		}
 	}
 
-	deleteResult := config.InitDB().Where("cabang = ?", cabang.NamaCabang).Delete(&kendaraan)
-	if deleteResult.Error != nil {
+	var kendaraan models.Kendaraan
+	deleteKendaraanResult := config.InitDB().Where("cabang = ?", cabang.NamaCabang).Delete(&kendaraan)
+	if deleteKendaraanResult.Error != nil {
 		exceptions.AppException(c, "Failed to delete Kendaraan")
 		return
 	}
