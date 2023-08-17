@@ -242,6 +242,24 @@ func compareData(apiData []Item, dbData []MCabang) []map[string]interface{} {
 			}
 			results = append(results, result)
 		}
+
+		found = false
+		for _, apiItem := range apiData {
+			if apiItem.IDSource == dbID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result := map[string]interface{}{
+				"id_source":    dbID,
+				"versi":        dbVersi,
+				"versi_master": dbVersiMaster,
+				"status":       "Cabang tidak ada dalam database",
+			}
+			results = append(results, result)
+		}
 	}
 
 	return results
@@ -284,22 +302,33 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 
 	for _, result := range compareResults {
 		if status, ok := result["status"].(string); ok && status == "Perbedaan versi master" {
-			logrus.Info("Status")
+			logrus.Info("Status ++++++++++++++++++++++++++++++++")
 			logrus.Info(status)
 			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
 			break
 		}
 	}
 
-	sqlStatements = append(sqlStatements, "INSERT INTO m_kendaraan (id_source, cabang_id, nomor_polisi, no_rangka, no_mesin) VALUES")
-	for idx, kendaraan := range mKendaraanData {
-		statement := fmt.Sprintf("(%d, %d, '%s', '%s', '%s')", kendaraan.ID, kendaraan.CabangID, kendaraan.NomorPolisi, kendaraan.NoRangka, kendaraan.NoMesin)
-		if idx == len(mKendaraanData)-1 {
-			statement += ";\n"
-		} else {
-			statement += ","
+	for _, result := range compareResults {
+		if status, ok := result["status"].(string); ok && status == "Cabang tidak ada dalam database" {
+			logrus.Info("Status ++++++++++++++++++++++++++++++++")
+			logrus.Info(status)
+			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
+			break
 		}
-		sqlStatements = append(sqlStatements, statement)
+	}
+
+	if len(mKendaraanData) > 0 {
+		sqlStatements = append(sqlStatements, "INSERT INTO m_kendaraan (id_source, cabang_id, nomor_polisi, no_rangka, no_mesin) VALUES")
+		for idx, kendaraan := range mKendaraanData {
+			statement := fmt.Sprintf("(%d, %d, '%s', '%s', '%s')", kendaraan.ID, kendaraan.CabangID, kendaraan.NomorPolisi, kendaraan.NoRangka, kendaraan.NoMesin)
+			if idx == len(mKendaraanData)-1 {
+				statement += ";\n"
+			} else {
+				statement += ","
+			}
+			sqlStatements = append(sqlStatements, statement)
+		}
 	}
 
 	sqlFile, err := os.Create("output.sql")
@@ -351,19 +380,23 @@ func UpdateSQLHandler(c *gin.Context) {
 			}
 			mKendaraanData = append(mKendaraanData, kendaraanData...)
 		case status == "Perbedaan versi":
-			versi := result["versi"].(int)
+			versi := 0
 			for _, item := range items {
 				if item.IDSource == result["id_source"].(int) {
 					versi = item.Versi
 					break
 				}
 			}
-			kendaraanData, err := getMKendaraanByCabangVersi(result["id_source"].(int), versi)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
+			if versi != 0 {
+				kendaraanData, err := getMKendaraanByCabangVersi(result["id_source"].(int), versi)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				mKendaraanData = append(mKendaraanData, kendaraanData...)
+			} else {
+				logrus.Info("------- Perbedaan versi tapi versi tidak ada dalam request API -------")
 			}
-			mKendaraanData = append(mKendaraanData, kendaraanData...)
 		}
 	}
 
