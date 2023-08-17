@@ -380,19 +380,23 @@ func UpdateSQLHandler(c *gin.Context) {
 			}
 			mKendaraanData = append(mKendaraanData, kendaraanData...)
 		case status == "Perbedaan versi":
-			versi := result["versi"].(int)
+			versi := 0
 			for _, item := range items {
 				if item.IDSource == result["id_source"].(int) {
 					versi = item.Versi
 					break
 				}
 			}
-			kendaraanData, err := getMKendaraanByCabangVersi(result["id_source"].(int), versi)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
+			if versi != 0 {
+				kendaraanData, err := getMKendaraanByCabangVersi(result["id_source"].(int), versi)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				mKendaraanData = append(mKendaraanData, kendaraanData...)
+			} else {
+				logrus.Info("------- Perbedaan versi tapi versi tidak ada dalam request API -------")
 			}
-			mKendaraanData = append(mKendaraanData, kendaraanData...)
 		}
 	}
 
