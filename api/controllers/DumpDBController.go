@@ -191,6 +191,7 @@ type MKendaraan struct {
 	NomorPolisi string `json:"nomor_polisi" gorm:"column:nomorPolisi"`
 	NoRangka    string `json:"no_rangka" gorm:"column:noRangka"`
 	NoMesin     string `json:"no_mesin" gorm:"column:noMesin"`
+	Versi       int    `json:"versi" gorm:"column:versi"`
 }
 
 func (e *MKendaraan) TableName() string {
@@ -315,9 +316,9 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 	}
 
 	if len(mKendaraanData) > 0 {
-		sqlStatements = append(sqlStatements, "INSERT INTO m_kendaraan (id_source, cabang_id, nomor_polisi, no_rangka, no_mesin) VALUES")
+		sqlStatements = append(sqlStatements, "INSERT INTO m_kendaraan (id_source, cabang_id, versi, nomor_polisi, no_rangka, no_mesin) VALUES")
 		for idx, kendaraan := range mKendaraanData {
-			statement := fmt.Sprintf("(%d, %d, '%s', '%s', '%s')", kendaraan.ID, kendaraan.CabangID, kendaraan.NomorPolisi, kendaraan.NoRangka, kendaraan.NoMesin)
+			statement := fmt.Sprintf("(%d, %d, %d, '%s', '%s', '%s')", kendaraan.ID, kendaraan.CabangID, kendaraan.Versi, kendaraan.NomorPolisi, kendaraan.NoRangka, kendaraan.NoMesin)
 			if idx == len(mKendaraanData)-1 {
 				statement += ";\n"
 			} else {
