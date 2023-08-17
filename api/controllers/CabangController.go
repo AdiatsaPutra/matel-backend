@@ -224,14 +224,12 @@ func DeleteCabang(c *gin.Context) {
 			return
 		}
 
-	} else {
-		cabang.VersiMaster = cabang.VersiMaster + 1
-		result = config.InitDB().Save(&cabang)
-		if result.Error != nil {
-			exceptions.AppException(c, "Something went wrong")
-			return
-		}
-
+	}
+	cabang.VersiMaster = cabang.VersiMaster + 1
+	result = config.InitDB().Save(&cabang)
+	if result.Error != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
 	}
 
 	var kendaraan models.Kendaraan
