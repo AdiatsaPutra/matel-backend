@@ -285,7 +285,7 @@ func getMKendaraanByCabangVersi(cabangID int, versi int) ([]MKendaraan, error) {
 	return results, nil
 }
 
-func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKendaraan, dbData []MCabang) {
+func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKendaraan, dbData []MCabang) string {
 	sqlStatements := []string{}
 
 	sqlStatements = append(sqlStatements, "DELETE FROM m_cabang;\n")
@@ -331,7 +331,9 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 		}
 	}
 
-	sqlFile, err := os.Create("output.sql")
+	zipFileName := randomString(10) + ".sql"
+
+	sqlFile, err := os.Create(zipFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -340,6 +342,8 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 	for _, statement := range sqlStatements {
 		sqlFile.WriteString(statement + "\n")
 	}
+
+	return zipFileName
 }
 
 func UpdateSQLHandler(c *gin.Context) {
@@ -401,10 +405,10 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	createSQLFile(compareResults, mKendaraanData, dbData)
+	filepath :=
+		createSQLFile(compareResults, mKendaraanData, dbData)
 
 	// handle download file
-
-	filepath := "output.sql"
 
 	fileSource, err := os.Open(filepath)
 	if err != nil {
