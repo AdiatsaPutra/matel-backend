@@ -7,7 +7,7 @@ import (
 )
 
 func DownloadLeasing(c *gin.Context) {
-	zipFilePath := "archive.zip"
+	zipFilePath := "dump_all.zip"
 
 	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+zipFilePath)
 	c.Writer.Header().Set("Content-Type", "application/zip")
@@ -18,7 +18,6 @@ func DownloadLeasing(c *gin.Context) {
 	// os.Remove(zipFilePath)
 
 }
-
 
 func DownloadApk(c *gin.Context) {
 	dir := "app"

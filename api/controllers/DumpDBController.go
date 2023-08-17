@@ -130,7 +130,7 @@ func DumpSQLHandler(c *gin.Context) {
 	}
 
 	// Create a zip archive.
-	zipFilePath := "archive.zip"
+	zipFilePath := "dump_all.zip"
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
@@ -418,7 +418,7 @@ func UpdateSQLHandler(c *gin.Context) {
 	}
 
 	// Create a zip archive.
-	zipFilePath := "archive.zip"
+	zipFilePath := "dump_update.zip"
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Failed to create ZIP file")
