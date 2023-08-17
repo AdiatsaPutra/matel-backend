@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func CreateCabang(c *gin.Context) {
@@ -217,7 +218,11 @@ func DeleteCabang(c *gin.Context) {
 		return
 	}
 
+	logrus.Info("Log")
+	logrus.Info(queryParam)
+
 	if queryParam == "delete-cabang" {
+		logrus.Info(queryParam)
 		result = config.InitDB().Delete(&cabang)
 		if result.Error != nil {
 			exceptions.AppException(c, "Something went wrong")
