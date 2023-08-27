@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func GetProfile(c *gin.Context) {
@@ -31,16 +32,18 @@ func GetProfile(c *gin.Context) {
 
 	var user models.User
 
-	user.Status = newUser.Status
 	user.StartSubscription = newUser.StartSubscription
 	user.EndSubscription = newUser.EndSubscription
 	user.CreatedAt = newUser.CreatedAt
 
 	newUser.Status = uint(helper.GetUserStatus(user))
+	user.Status = newUser.Status
 
-	if newUser.Status == 0 {
+	if user.Status == 0 {
+		logrus.Info(newUser.Status)
 		var endDate = newUser.CreatedAt.Add(30 * 24 * time.Hour)
 		user.EndSubscription = endDate.Format("2006-01-02")
+		logrus.Info(user.Status)
 	}
 
 	// Format the EndSubscription date to "yyyy-mm-dd"
