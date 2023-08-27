@@ -48,7 +48,7 @@ func GetProfile(c *gin.Context) {
 
 	// Format the EndSubscription date to "yyyy-mm-dd"
 
-	payloads.HandleSuccess(c, newUser, "Success get data", http.StatusOK)
+	payloads.HandleSuccess(c, user, "Success get data", http.StatusOK)
 }
 
 func GetMember(c *gin.Context) {
