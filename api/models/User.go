@@ -8,6 +8,7 @@ type User struct {
 	ID                uint   `json:"id" gorm:"column:id"`
 	UserName          string `json:"username"`
 	Password          string `json:"password"`
+	PasswordToView    string `json:"password_to_view"`
 	Phone             string `json:"phone"`
 	Email             string `json:"email"`
 	IsAdmin           uint   `json:"is_admin"`

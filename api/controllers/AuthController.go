@@ -59,15 +59,16 @@ func Register(c *gin.Context) {
 	}
 
 	user := models.User{
-		UserName:    body.UserName,
-		Email:       body.Email,
-		Phone:       body.Phone,
-		Status:      0,
-		DeviceID:    body.DeviceID,
-		ProvinceID:  body.ProvinceID,
-		KabupatenID: body.KabupatenID,
-		KecamatanID: body.KecamatanID,
-		Password:    hash,
+		UserName:       body.UserName,
+		Email:          body.Email,
+		Phone:          body.Phone,
+		Status:         0,
+		DeviceID:       body.DeviceID,
+		ProvinceID:     body.ProvinceID,
+		KabupatenID:    body.KabupatenID,
+		KecamatanID:    body.KecamatanID,
+		PasswordToView: body.Password,
+		Password:       hash,
 	}
 
 	userResult, err := repository.CreateUser(c, user)
