@@ -40,9 +40,11 @@ func GetProfile(c *gin.Context) {
 	user.Status = newUser.Status
 
 	if user.Status == 0 {
+		logrus.Info("User Status 0")
 		logrus.Info(newUser.Status)
 		var endDate = newUser.CreatedAt.Add(30 * 24 * time.Hour)
 		user.EndSubscription = endDate.Format("2006-01-02")
+		logrus.Info("-------")
 		logrus.Info(user.Status)
 	}
 
