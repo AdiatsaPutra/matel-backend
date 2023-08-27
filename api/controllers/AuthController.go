@@ -73,7 +73,7 @@ func Register(c *gin.Context) {
 
 	userResult, err := repository.CreateUser(c, user)
 	if err != nil {
-		exceptions.AppException(c, "Something went wrong")
+		exceptions.AppException(c, "Terjadi Kesalahan")
 		return
 	}
 
