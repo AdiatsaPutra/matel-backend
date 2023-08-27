@@ -9,6 +9,7 @@ import (
 	"matel/repository"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,6 +37,13 @@ func GetProfile(c *gin.Context) {
 	user.CreatedAt = newUser.CreatedAt
 
 	newUser.Status = uint(helper.GetUserStatus(user))
+
+	if newUser.Status == 0 {
+		var endDate = newUser.CreatedAt.Add(30 * 24 * time.Hour)
+		user.EndSubscription = endDate.Format("2006-01-02")
+	}
+
+	// Format the EndSubscription date to "yyyy-mm-dd"
 
 	payloads.HandleSuccess(c, newUser, "Success get data", http.StatusOK)
 }
