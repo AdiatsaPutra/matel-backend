@@ -46,6 +46,7 @@ func GetProfile(c *gin.Context) {
 		user.EndSubscription = endDate.Format("2006-01-02")
 		logrus.Info("-------")
 		logrus.Info(user.EndSubscription)
+		newUser.EndSubscription = user.EndSubscription
 	}
 
 	logrus.Info(user)
