@@ -69,5 +69,7 @@ func main() {
 	r.PUT("/banks/:id", controllers.UpdateBank)
 	r.DELETE("/banks/:id", controllers.DeleteBank)
 
+	r.POST("/version", controllers.GetLatestVersion)
+
 	r.Run()
 }
