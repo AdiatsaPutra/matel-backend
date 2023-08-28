@@ -36,21 +36,17 @@ func GetProfile(c *gin.Context) {
 	user.EndSubscription = newUser.EndSubscription
 	user.CreatedAt = newUser.CreatedAt
 
+	logrus.Info(newUser.StartSubscription)
+	logrus.Info(newUser.EndSubscription)
+
 	newUser.Status = uint(helper.GetUserStatus(user))
 	user.Status = newUser.Status
 
 	if user.Status == 0 {
-		logrus.Info("User Status 0")
-		logrus.Info(newUser.Status)
 		var endDate = newUser.CreatedAt.Add(30 * 24 * time.Hour)
 		user.EndSubscription = endDate.Format("2006-01-02")
-		logrus.Info("-------")
-		logrus.Info(user.EndSubscription)
 		newUser.EndSubscription = user.EndSubscription
 	}
-
-	logrus.Info(user)
-	logrus.Info(newUser)
 
 	payloads.HandleSuccess(c, newUser, "Success get data", http.StatusOK)
 }
