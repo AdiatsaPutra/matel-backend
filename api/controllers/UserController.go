@@ -36,6 +36,7 @@ func GetProfile(c *gin.Context) {
 	user.EndSubscription = newUser.EndSubscription
 	user.CreatedAt = newUser.CreatedAt
 
+	logrus.Info(newUser.SubscriptionMonth)
 	logrus.Info(newUser.StartSubscription)
 	logrus.Info(newUser.EndSubscription)
 
