@@ -25,9 +25,9 @@ func GetUserStatus(user models.User) int {
 			return 2
 		}
 	} else {
-		if currentTime.Before(user.CreatedAt.AddDate(0, 0, 30)) {
+		if currentTime.Before(user.CreatedAt.AddDate(0, 0, 1)) {
 			return 0
-		} else if currentTime.After(user.CreatedAt.AddDate(0, 0, 30)) {
+		} else if currentTime.After(user.CreatedAt.AddDate(0, 0, 1)) {
 			return 2
 		}
 	}
