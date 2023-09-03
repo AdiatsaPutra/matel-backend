@@ -44,7 +44,7 @@ func GetProfile(c *gin.Context) {
 	user.Status = newUser.Status
 
 	if user.Status == 0 {
-		var endDate = newUser.CreatedAt.Add(30 * 24 * time.Hour)
+		var endDate = newUser.CreatedAt.Add(1 * 24 * time.Hour)
 		user.EndSubscription = endDate.Format("2006-01-02")
 		newUser.EndSubscription = user.EndSubscription
 	}
@@ -90,6 +90,9 @@ func SetUser(c *gin.Context) {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
+
+	logrus.Info("-------")
+	logrus.Info(sub)
 
 	err := repository.SetUser(c, req.UserID, uint(sub))
 
