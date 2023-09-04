@@ -155,6 +155,8 @@ func SetUser(c *gin.Context, userID uint, subscriptionMonths uint) error {
 	}
 
 	if subscriptionMonths == 0 {
+		logrus.Info("-------")
+		logrus.Info(subscriptionMonths)
 		if err := db.Model(&user).Updates(models.User{
 			StartSubscription: "",
 			EndSubscription:   "",
@@ -164,7 +166,6 @@ func SetUser(c *gin.Context, userID uint, subscriptionMonths uint) error {
 			return err
 		}
 	} else {
-		logrus.Info(1)
 		now := time.Now()
 		nowEnd := time.Now()
 
