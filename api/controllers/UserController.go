@@ -61,19 +61,31 @@ func GetMember(c *gin.Context) {
 		return
 	}
 
+	var newUser []models.User
+
 	user, err := repository.GetMember(c, search)
 
+	for _, v := range user {
+		v.Status = uint(helper.GetUserStatus(v))
+		newUser = append(newUser, v)
+	}
+
+	for _, v := range newUser {
+		logrus.Info(v.SubscriptionMonth)
+	}
+
+	
 	if len(user) == 0 {
 		payloads.HandleSuccess(c, nil, "User tidak ditemukan", http.StatusOK)
 		return
 	}
-
+	
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
 	}
 
-	payloads.HandleSuccess(c, user, "Success get data", http.StatusOK)
+	payloads.HandleSuccess(c, newUser, "Success get data", http.StatusOK)
 }
 
 func SetUser(c *gin.Context) {
