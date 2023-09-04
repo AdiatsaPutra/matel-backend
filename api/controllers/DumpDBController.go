@@ -305,7 +305,6 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 			logrus.Info("Status ++++++++++++++++++++++++++++++++")
 			logrus.Info(status)
 			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
-			break
 		}
 	}
 
@@ -314,7 +313,6 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 			logrus.Info("Status ++++++++++++++++++++++++++++++++")
 			logrus.Info(status)
 			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
-			break
 		}
 	}
 
