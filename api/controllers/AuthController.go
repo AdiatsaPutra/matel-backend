@@ -54,7 +54,7 @@ func Register(c *gin.Context) {
 
 	hash, err := security.HashPassword(body.Password)
 	if err != nil {
-		exceptions.AppException(c, err.Error())
+		exceptions.AppException(c, "Email atau password salah")
 		return
 	}
 
