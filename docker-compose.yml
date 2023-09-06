@@ -95,7 +95,8 @@ services:
     build: ./crontab
     restart: always
     volumes:
-      - /home/yunus/matel-backend:/usr/scheduler
+      - /home/yunus/matel-backend:/matel-backend
+      - ./crontab:/usr/scheduler
 
   certbot:
     image: certbot/certbot:latest
