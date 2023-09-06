@@ -17,7 +17,7 @@ RUN dos2unix *.sh jobs/*.* \
     find . -type f -iname "*.sh" -exec chmod +x {} \;
 
 # execute permissions fro start.sh
-RUN chmod +x ./start.sh
+RUN chmod +x start.sh
 
 # Run cron on container startup
-CMD ["./start.sh"]
+CMD ["start.sh"]
