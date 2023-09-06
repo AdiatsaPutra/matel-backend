@@ -9,8 +9,7 @@ WORKDIR /usr/scheduler
 ENV SCHEDULER_ENVIRONMENT=production
 ENV TZ=Asia/Jakarta
 
-RUN echo pwd
-RUN ls -la
+COPY . .
 
 # Fix line endings && execute permissions
 RUN dos2unix *.sh jobs/*.* \
