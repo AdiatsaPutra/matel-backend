@@ -54,7 +54,7 @@ func Register(c *gin.Context) {
 
 	hash, err := security.HashPassword(body.Password)
 	if err != nil {
-		exceptions.AppException(c, err.Error())
+		exceptions.AppException(c, "Email atau password salah")
 		return
 	}
 
@@ -164,7 +164,7 @@ func Login(c *gin.Context) {
 					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 				}
 			} else {
-				exceptions.AppException(c, hash.Error())
+				exceptions.AppException(c, "Email atau password salah")
 				return
 			}
 		} else if findUserFromDB.DeviceID == body.DeviceID || (findUserFromDB.DeviceID != body.DeviceID && findUserFromDB.Token == "") {
@@ -209,7 +209,7 @@ func Login(c *gin.Context) {
 					payloads.HandleSuccess(c, findUserFromDB, "Login Success", http.StatusOK)
 				}
 			} else {
-				exceptions.AppException(c, hash.Error())
+				exceptions.AppException(c, "Email atau password salah")
 				return
 			}
 		} else {
