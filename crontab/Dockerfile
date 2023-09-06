@@ -15,4 +15,4 @@ ENV TZ=Asia/Jakarta
 #     find . -type f -iname "*.sh" -exec chmod +x {} \;
 
 # Run cron on container startup
-CMD ["./start.sh"]
+# CMD ["./start.sh"]
