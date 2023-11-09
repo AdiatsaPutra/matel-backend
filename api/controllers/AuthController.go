@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/sirupsen/logrus"
 )
 
 func Register(c *gin.Context) {
@@ -46,6 +47,11 @@ func Register(c *gin.Context) {
 	}
 
 	findUserDeviceID, _ := repository.GetUserByDeviceID(c, body.DeviceID)
+
+	logrus.Info("FINDUSER")
+	logrus.Info(findUserDeviceID.DeviceID)
+	logrus.Info("BODY")
+	logrus.Info(body.DeviceID)
 
 	if findUserDeviceID.DeviceID == body.DeviceID {
 		exceptions.AppException(c, "Perangkat anda sudah terdaftar")
