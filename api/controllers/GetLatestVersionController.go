@@ -23,7 +23,7 @@ func GetLatestVersion(c *gin.Context) {
 
 	data := make(map[string]interface{})
 
-	latestVersion := "1.5.2"
+	latestVersion := "1.7.1"
 
 	isMajorUpdate := strings.Split(body.Version, ".")[0] < strings.Split(latestVersion, ".")[0]
 	isMinorUpdate := strings.Split(body.Version, ".")[1] < strings.Split(latestVersion, ".")[1]

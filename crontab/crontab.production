@@ -1,3 +1,1 @@
 0 0 * * * /usr/scheduler/jobs/dump-sql.sh
-
-0 0 5 * * /usr/scheduler/jobs/renew-cert.sh
