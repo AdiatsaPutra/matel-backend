@@ -74,12 +74,11 @@ func GetMember(c *gin.Context) {
 		logrus.Info(v.SubscriptionMonth)
 	}
 
-	
 	if len(user) == 0 {
 		payloads.HandleSuccess(c, nil, "User tidak ditemukan", http.StatusOK)
 		return
 	}
-	
+
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
@@ -125,7 +124,7 @@ func DeleteMember(c *gin.Context) {
 		return
 	}
 
-	err := config.InitDB().Delete(&user).Error
+	err := config.InitDB().Unscoped().Delete(&user).Error
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
 		return
