@@ -239,11 +239,17 @@ func DeleteCabang(c *gin.Context) {
 	}
 
 	var kendaraan models.Kendaraan
-	deleteKendaraanResult := config.InitDB().Where("cabang = ?", cabang.NamaCabang).Delete(&kendaraan)
+	deleteKendaraanResult := config.InitDB().
+		Table("m_kendaraan").
+		Where("cabang_id NOT IN (?)", config.InitDB().Model(models.Cabang{}).Select("id").Where("deleted_at IS NULL")).
+		Delete(&kendaraan)
+
 	if deleteKendaraanResult.Error != nil {
 		exceptions.AppException(c, "Failed to delete Kendaraan")
 		return
 	}
+
+	// config.InitDB().Exec("DELETE FROM m_kendaraan WHERE cabang_id NOT IN (SELECT id FROM m_cabang WHERE deleted_at IS NULL)")
 
 	config.CloseDB(config.InitDB())
 
