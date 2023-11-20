@@ -25,6 +25,7 @@ func main() {
 
 	r.GET("/home", controllers.GetHome)
 	r.GET("/kendaraan-per-cabang", controllers.GetKendaraanPerCabang)
+	r.GET("/kendaraan-total", controllers.GetTotalKendaraan)
 
 	r.GET("/leasing-master", controllers.GetLeasingMaster)
 	r.POST("/leasing-master", controllers.CreateLeasing)

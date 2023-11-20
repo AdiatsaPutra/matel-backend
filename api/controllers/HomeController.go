@@ -59,6 +59,18 @@ func GetHome(c *gin.Context) {
 	payloads.HandleSuccess(c, data, "Data found", http.StatusOK)
 }
 
+func GetTotalKendaraan(c *gin.Context) {
+
+	kendaraanTotal, err := repository.GetKendaraanTotal(c)
+
+	if err != nil {
+		payloads.HandleSuccess(c, nil, "Something went wrong", http.StatusOK)
+		return
+	}
+
+	payloads.HandleSuccess(c, kendaraanTotal, "Data found", http.StatusOK)
+}
+
 func GetKendaraanPerCabang(c *gin.Context) {
 
 	leasingChart, err := repository.GetLeasingChart(c)
