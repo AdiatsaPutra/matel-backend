@@ -95,31 +95,22 @@ func GetCabangWithTotal(c *gin.Context) {
 	var results []models.CabangTotal
 
 	err := db.Raw(`SELECT
-			c.id,
-			c.nama_cabang,
-			c.no_hp,
-			l.nama_leasing,
-			COALESCE(k.kendaraan_total, 0) AS kendaraan_total,
-			COALESCE(k.latest_created_at, NULL) AS latest_created_at
-		FROM
-			m_cabang c
-		LEFT JOIN
-			m_leasing l ON c.leasing_id = l.id
-		LEFT JOIN (
-			SELECT
-				cabang,
-				cabang_id,
-				COUNT(nomorPolisi) AS kendaraan_total,
-				MAX(created_at) AS latest_created_at
-			FROM
-				m_kendaraan
-			WHERE
-				deleted_at IS NULL
-			GROUP BY
-				cabang, cabang_id
-		) k ON c.id = k.cabang_id
-		WHERE
-			c.leasing_id = ? AND c.deleted_at IS NULL;
+    c.id,
+    c.nama_cabang,
+    c.no_hp,
+    l.nama_leasing,
+    COUNT(k.nomorPolisi) AS kendaraan_total,
+    MAX(k.created_at) AS latest_created_at
+FROM
+    m_cabang c
+LEFT JOIN
+    m_leasing l ON c.leasing_id = l.id
+LEFT JOIN
+    m_kendaraan k ON c.id = k.cabang_id AND k.deleted_at IS NULL
+WHERE
+    c.leasing_id = ? AND c.deleted_at IS NULL
+GROUP BY
+    c.id, c.nama_cabang, c.no_hp, l.nama_leasing;
 		`, leasingID).Scan(&results).Error
 
 	if err != nil {
