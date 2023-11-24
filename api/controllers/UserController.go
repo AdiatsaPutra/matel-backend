@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	config "matel/configs"
 	"matel/exceptions"
 	"matel/helper"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/xuri/excelize/v2"
 )
 
 func GetProfile(c *gin.Context) {
@@ -35,10 +37,6 @@ func GetProfile(c *gin.Context) {
 	user.StartSubscription = newUser.StartSubscription
 	user.EndSubscription = newUser.EndSubscription
 	user.CreatedAt = newUser.CreatedAt
-
-	logrus.Info(newUser.SubscriptionMonth)
-	logrus.Info(newUser.StartSubscription)
-	logrus.Info(newUser.EndSubscription)
 
 	newUser.Status = uint(helper.GetUserStatus(user))
 	user.Status = newUser.Status
@@ -87,6 +85,63 @@ func GetMember(c *gin.Context) {
 	payloads.HandleSuccess(c, newUser, "Success get data", http.StatusOK)
 }
 
+func MemberChange(c *gin.Context) {
+
+	user, err := repository.MemberChange(c)
+
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	err = exportMemberToExcel(user, c)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	payloads.HandleSuccess(c, nil, "Excel file generated and sent for download", 200)
+
+}
+
+func exportMemberToExcel(data []models.UserChangeExport, c *gin.Context) error {
+	file := excelize.NewFile()
+	sheetName := "Sheet1"
+
+	// Set header row
+	headers := []string{"Nama Pengguna", "Sebelum Diubah", "Setelah Diubah", "Mulai Berlangganan"}
+	for col, header := range headers {
+		cell := fmt.Sprintf("%c%d", 'A'+col, 1)
+		file.SetCellValue(sheetName, cell, header)
+	}
+
+	// Set data rows
+	for row, user := range data {
+		cell := fmt.Sprintf("A%d", row+2)
+		file.SetCellValue(sheetName, cell, user.UserName)
+		cell = fmt.Sprintf("B%d", row+2)
+		formattedUnupdatedStatus := fmt.Sprintf("%d hari", user.UnupdatedStatus)
+		file.SetCellValue(sheetName, cell, formattedUnupdatedStatus)
+		cell = fmt.Sprintf("C%d", row+2)
+		formattedUpdatedStatus := fmt.Sprintf("%d hari", user.UpdatedStatus)
+		file.SetCellValue(sheetName, cell, formattedUpdatedStatus)
+		cell = fmt.Sprintf("D%d", row+2)
+		file.SetCellValue(sheetName, cell, user.TimeUpdated)
+	}
+
+	// Set the content type and headers for the response
+	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	c.Header("Content-Disposition", "attachment; filename=cabang_export.xlsx")
+
+	// Save the Excel file to the response writer
+	err := file.Write(c.Writer)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func SetUser(c *gin.Context) {
 	type SetUserReq struct {
 		UserID            uint   `json:"user_id" validate:"required"`
@@ -95,6 +150,13 @@ func SetUser(c *gin.Context) {
 	var req SetUserReq
 	c.BindJSON(&req)
 
+	u, err := repository.UserProfile(c, req.UserID)
+
+	if err != nil {
+		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
 	sub, e := strconv.Atoi(req.SubscriptionMonth)
 
 	if e != nil {
@@ -102,13 +164,32 @@ func SetUser(c *gin.Context) {
 		return
 	}
 
-	logrus.Info("-------")
-	logrus.Info(sub)
-
-	err := repository.SetUser(c, req.UserID, uint(sub))
+	err = repository.SetUser(c, req.UserID, uint(sub))
 
 	if err != nil {
 		exceptions.AppException(c, "Something went wrong")
+		return
+	}
+
+	var user models.UserChange
+
+	currentTime := time.Now()
+
+	// Define the desired format
+	format := "02 Jan 2006"
+
+	// Format the date and time to the desired format
+	formattedDateTime := currentTime.Format(format)
+
+	user.UserID = req.UserID
+	user.TimeUpdated = formattedDateTime
+	user.UnupdatedStatus = u.SubscriptionMonth
+	user.UpdatedStatus = uint(sub)
+
+	err = repository.UserChange(c, user)
+
+	if err != nil {
+		exceptions.AppException(c, err.Error())
 		return
 	}
 

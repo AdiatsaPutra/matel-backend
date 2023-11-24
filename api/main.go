@@ -57,6 +57,7 @@ func main() {
 	r.GET("/download-app", controllers.DownloadApk)
 
 	r.GET("/member", security.AuthMiddleware(), controllers.GetMember)
+	r.GET("/member-change", controllers.MemberChange)
 	r.POST("/update-member", controllers.SetUser)
 	r.DELETE("/delete-member/:id", controllers.DeleteMember)
 

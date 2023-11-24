@@ -113,6 +113,22 @@ func GetMember(c *gin.Context, keyword string) ([]models.User, error) {
 	return user, nil
 }
 
+func MemberChange(c *gin.Context) ([]models.UserChangeExport, error) {
+	var userChanges []models.UserChangeExport
+	db := config.InitDB()
+
+	// Execute raw SQL query
+	result := db.Raw(`SELECT m_users_change.*, m_users.user_name
+	FROM m_users_change
+	JOIN m_users ON m_users_change.user_id = m_users.id;`).Scan(&userChanges)
+
+	if result.Error != nil {
+		return userChanges, result.Error
+	}
+
+	return userChanges, nil
+}
+
 func Logout(c *gin.Context, UserID uint) error {
 	var user models.User
 
@@ -183,6 +199,16 @@ func SetUser(c *gin.Context, userID uint, subscriptionMonths uint) error {
 			return err
 		}
 
+	}
+
+	return nil
+}
+
+func UserChange(c *gin.Context, userChange models.UserChange) error {
+	result := config.InitDB().Create(&userChange)
+
+	if result.Error != nil {
+		return result.Error
 	}
 
 	return nil
