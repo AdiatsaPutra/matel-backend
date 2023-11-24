@@ -167,7 +167,7 @@ func exportToExcel(data []models.CabangExport, c *gin.Context) error {
 	sheetName := "Sheet1"
 
 	// Set header row
-	headers := []string{"Nama Cabang", "No HP", "Latest Created At"}
+	headers := []string{"Nama Cabang", "No HP", "Tanggal Upload"}
 	for col, header := range headers {
 		cell := fmt.Sprintf("%c%d", 'A'+col, 1)
 		file.SetCellValue(sheetName, cell, header)
