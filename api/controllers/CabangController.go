@@ -95,22 +95,54 @@ func GetCabangWithTotal(c *gin.Context) {
 	var results []models.CabangTotal
 
 	err := db.Raw(`SELECT
-    c.id,
-    c.nama_cabang,
-    c.no_hp,
-    l.nama_leasing,
-    COUNT(k.nomorPolisi) AS kendaraan_total,
-    MAX(k.created_at) AS latest_created_at
-FROM
-    m_cabang c
-LEFT JOIN
-    m_leasing l ON c.leasing_id = l.id
-LEFT JOIN
-    m_kendaraan k ON c.id = k.cabang_id AND k.deleted_at IS NULL
-WHERE
-    c.leasing_id = ? AND c.deleted_at IS NULL
-GROUP BY
-    c.id, c.nama_cabang, c.no_hp, l.nama_leasing;
+				c.id,
+				c.nama_cabang,
+				c.no_hp,
+				l.nama_leasing,
+				COUNT(k.nomorPolisi) AS kendaraan_total,
+				MAX(k.created_at) AS latest_created_at
+			FROM
+				m_cabang c
+			LEFT JOIN
+				m_leasing l ON c.leasing_id = l.id
+			LEFT JOIN
+				m_kendaraan k ON c.id = k.cabang_id AND k.deleted_at IS NULL
+			WHERE
+				c.leasing_id = ? AND c.deleted_at IS NULL
+			GROUP BY
+				c.id, c.nama_cabang, c.no_hp, l.nama_leasing;
+		`, leasingID).Scan(&results).Error
+
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+	config.CloseDB(config.InitDB())
+
+	payloads.HandleSuccess(c, results, "Data found", 200)
+}
+
+func GetCabangExport(c *gin.Context) {
+	leasingID := c.Query("leasing_id")
+
+	db := config.InitDB()
+
+	var results []models.CabangExport
+
+	err := db.Raw(`SELECT
+			c.nama_cabang,
+			c.no_hp,
+			MAX(k.created_at) AS latest_created_at
+		FROM
+			m_cabang c
+		LEFT JOIN
+			m_leasing l ON c.leasing_id = l.id
+		LEFT JOIN
+			m_kendaraan k ON c.id = k.cabang_id AND k.deleted_at IS NULL
+		WHERE
+			c.leasing_id = ? AND c.deleted_at IS NULL
+		GROUP BY
+			c.id, c.nama_cabang, c.no_hp, l.nama_leasing;
 		`, leasingID).Scan(&results).Error
 
 	if err != nil {
