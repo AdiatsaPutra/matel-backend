@@ -7,9 +7,11 @@ import (
 	"matel/models"
 	"matel/payloads"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/xuri/excelize/v2"
 )
 
 func CreateCabang(c *gin.Context) {
@@ -126,6 +128,7 @@ func GetCabangExport(c *gin.Context) {
 	leasingID := c.Query("leasing_id")
 
 	db := config.InitDB()
+	defer config.CloseDB(db)
 
 	var results []models.CabangExport
 
@@ -149,9 +152,57 @@ func GetCabangExport(c *gin.Context) {
 		exceptions.AppException(c, err.Error())
 		return
 	}
-	config.CloseDB(config.InitDB())
 
-	payloads.HandleSuccess(c, results, "Data found", 200)
+	err = exportToExcel(results, c)
+	if err != nil {
+		exceptions.AppException(c, err.Error())
+		return
+	}
+
+	payloads.HandleSuccess(c, nil, "Excel file generated and sent for download", 200)
+}
+
+func exportToExcel(data []models.CabangExport, c *gin.Context) error {
+	file := excelize.NewFile()
+	sheetName := "Sheet1"
+
+	// Set header row
+	headers := []string{"Nama Cabang", "No HP", "Latest Created At"}
+	for col, header := range headers {
+		cell := fmt.Sprintf("%c%d", 'A'+col, 1)
+		file.SetCellValue(sheetName, cell, header)
+	}
+
+	// Set data rows
+	for row, cabang := range data {
+		cell := fmt.Sprintf("A%d", row+2)
+		file.SetCellValue(sheetName, cell, cabang.Cabang)
+		cell = fmt.Sprintf("B%d", row+2)
+		file.SetCellValue(sheetName, cell, cabang.NoHP)
+		// Parse the string into time.Time
+		latestCreatedAt, err := time.Parse("2006-01-02 15:04:05", cabang.LatestCreatedAt)
+		if err != nil {
+			return err
+		}
+
+		// Format the time as "2 January 2006"
+		formattedDate := latestCreatedAt.Format("2 January 2006")
+
+		cell = fmt.Sprintf("C%d", row+2)
+		file.SetCellValue(sheetName, cell, formattedDate)
+	}
+
+	// Set the content type and headers for the response
+	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	c.Header("Content-Disposition", "attachment; filename=cabang_export.xlsx")
+
+	// Save the Excel file to the response writer
+	err := file.Write(c.Writer)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func UpdateCabang(c *gin.Context) {
