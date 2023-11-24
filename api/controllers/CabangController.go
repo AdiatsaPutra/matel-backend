@@ -180,7 +180,7 @@ func exportToExcel(data []models.CabangExport, c *gin.Context) error {
 		cell = fmt.Sprintf("B%d", row+2)
 		file.SetCellValue(sheetName, cell, cabang.NoHP)
 		// Parse the string into time.Time
-		latestCreatedAt, err := time.Parse("2006-01-02T15:04:05.000Z", cabang.LatestCreatedAt)
+		latestCreatedAt, err := time.Parse(time.RFC3339, cabang.LatestCreatedAt)
 		if err != nil {
 			return err
 		}
