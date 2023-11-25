@@ -118,7 +118,7 @@ func MemberChange(c *gin.Context) ([]models.UserChangeExport, error) {
 	db := config.InitDB()
 
 	// Execute raw SQL query
-	result := db.Raw(`SELECT m_users_change.*, m_users.user_name
+	result := db.Raw(`SELECT m_users_change.*, m_users.user_name, m_users.email, m_users.phone, m_users.device_id
 	FROM m_users_change
 	JOIN m_users ON m_users_change.user_id = m_users.id;`).Scan(&userChanges)
 
