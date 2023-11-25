@@ -109,7 +109,7 @@ func exportMemberToExcel(data []models.UserChangeExport, c *gin.Context) error {
 	sheetName := "Sheet1"
 
 	// Set header row
-	headers := []string{"Nama Pengguna", "Sebelum Diubah", "Setelah Diubah", "Mulai Berlangganan"}
+	headers := []string{"Nama Pengguna", "Email", "Phone", "Device ID", "Sebelum Diubah", "Setelah Diubah", "Mulai Berlangganan"}
 	for col, header := range headers {
 		cell := fmt.Sprintf("%c%d", 'A'+col, 1)
 		file.SetCellValue(sheetName, cell, header)
@@ -120,12 +120,18 @@ func exportMemberToExcel(data []models.UserChangeExport, c *gin.Context) error {
 		cell := fmt.Sprintf("A%d", row+2)
 		file.SetCellValue(sheetName, cell, user.UserName)
 		cell = fmt.Sprintf("B%d", row+2)
+		file.SetCellValue(sheetName, cell, user.Email)
+		cell = fmt.Sprintf("C%d", row+2)
+		file.SetCellValue(sheetName, cell, user.Phone)
+		cell = fmt.Sprintf("D%d", row+2)
+		file.SetCellValue(sheetName, cell, user.DeviceID)
+		cell = fmt.Sprintf("E%d", row+2)
 		formattedUnupdatedStatus := fmt.Sprintf("%d hari", user.UnupdatedStatus)
 		file.SetCellValue(sheetName, cell, formattedUnupdatedStatus)
-		cell = fmt.Sprintf("C%d", row+2)
+		cell = fmt.Sprintf("F%d", row+2)
 		formattedUpdatedStatus := fmt.Sprintf("%d hari", user.UpdatedStatus)
 		file.SetCellValue(sheetName, cell, formattedUpdatedStatus)
-		cell = fmt.Sprintf("D%d", row+2)
+		cell = fmt.Sprintf("G%d", row+2)
 		file.SetCellValue(sheetName, cell, user.TimeUpdated)
 	}
 
