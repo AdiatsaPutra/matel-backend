@@ -15,38 +15,6 @@ import (
 )
 
 func GetKendaraan(c *gin.Context) {
-	search := c.Query("search")
-
-	if search != "" {
-		query := config.InitDB().Model(&models.Kendaraan{}).
-			Where("leasing LIKE ?", ""+search+"").
-			Or("cabang LIKE ?", ""+search+"").
-			Or("nomorPolisi LIKE ?", ""+search+"").
-			Order("created_at DESC")
-
-		var kendaraans []models.Kendaraan
-
-		result := query.Find(&kendaraans)
-		if result.Error != nil {
-			exceptions.AppException(c, "Something went wrong")
-			return
-		}
-
-		var count int64
-		r := query.Count(&count)
-		if r.Error != nil {
-			exceptions.AppException(c, "Something went wrong")
-			return
-		}
-
-		data := make(map[string]interface{})
-		data["total"] = count
-		data["kendaraan"] = kendaraans
-		config.CloseDB(config.InitDB())
-
-		payloads.HandleSuccess(c, kendaraans, "Kendaraan faound", http.StatusOK)
-		return
-	}
 
 	pageNumber, _ := strconv.Atoi(c.Query("page"))
 	if pageNumber <= 0 {
@@ -93,6 +61,10 @@ func GetKendaraan(c *gin.Context) {
 			return
 		}
 
+	}
+
+	if search := c.Query("search"); search != "" {
+		query = query.Where("nomorPolisi LIKE ?", ""+search+"")
 	}
 
 	data := make(map[string]interface{})
