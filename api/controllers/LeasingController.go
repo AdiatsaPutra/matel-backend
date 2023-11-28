@@ -19,9 +19,9 @@ func GetKendaraan(c *gin.Context) {
 
 	if search != "" {
 		query := config.InitDB().Model(&models.Kendaraan{}).
-			Where("leasing LIKE ?", "%"+search+"%").
-			Or("cabang LIKE ?", "%"+search+"%").
-			Or("nomorPolisi LIKE ?", "%"+search+"%").
+			Where("leasing LIKE ?", ""+search+"").
+			Or("cabang LIKE ?", ""+search+"").
+			Or("nomorPolisi LIKE ?", ""+search+"").
 			Order("created_at DESC")
 
 		var kendaraans []models.Kendaraan
