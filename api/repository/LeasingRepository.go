@@ -65,9 +65,10 @@ func GetKendaraanPerCabangTotal(c *gin.Context, leasing string, cabang string) (
 
 func GetKendaraanTotal(c *gin.Context) (uint, error) {
 	var count sql.NullInt64
-	result := config.InitDB().Raw(`SELECT COUNT(*)
-	FROM m_kendaraan
-	WHERE id < 99999999 AND deleted_at IS NULL;`).Scan(&count)
+	result := config.InitDB().Raw(`SELECT COUNT(*) FROM 
+	m_kendaraan WHERE cabang_id IN 
+	( SELECT id FROM m_cabang WHERE deleted_at is NULL ) 
+	AND deleted_at is NULL;`).Scan(&count)
 
 	if result.Error != nil {
 		return 0, result.Error
