@@ -48,6 +48,11 @@ func GetKendaraan(c *gin.Context) {
 		return
 	}
 
+	if search := c.Query("search"); search != "" {
+		limit = -1
+		query = query.Where("nomorPolisi LIKE ?", ""+search+"")
+	}
+
 	if limit == -1 {
 		result := query.Find(&kendaraans)
 		if result.Error != nil {
@@ -61,10 +66,6 @@ func GetKendaraan(c *gin.Context) {
 			return
 		}
 
-	}
-
-	if search := c.Query("search"); search != "" {
-		query = query.Where("nomorPolisi LIKE ?", ""+search+"")
 	}
 
 	data := make(map[string]interface{})
