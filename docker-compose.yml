@@ -30,6 +30,10 @@ services:
         '--character-set-server=utf8mb4',
         '--collation-server=utf8mb4_unicode_ci'
     ]
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   phpmyadmin:
     links:
@@ -44,6 +48,10 @@ services:
       PMA_ABSOLUTE_URI: https://taurusaplikasi.com/phpmyadmin/
     networks:
       - internal_network
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api:
     build: ./api
@@ -56,6 +64,10 @@ services:
       - ./app:/app/app
     depends_on:
       - db
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   web:
     build: ./web
@@ -64,6 +76,10 @@ services:
     networks:
       - internal_network
     command: "npm run start"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   dozzle:
     image: amir20/dozzle:latest
@@ -75,6 +91,10 @@ services:
       DOZZLE_NO_ANALYTICS: "true"
       DOZZLE_BASE: /logs
       DOZZLE_ADDR: "0.0.0.0:1212"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     build: ./nginx
@@ -90,16 +110,28 @@ services:
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
     # command: ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   crontab:
     build: ./crontab
     restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   certbot:
     image: certbot/certbot:latest
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   jenkins:
     image: jenkins/jenkins:lts
@@ -113,6 +145,10 @@ services:
       - JENKINS_OPTS="--prefix=/jenkins"
     networks:
       - internal_network
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   agent:
     image: jenkins/ssh-agent:jdk11
@@ -125,6 +161,10 @@ services:
       - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEyRJN5jO1w+UOejJNJJOHXOgHQEYNTY378ML6dF2Cz6 yunus@ubuntu-s-2vcpu-4gb-intel-sgp1-01-betaeagle
     networks:
       - internal_network
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   internal_network:
