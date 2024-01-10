@@ -15,7 +15,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -270,8 +269,6 @@ func getMKendaraanByCabang(cabangID int) ([]MKendaraan, error) {
 	if err := config.InitDB().Where("cabang_id = ? AND deleted_at IS NULL", cabangID).Find(&results).Error; err != nil {
 		return nil, err
 	}
-	logrus.Info("DATA KENDARAAN BY CABANG")
-	logrus.Info(results)
 	return results, nil
 }
 
@@ -280,8 +277,6 @@ func getMKendaraanByCabangVersi(cabangID int, versi int) ([]MKendaraan, error) {
 	if err := config.InitDB().Where("cabang_id = ? AND versi > ? AND deleted_at IS NULL", cabangID, versi).Find(&results).Error; err != nil {
 		return nil, err
 	}
-	logrus.Info("DATA KENDARAAN BY CABANG VERSI")
-	logrus.Info(results)
 	return results, nil
 }
 
@@ -302,16 +297,12 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 
 	for _, result := range compareResults {
 		if status, ok := result["status"].(string); ok && status == "Perbedaan versi master" {
-			logrus.Info("Status ++++++++++++++++++++++++++++++++")
-			logrus.Info(status)
 			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
 		}
 	}
 
 	for _, result := range compareResults {
 		if status, ok := result["status"].(string); ok && status == "Cabang tidak ada dalam database" {
-			logrus.Info("Status ++++++++++++++++++++++++++++++++")
-			logrus.Info(status)
 			sqlStatements = append(sqlStatements, fmt.Sprintf("DELETE FROM m_kendaraan WHERE cabang_id = %d;\n", result["id_source"].(int)))
 		}
 	}
@@ -347,7 +338,6 @@ func createSQLFile(compareResults []map[string]interface{}, mKendaraanData []MKe
 func UpdateSQLHandler(c *gin.Context) {
 	var items []Item
 	if err := c.ShouldBindJSON(&items); err != nil {
-		logrus.Info(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -362,12 +352,9 @@ func UpdateSQLHandler(c *gin.Context) {
 	mKendaraanData := []MKendaraan{}
 
 	for _, result := range compareResults {
-		logrus.Info("Status -----------------------------------")
-		logrus.Info(result["status"].(string))
 		switch status := result["status"].(string); {
 		case status == "Cabang tidak ada dalam request API":
 			kendaraanData, err := getMKendaraanByCabang(result["id_source"].(int))
-			logrus.Info(kendaraanData)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -375,7 +362,6 @@ func UpdateSQLHandler(c *gin.Context) {
 			mKendaraanData = append(mKendaraanData, kendaraanData...)
 		case status == "Perbedaan versi master":
 			kendaraanData, err := getMKendaraanByCabang(result["id_source"].(int))
-			logrus.Info(kendaraanData)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -397,7 +383,6 @@ func UpdateSQLHandler(c *gin.Context) {
 				}
 				mKendaraanData = append(mKendaraanData, kendaraanData...)
 			} else {
-				logrus.Info("------- Perbedaan versi tapi versi tidak ada dalam request API -------")
 			}
 		}
 	}

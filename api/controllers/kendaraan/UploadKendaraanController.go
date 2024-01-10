@@ -22,7 +22,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -283,16 +282,13 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 	}()
 
 	placeholderRows := generateQuestionsMark(len(rows), len(header)+6)
-	logrus.Info(placeholderRows)
 
 	query := fmt.Sprintf("INSERT INTO m_kendaraan (leasing, cabang_id, cabang, %s, created_at, status, versi) VALUES %s",
 		strings.Join(header, ","),
 		placeholderRows,
 	)
-	logrus.Info(query)
 
 	args := make([]interface{}, 0, len(valuesBatch)*len(header)+6)
-	logrus.Info(args)
 	for _, values := range valuesBatch {
 		if v, ok := values.([]interface{}); ok {
 			args = append(args, v...)
@@ -301,7 +297,6 @@ func doTheJobBatch(c *gin.Context, workerIndex int, db *sql.DB, rows [][]interfa
 
 	_, err = conn.ExecContext(context.Background(), query, args...)
 	if err != nil {
-		logrus.Info(err)
 		exceptions.AppException(c, err.Error())
 		return err
 	}

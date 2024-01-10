@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -66,10 +65,6 @@ func GetMember(c *gin.Context) {
 	for _, v := range user {
 		v.Status = uint(helper.GetUserStatus(v))
 		newUser = append(newUser, v)
-	}
-
-	for _, v := range newUser {
-		logrus.Info(v.SubscriptionMonth)
 	}
 
 	if len(user) == 0 {

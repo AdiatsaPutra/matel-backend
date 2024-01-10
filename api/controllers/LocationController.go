@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 // GetProvince retrieves a single Province by its ID.
@@ -25,8 +24,6 @@ func GetProvince(c *gin.Context) {
 // GetKabupaten retrieves a single Kabupaten by its ID.
 func GetKabupaten(c *gin.Context) {
 	kabupatenID, _ := strconv.ParseUint(c.Param("province-id"), 10, 64)
-
-	logrus.Info(kabupatenID)
 
 	kabupaten, err := repository.GetAllKabupaten(c, uint(kabupatenID))
 	if err != nil {
