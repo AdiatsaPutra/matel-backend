@@ -14,8 +14,6 @@ func main() {
 
 	r.Use(middlewares.SetupCorsMiddleware())
 
-	r.GET("/.well-known", controllers.AssetLinks)
-
 	r.POST("/register", controllers.Register)
 	r.POST("/login", controllers.Login)
 	r.POST("/login-web", controllers.LoginWeb)
