@@ -21,7 +21,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -233,7 +232,6 @@ func doTheJob(c *gin.Context, workerIndex, counter int, db *sql.DB, values []int
 
 			_, err = conn.ExecContext(context.Background(), query, values...)
 			if err != nil {
-				logrus.Info(err)
 				exceptions.AppException(c, err.Error())
 				*outerError = err
 				return

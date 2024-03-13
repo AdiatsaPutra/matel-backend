@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func GetUserTotalInfo(c *gin.Context) (models.HomeUserInfo, error) {
@@ -171,8 +170,6 @@ func SetUser(c *gin.Context, userID uint, subscriptionMonths uint) error {
 	}
 
 	if subscriptionMonths == 0 {
-		logrus.Info("-------")
-		logrus.Info(subscriptionMonths)
 		if err := db.Model(&user).Updates(models.User{
 			StartSubscription: "",
 			EndSubscription:   "",
